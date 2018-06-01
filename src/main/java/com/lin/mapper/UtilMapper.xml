@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.dao.UtilDaoI">
+	<select id="getSeqAppAddresslist" resultType="java.lang.String">
+		select appuser.seq_app_addresslist.nextval from dual
+	</select>
+	<select id="getSeqAppGourpUser" resultType="java.lang.String">
+		select appuser.seq_app_groupuser.nextval from dual
+	</select>
+	<select id="getSeqAppUserTerritory" resultType="java.lang.String">
+		select appuser.seq_app_userterritory.nextval from dual
+	</select>
+	<select id="getSeqAppUserWork" resultType="java.lang.String">
+		select appuser.seq_app_userwork.nextval from dual
+	</select>
+	<select id="getSeqAppAddressInfLog" resultType="java.lang.String">
+		select appuser.seq_app_addressinflog.nextval from dual
+	</select>
+</mapper>

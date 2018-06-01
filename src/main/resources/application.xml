@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	
+	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+	
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 引入jdbc配置文件 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:properties/*.properties</value>
+				<!--要是有多个配置文件，只需在这里继续添加即可 -->
+			</list>
+		</property>
+	</bean>
+
+
+
+	<!-- 配置mysql数据源 -->
+
+	<!-- oracle数据库配置 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+
+		<property name="driverClassName" value="${dataSource_oracle.diverClassName}" />
+		<property name="url" value="${dataSource_oracle.url}" />
+		<property name="username" value="${dataSource_oracle.username}" />
+		<property name="password" value="${dataSource_oracle.password}" />
+
+		<property name="numTestsPerEvictionRun" value="${dataSource_oracle.numTestsPerEvictionRun}" />
+		<property name="poolPreparedStatements" value="${dataSource_oracle.poolPreparedStatements}" />
+		<property name="maxOpenPreparedStatements"
+			value="${dataSource_oracle.maxOpenPreparedStatements}" />
+		<property name="defaultAutoCommit" value="${dataSource_oracle.defaultAutoCommit}" />
+		<property name="removeAbandoned" value="${dataSource_oracle.removeAbandoned}" />
+		<property name="removeAbandonedTimeout" value="${dataSource_oracle.removeAbandonedTimeout}" />
+		<property name="logAbandoned" value="${dataSource_oracle.logAbandoned}" />
+
+		<property name="initialSize" value="${druid_initialSize}" />
+		<property name="maxActive" value="${druid_maxActive}" />
+		<property name="minIdle" value="${druid_minIdle}" />
+		<property name="maxWait" value="${druid_maxWait}" />
+
+		<!-- <property name="validationQuery" value="${druid_validationQuery}" 
+			/> -->
+		<property name="testOnBorrow" value="${druid_testOnBorrow}" />
+		<property name="testOnReturn" value="${druid_testOnReturn}" />
+		<property name="testWhileIdle" value="${druid_testWhileIdle}" />
+
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${druid_timeBetweenEvictionRunsMillis}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${druid_minEvictableIdleTimeMillis}" />
+
+		<!-- 监控数据库 -->
+		<property name="filters" value="${druid_filters}" />
+		<property name="connectionProperties" value="${druid_connectionProperties}" />
+	</bean>
+
+	<!-- 49.81 <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
+		<property name="jndiName" value="jdbc/sales_app" /> </bean> -->
+	<!-- 233 <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
+		<property name="jndiName" value="jdbc/SALES_APP" /> </bean> -->
+
+
+	<!-- 自动扫描了所有的XxxxMapper.xml对应的mapper接口文件，这样就不用一个一个手动配置Mpper的映射了，只要Mapper接口类和Mapper映射文件对应起来就可以了。 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.lin.dao" />
+	</bean>
+
+	<!-- 配置Mybatis的文件 ，mapperLocations配置**Mapper.xml文件位置，configLocation配置mybatis-config文件位置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath*:com/lin/mapper/**/*.xml" />
+		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml" />
+		<!-- <property name="typeAliasesPackage" value="com.tiantian.ckeditor.model" 
+			/> -->
+	</bean>
+
+	<!-- Redis -->
+	<!-- blockWhenExhausted: 从Pool中获取Jedis对象，Pool资源耗尽后阻塞maxWaitMillis参数指定时间 -->
+	<!-- maxWaitMillis: 从Pool中获取Jedis对象超时时间 -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="minIdle" value="2" />
+		<property name="maxIdle" value="5" />
+		<property name="maxTotal" value="8" />
+		<property name="maxWaitMillis" value="-1" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="testWhileIdle" value="true" />
+		<property name="blockWhenExhausted" value="true" />
+	</bean>
+
+	<!-- 49.81 <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"> 
+		<property name="usePool" value="true" /> <property name="hostName" value="10.1.11.32" 
+		/> <property name="port" value="6379" /> <property name="password" value="" 
+		/> <property name="timeout" value="300000" /> <constructor-arg name="poolConfig" 
+		ref="jedisPoolConfig" /> </bean> -->
+
+	<!-- 生产 <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"> 
+		<property name="usePool" value="true" /> <property name="hostName" value="10.128.49.138" 
+		/> <property name="port" value="6379" /> <property name="password" value="" 
+		/> <property name="timeout" value="300000" /> <constructor-arg name="poolConfig" 
+		ref="jedisPoolConfig" /> </bean> -->
+
+	<bean id="jedisConnectionFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="usePool" value="true" />
+		<property name="hostName">
+			<value>${jedis_hostName}</value>
+		</property>
+		<property name="port">
+			<value>${jedis_port}</value>
+		</property>
+		<property name="password">
+			<value>${jedis_password}</value>
+		</property>
+		<property name="timeout">
+			<value>${jedis_timeout}</value>
+		</property>
+		<constructor-arg name="poolConfig" ref="jedisPoolConfig" />
+	</bean>
+
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+		<property name="connectionFactory" ref="jedisConnectionFactory" />
+	</bean>
+
+	<!-- 配置缓存 -->
+	<bean id="cacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
+		<constructor-arg ref="redisTemplate" />
+	</bean>
+
+	<!-- 将session放入redis -->
+	<!-- <bean id="redisHttpSessionConfiguration" class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration"> 
+		<property name="maxInactiveIntervalInSeconds" value="28800" /> </bean> -->
+
+	<!-- 自动扫描注解的bean -->
+	<context:component-scan base-package="com.lin.service" />
+
+</beans>
