@@ -3,3 +3,6 @@ target/
 .idea/
 logs/
 **/.svn
+.classpath
+.project
+app-addresslist.eml
