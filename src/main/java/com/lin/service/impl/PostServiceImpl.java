@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.lin.dao.PostDaoI;
+import com.lin.mapper.PostMapper;
 import com.lin.domain.Position;
 import com.lin.service.PostServiceI;
 
@@ -18,7 +18,7 @@ import com.lin.service.PostServiceI;
 public class PostServiceImpl implements PostServiceI {
 
 	@Autowired
-	private PostDaoI postDao;
+	private PostMapper postDao;
 
 	@Override
 	public List<Position> selectAllPosition() {

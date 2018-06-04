@@ -1,8 +1,8 @@
 package com.lin.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Strings;
 import java.util.List;
-
-import com.lin.util.PropUtil;
 
 /**
  * 五、个人资料详情查询 实体类
@@ -12,7 +12,8 @@ import com.lin.util.PropUtil;
  *
  */
 public class UserDetails {
-
+	@JsonIgnore
+	public static String picHttpIp;
 	// 人员ID
 	private String userID;
 	// 姓名
@@ -97,10 +98,12 @@ public class UserDetails {
 	}
 
 	public String getUserPic() {
-		if (userPic.indexOf(PropUtil.PIC_HTTPIP) > -1) {
+		if(Strings.isNullOrEmpty(userPic))
+			return userPic;
+		if (userPic.indexOf(picHttpIp) > -1) {
 			return userPic;
 		} else {
-			return PropUtil.PIC_HTTPIP + userPic;
+			return picHttpIp + userPic;
 		}
 	}
 

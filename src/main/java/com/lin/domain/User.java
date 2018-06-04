@@ -1,38 +1,41 @@
 package com.lin.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Strings;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
-
-import com.lin.util.PropUtil;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * 用户实体类
  * @author zhangWeiJie
  * @date 2017年8月18日
  */
-/**
- * {
- * "field":"互联网、物联网",y
- * "userID":"123",y
- * "provinceID":"12345",y
- * "phone":"15900000000",y
- * "post":"大客户经理",y
- * "userPic":"/pic.pic",y
- * "address":"北京",y
- * "email":"15900000000@qq.com",y
- * "context":"联系大客户、大客户维护",y
- * "organizationID":"12345",
- * "userName":"小明",y
- * "type":"1,2"}y
- *
- */
+
+@ApiModel(value = "User", description = "用户")
+@Entity
+@Table(name = "address_user")
 public class User implements Serializable ,Comparable<User>{
+  @JsonIgnore
+  public static String picHttpIp;
 	/**
 	 * 擅长领域
 	 */
+	@Column(name = "USERTERRITORY")
 	private String field;
+
+  @ApiModelProperty(value = "主键")
+	@Id
+  @Column(name = "ROW_ID")
+  private String roleId;
 	/**
 	 * 用户ID
 	 */
+  @Column(name = "USER_ID")
 	private String userID;
 	/**
 	 * 省份ID
@@ -45,10 +48,12 @@ public class User implements Serializable ,Comparable<User>{
 	/**
 	 * 职务
 	 */
+	@Column(name = "POS_ID")
 	private String post;
 	/**
 	 * 头像地址
 	 */
+	@Column(name = "PORTRAIT_URL")
 	private String userPic;
 	/**
 	 * 地址
@@ -61,26 +66,32 @@ public class User implements Serializable ,Comparable<User>{
 	/**
 	 * 工作内容
 	 */
+	@Column(name = "USERWORK")
 	private String context;
 	/**
 	 * 组织ID
 	 */
+	@Column(name = "DEP_ID")
 	private String organizationID;
 	/**
 	 * 名称
 	 */
+	@Column(name = "USER_NAME")
 	private String userName;
 	/**
 	 * 类型 1 新增 2 修改 3 删除
 	 */
+	@Column(name = "STATUS")
 	private String type;
 	/**
 	 * 最后更新时间 
 	 */
+	@Column(name = "UPDATE_DATE")
 	private String updateDate;
 	/**
 	 * 是否为领导 1领导 2部门成员
 	 */
+	@Column(name="POSITION_TYPE")
 	private String deptype;
 	/**
 	 * 姓名全拼
@@ -105,32 +116,34 @@ public class User implements Serializable ,Comparable<User>{
 	/**
 	 * 人员级别
 	 */
-	private int sortNum;
+	@Column(name = "SORT_NUM")
+	private Integer sortNum;
 	/**
 	 * 排序字段
 	 */
-	private int orderNum;
+	@Column(name = "ORDER_NUM")
+	private Integer orderNum;
 	/**
 	 * 是否安装销售助手,1 安装过,0未安装过
 	 */
-	private int install;
+	private Integer install;
 	
-	public int getInstall() {
+	public Integer getInstall() {
 		return install;
 	}
-	public void setInstall(int install) {
+	public void setInstall(Integer install) {
 		this.install = install;
 	}
-	public int getSortNum() {
+	public Integer getSortNum() {
 		return sortNum;
 	}
-	public void setSortNum(int sortNum) {
+	public void setSortNum(Integer sortNum) {
 		this.sortNum = sortNum;
 	}
-	public int getOrderNum() {
+	public Integer getOrderNum() {
 		return orderNum;
 	}
-	public void setOrderNum(int orderNum) {
+	public void setOrderNum(Integer orderNum) {
 		this.orderNum = orderNum;
 	}
 	public String getDeptype() {
@@ -170,10 +183,13 @@ public class User implements Serializable ,Comparable<User>{
 		this.post = post;
 	}
 	public String getUserPic() {
-		if (userPic.indexOf(PropUtil.PIC_HTTPIP)>-1){
+	  if(Strings.isNullOrEmpty(userPic))
+	    return userPic;
+
+		if (userPic.indexOf(picHttpIp)>-1){
 			return userPic;
 		}else{
-			return PropUtil.PIC_HTTPIP+userPic;
+			return picHttpIp + userPic;
 		}
 	}
 	public void setUserPic(String userPic) {
@@ -236,36 +252,7 @@ public class User implements Serializable ,Comparable<User>{
 			return 0; // 0为等于
 		}
 	}
-	
-	//RuleBasedCollator collator = (RuleBasedCollator)Collator.getInstance(Locale.CHINA);
-	/*@Override
-	public int compareTo(User u) {
-		
-		String thisZ=this.shouZiMu;
-		if(thisZ==null) {
-			thisZ="";
-		}else {
-			thisZ=this.shouZiMu.toLowerCase();
-		}
-		String paraZ=u.getShouZiMu();
-		if(paraZ==null) {
-			paraZ="";
-		}else {
-			paraZ=u.getShouZiMu().toLowerCase();
-		}
-		
-		if ((thisZ.compareTo(paraZ)) > 0) {
-			return 1; // 正整数是大于
-		} else if ((thisZ.compareTo(paraZ)) < 0) {
-			return -1;// 负整数是小于
-		} else {
-			return 0; // 0为等于
-		}
-	}*/
-	
-	public static void main(String[] args) {
-		
-	}
+
 	public String getQuanPin() {
 		return quanPin;
 	}
@@ -296,5 +283,12 @@ public class User implements Serializable ,Comparable<User>{
 	public void setFlagOnline(String flagOnline) {
 		this.flagOnline = flagOnline;
 	}
-	
+
+  public String getRoleId() {
+    return roleId;
+  }
+
+  public void setRoleId(String roleId) {
+    this.roleId = roleId;
+  }
 }

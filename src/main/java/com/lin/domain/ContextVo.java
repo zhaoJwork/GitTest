@@ -15,9 +15,7 @@ public class ContextVo {
 	private String flag;
 	private String rowId;//当前主键ID
 	private String userID;//用户ID
-	
-	
-	
+
 	public String getUserID() {
 		return userID;
 	}
@@ -57,7 +55,4 @@ public class ContextVo {
 	public void setFlag(String flag) {
 		this.flag = flag;
 	}
-	
-	
-	
 }

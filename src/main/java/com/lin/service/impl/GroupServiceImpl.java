@@ -1,20 +1,20 @@
 package com.lin.service.impl;
 
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.lin.dao.GroupDaoI;
-import com.lin.dao.UtilDaoI;
+import com.lin.mapper.GroupMapper;
+import com.lin.mapper.UtilMapper;
 import com.lin.domain.Group;
 import com.lin.domain.GroupBean;
 import com.lin.domain.GroupDetails;
@@ -22,10 +22,9 @@ import com.lin.domain.GroupUserBean;
 import com.lin.domain.User;
 import com.lin.service.GroupServiceI;
 import com.lin.util.ImageUtil;
-import com.lin.util.PropUtil;
 
 /**
- * TODO
+ *
  * 
  * @author zhangWeiJie
  * @date 2017年8月18日
@@ -33,10 +32,22 @@ import com.lin.util.PropUtil;
 @Service("groupService")
 public class GroupServiceImpl implements GroupServiceI {
 
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp;
+
+	@Value("${application.pic_group_img}")
+	private String picGroupImg;
+	@Value("${application.pic_group_temp_img}")
+	private String picGroupTempImg;
+	@Value("${application.pic_group_db_img_root}")
+	private String picGroupDbImgRoot;
+	@Value("${application.pic_group_db_img}")
+	private String picGroupDbImg;
+
 	@Autowired
-	private GroupDaoI groupDao;
+	private GroupMapper groupDao;
 	@Autowired
-	private UtilDaoI utilDao;
+	private UtilMapper utilDao;
 
 	@Override
 	public List<Group> selectAllGroupByLoginID(String loginID) {
@@ -144,10 +155,10 @@ public class GroupServiceImpl implements GroupServiceI {
 	private void editGroupImg(String groupID) throws Exception {
 		// 查询所属组的人
 		List<User> userIdList = groupDao.selectGroupUserBygroupID(groupID);
-		String imgIp = PropUtil.PIC_HTTPIP;// "http://42.99.16.145:19491";//
+		String imgIp = picHttpIp;// "http://42.99.16.145:19491";//
 											// 头像缺少IP地址
-		String tem = PropUtil.PIC_GROUP_TEMP_IMG;// 临时文件路径
-		String imgRoot=PropUtil.PIC_GROUP_DB_IMG_ROOT;//文件所缺根路径
+		String tem = picGroupTempImg;// 临时文件路径
+		String imgRoot = picGroupDbImgRoot;//文件所缺根路径
 		List<File> fileList = new ArrayList<File>();
 		for (User u : userIdList) {
 			String uPic = u.getUserPic();
@@ -158,8 +169,7 @@ public class GroupServiceImpl implements GroupServiceI {
 			String uPicTem = tem + u.getUserID() + ".png";
 			try {
 				uPic=uPic.replace(imgIp,imgRoot);//去掉IP地址
-				//FileUtils.copyURLToFile(new URL(uPic), new File(uPicTem));
-				FileUtils.copyFile(new File(uPic), new File(uPicTem));
+				Files.copy(new File(uPic), new File(uPicTem));
 				File f = new File(uPicTem);
 				fileList.add(f);
 				// 只要九个图片(方法只允许最多9张图片)
@@ -175,10 +185,10 @@ public class GroupServiceImpl implements GroupServiceI {
 		if (fileList.size() > 0) {
 			//文件名称不能单用groupId生成 如果前端设置本地缓存 则图片不会更新
 			String union=System.currentTimeMillis()+"";
-			String groupImgAddress = PropUtil.PIC_GROUP_IMG +union+ groupID + ".png";// 存放群组图片地址服务器文件路径
+			String groupImgAddress = picGroupImg + union+ groupID + ".png";// 存放群组图片地址服务器文件路径
 			ImageUtil.createImage(fileList, groupImgAddress, "");// 9张图片生成1张图片
 			File f = new File(groupImgAddress);
-			String saveUrl = PropUtil.PIC_GROUP_DB_IMG +union+ groupID + ".png";
+			String saveUrl = picGroupDbImg + union+ groupID + ".png";
 			if (f.exists()) {// 更新appuser.address_group表
 				groupDao.updateGroupImgInfo(groupID, saveUrl);
 			}

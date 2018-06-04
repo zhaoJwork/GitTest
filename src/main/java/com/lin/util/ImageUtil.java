@@ -7,12 +7,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * 用来处理头像组合
@@ -113,23 +112,6 @@ public class ImageUtil {
             width = 40;
         }
         return width;
-    }
-
-    /**
-     * 下载图片到指定目录
-     * @param urlString 源文件路径
-     * @param filename  文件名
-     * @param savePath  保存路径
-     * @throws Exception
-     */
-    public static File download(String urlString, String filename, String savePath) throws Exception {
-        File sf = new File(savePath);
-        if (!sf.exists()) {
-            sf.mkdirs();
-        }
-        File file = new File(sf.getPath() + File.separator + filename);
-        FileUtils.copyURLToFile(new URL(urlString), file, 3000, 3000);
-        return file;
     }
     
     public static void main(String[] args) throws Exception {

@@ -3,7 +3,7 @@ package com.lin.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.lin.dao.SourceDaoI;
+import com.lin.mapper.SourceMapper;
 import com.lin.domain.User;
 import com.lin.service.SourceServiceI;
 
@@ -16,7 +16,7 @@ import com.lin.service.SourceServiceI;
 public class SourceServiceImpl implements SourceServiceI {
 
 	@Autowired
-	private SourceDaoI sourceDao;
+	private SourceMapper sourceDao;
 	/**
 	 * 添加黑名单
 	 */
@@ -63,11 +63,11 @@ public class SourceServiceImpl implements SourceServiceI {
 	}
 	
 
-	public SourceDaoI getSourceDao() {
+	public SourceMapper getSourceDao() {
 		return sourceDao;
 	}
 
-	public void setSourceDao(SourceDaoI sourceDao) {
+	public void setSourceDao(SourceMapper sourceDao) {
 		this.sourceDao = sourceDao;
 	}
 	

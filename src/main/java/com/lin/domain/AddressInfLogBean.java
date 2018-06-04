@@ -14,7 +14,21 @@ public class AddressInfLogBean {
 	private String createDate;
 	private String endDate;
 	private String expError;//错误原因
-	
+
+	public AddressInfLogBean() {
+	}
+
+	public AddressInfLogBean(String rowID, String addName, String reqJson, String respJson,
+			String createDate, String endDate, String expError) {
+		this.rowID = rowID;
+		this.addName = addName;
+		this.reqJson = reqJson;
+		this.respJson = respJson;
+		this.createDate = createDate;
+		this.endDate = endDate;
+		this.expError = expError;
+	}
+
 	public String getRowID() {
 		return rowID;
 	}

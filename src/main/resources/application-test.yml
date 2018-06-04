@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    name: Oracle
+    url:  jdbc:oracle:thin:@//localhost:1521/lwzdb
+    username: jtuam
+    password: jtuam
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        default_schema: jtuam
+        format_sql: true
+        dialect: org.hibernate.dialect.Oracle10gDialect
+  thymeleaf:
+    cache: false

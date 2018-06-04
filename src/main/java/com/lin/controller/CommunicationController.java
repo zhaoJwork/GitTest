@@ -1,5 +1,6 @@
 package com.lin.controller;
 
+import com.lin.util.JsonUtil;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.alibaba.fastjson.JSON;
 import com.lin.domain.AddressInfLogBean;
 import com.lin.domain.Department;
 import com.lin.domain.Group;
@@ -33,7 +34,6 @@ import com.lin.service.RedisServiceI;
 import com.lin.service.UserServiceI;
 import com.lin.util.IntegralUtil;
 import com.lin.util.JedisKey;
-import com.lin.util.PropUtil;
 import com.lin.util.Result;
 
 /**
@@ -46,6 +46,10 @@ import com.lin.util.Result;
 @RequestMapping("/communication")
 public class CommunicationController {
 
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp;
+	@Autowired
+  private IntegralUtil integralUtil;
 	@Autowired
 	private DepartmentServiceI departmentService;
 	@Autowired
@@ -124,6 +128,7 @@ public class CommunicationController {
 	@ResponseBody
 	public Result userlist(HttpServletRequest req, String loginID, String search, String groupID, String organizationID,
 			String provinceID, String fieldID) {
+	  //User.picHttpIp = picHttpIp;
 		AddressInfLogBean log = logService.getAddressInfLog(req, "人员列表");
 		Result result = new Result();
 		if (loginID == null || loginID.trim().equals("")) {
@@ -163,7 +168,7 @@ public class CommunicationController {
 		paras.put("fields", field);
 		try {
 			List<User> list = userService.selectUserByFilter(paras);
-			result.setRespCode("1");
+ 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(list);
 		} catch (Exception e) {
@@ -458,17 +463,8 @@ public class CommunicationController {
 			 * 获取当前修改人的个人信息 供下面的redis更新使用
 			 */
 			User ud = userService.SelectuserupdateById(userID);
-			/*
-			 * 通讯录->个人资料页面，选择擅长领域或者工作内容后，此人的部分数据会缺失 2017-10-27 zhangWeiJie 注
-			 * if(null != ud.getField() && !ud.getField().equals("")){
-			 * userService.updateAdduserById(userID,"","","","","","","","","",
-			 * ud.getField()); } if(null != ud.getContext() &&
-			 * !ud.getContext().equals("")){
-			 * userService.updateAdduserById(userID,"","","","","","","","",ud.
-			 * getContext(),""); }
-			 */
 
-			jedisService.save(JedisKey.USERKEY, userID, JSON.toJSONString(ud)); // 更新redis
+			jedisService.save(JedisKey.USERKEY, userID, JsonUtil.toJson(ud)); // 更新redis
 																				// userID的key
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			String date = sdf.format(new Date());
@@ -501,8 +497,6 @@ public class CommunicationController {
 
 	/**
 	 * 
-	 * @param group
-	 * @return Result
 	 * @author
 	 * @date 2017年8月18日
 	 * @describe 描述 获取登录账号所属的常用分组列表 URL
@@ -712,7 +706,7 @@ public class CommunicationController {
 			map.put("BusiCode", "020");
 			int num  = organizationService.getCountIntegralByDay(map);
 			if(num ==0){
-				IntegralUtil.addScore(loginID, "020", "进入通讯录模块","0");
+        integralUtil.addScore(loginID, "020", "进入通讯录模块","0");
 				System.out.println("----进入通讯录模块积分添加成功----");
 			}
 		}catch(Exception e){
@@ -761,7 +755,7 @@ public class CommunicationController {
 		try {// 查询群组信息
 			GroupDetails gd = groupService.groupDetails(loginID, groupID);
 			// 完整的图片下载地址
-			gd.setGroupImg(PropUtil.PIC_HTTPIP + gd.getGroupImg());
+			gd.setGroupImg(picHttpIp + gd.getGroupImg());
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(gd);
@@ -891,8 +885,7 @@ public class CommunicationController {
 			return result;
 		}
 		try {
-			Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-			orgtreeMap = organizationService.fiveCityOrganization(loginID);
+			Map<String, Object> orgtreeMap = organizationService.fiveCityOrganization(loginID);
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(orgtreeMap);
@@ -984,21 +977,5 @@ public class CommunicationController {
 			result.setRespDesc("失败");
 		}
 		return result;
-	}
-
-	public void setDepartmentService(DepartmentServiceI departmentService) {
-		this.departmentService = departmentService;
-	}
-
-	public void setGroupService(GroupServiceI groupService) {
-		this.groupService = groupService;
-	}
-
-	public void setPostService(PostServiceI postService) {
-		this.postService = postService;
-	}
-
-	public void setUserService(UserServiceI userService) {
-		this.userService = userService;
 	}
 }

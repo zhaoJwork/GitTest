@@ -1,0 +1,93 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.mapper.GroupMapper">
+	
+	<!-- 根据登陆人 查找群组 zhangweijie -->
+	<select id="selectAllGroupByLoginID" parameterType="java.lang.String"
+		resultType="com.lin.domain.Group">
+		select tc.group_id groupID, tc.group_name groupName, tc.aa,tc.group_img groupImg
+		  from (select t.group_id, t.group_name,lower(substr(f_get_hzpy(t.group_name), 0, 1)) aa, t.create_date,t.group_img, decode(t.group_id,'5002','3','2') og
+		          from appuser.address_group t
+		         where t.CREATE_USER = '0'
+		        union all
+		        select t1.group_id, t1.group_name, lower(substr(f_get_hzpy(t1.group_name), 0, 1)) aa, t1.create_date, t1.group_img,'1'og
+		          from appuser.address_group t1
+		         where t1.CREATE_USER = '${_parameter}') tc
+		      order by tc.og desc,REGEXP_SUBSTR(tc.aa, '[[:alpha:]]+'),cast(REGEXP_SUBSTR(tc.aa, '[0-9]+') as int)
+	</select>
+	
+	<select id="getNGroupID" resultType="java.lang.String">
+		select max(g.group_id) + 1 from appuser.address_group g
+	</select>
+	
+	<insert id="saveGroup" parameterType="com.lin.domain.GroupBean">
+		insert into appuser.address_group
+  			(row_id, group_id, group_name, group_desc, create_user, create_date)
+  		values (
+  			#{rowID},
+  			#{groupID},
+  			#{groupName},
+  			#{groupDesc},
+  			#{createUser},
+  			sysdate
+  		)	
+	</insert>
+	<insert id="saveGroupUser" parameterType="com.lin.domain.GroupUserBean">
+		insert into appuser.address_group_user (row_id,group_id,group_user,create_date)
+		 <foreach collection="list" item="item" index="index" open="(" close=")" separator="union all">
+		    SELECT '${item.rowID}' as a, '${item.groupID}' as b, '${item.groupUser}' as c,sysdate as d FROM DUAL
+		 </foreach> 
+	</insert>
+	<delete id="deleteGroupUser" parameterType="com.lin.domain.GroupUserBean">
+		delete from appuser.address_group_user g 
+			where g.group_id = #{groupID}
+		<if test="groupUser !='' and groupUser !=null">
+			and g.group_user in (${groupUser})
+		</if>
+	</delete>
+	<delete id="deleteGroup" parameterType="java.lang.String">
+		delete from appuser.address_group g 
+			where g.group_id = #{_parameter}
+	</delete>
+	<update id="updateGroup" parameterType="com.lin.domain.GroupBean">
+		update appuser.address_group g set 
+		<if test="groupName !='' and groupName !=null">
+			g.group_name = #{groupName},
+		</if>   
+		<if test="groupDesc !='' and groupDesc !=null">
+			g.group_desc = #{groupDesc},
+		</if>   
+			g.update_date = sysdate
+		 where g.group_id = #{groupID}
+	</update>
+	
+	<select id="selectGroupBygroupID" parameterType="java.lang.String"
+		resultType="com.lin.domain.GroupDetails">
+		select t.group_id groupID, t.group_name groupName, t.group_img groupImg,t.group_desc groupDesc
+		from appuser.address_group t
+		where t.group_id = #{0}
+	</select>
+	
+	<select id="selectGroupUserBygroupID" parameterType="java.lang.String"
+		resultType="com.lin.domain.User">
+		select u.user_id userID, u.user_name userName ,decode(n.portrait_url,'',u.portrait_url,n.portrait_url) userPic
+				from appuser.address_group_user t
+		    left join appuser.address_user u 
+		    on t.group_user = u.user_id
+		    left join appuser.address_user_new n
+    		on n.user_id = u.user_id
+		    where t.group_id =  #{0}
+	</select>
+	<!-- #{1},#{0} -->
+	<update id="updateGroupImgInfo" parameterType="java.lang.String">
+		 update appuser.address_group p 
+		 set p.group_img=#{1}
+		 where p.group_id=#{0}
+	</update>
+	<select id="getGroupUserIDs" resultType="java.lang.String"
+			 parameterType="java.lang.String">
+		select to_char(wm_concat(gu.group_user)) userids
+		  from appuser.address_group_user gu
+		 where gu.group_id = '${_parameter}'
+	</select>
+</mapper>

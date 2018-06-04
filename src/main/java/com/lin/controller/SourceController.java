@@ -95,43 +95,8 @@ public class SourceController {
 			result.setRespCode("3");
 			result.setRespDesc("异常:"+e.getMessage());
 		}
-		
-		
-		/*if (name != null && pwd != null) {
-			if (name.equals("aaa") && pwd.equals("bbb")) {
-				jedisService.delete(JedisKey.USERKEY_DATE);
-				Date d = new Date();
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				jedisService.save(JedisKey.USERKEY_DATE,sdf.format(d));
-				result.setRespCode("1");
-				result.setRespDesc("chenggong");
-			}
-		}*/
+
 		return result;
-	}
-
-	public RedisServiceI getJedisService() {
-		return jedisService;
-	}
-
-	public void setJedisService(RedisServiceI jedisService) {
-		this.jedisService = jedisService;
-	}
-
-	public UserServiceI getUserService() {
-		return userService;
-	}
-
-	public void setUserService(UserServiceI userService) {
-		this.userService = userService;
-	}
-	
-	public SourceServiceI getSourceService() {
-		return sourceService;
-	}
-
-	public void setSourceService(SourceServiceI sourceService) {
-		this.sourceService = sourceService;
 	}
 
 	/**

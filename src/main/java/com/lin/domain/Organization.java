@@ -27,7 +27,7 @@ public class Organization implements Comparable<Organization> {
 	// 首字母
 	private String zimuname;
 	
-	private int orderValue;
+	private Integer orderValue;
 
 	public String getOrganizationID() {
 		return organizationID;
@@ -139,7 +139,7 @@ public class Organization implements Comparable<Organization> {
 		}
 	}*/
 	
-	public int getOrderValue() {
+	public Integer getOrderValue() {
 		return orderValue;
 	}
 

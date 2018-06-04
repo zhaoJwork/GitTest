@@ -1,0 +1,20 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.mapper.AddressInfLogMapper">
+
+	<insert id="saveAddressInfLog" parameterType="com.lin.domain.AddressInfLogBean">
+		insert into
+		address_inf_log
+		(row_id, add_name, req_json, resp_json, create_date, end_date,exp_error)
+		values
+		(
+		#{rowID},
+		#{addName},
+		#{reqJson},
+		#{respJson},
+		to_date('${createDate}','yyyy-mm-dd hh24:mi:ss'),
+		to_date('${endDate}','yyyy-mm-dd hh24:mi:ss'),
+		#{expError}
+		)
+	</insert>
+</mapper>

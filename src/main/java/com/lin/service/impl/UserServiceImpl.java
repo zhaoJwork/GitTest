@@ -1,5 +1,7 @@
 package com.lin.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.lin.util.JsonUtil;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,9 +13,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.lin.dao.UserDaoI;
-import com.lin.dao.UtilDaoI;
+import com.lin.mapper.UserMapper;
+import com.lin.mapper.UtilMapper;
 import com.lin.domain.ContextVo;
 import com.lin.domain.FieldVo;
 import com.lin.domain.Privilege;
@@ -35,10 +36,10 @@ import com.lin.util.JedisKey;
 public class UserServiceImpl implements UserServiceI {
 
 	@Autowired
-	private UserDaoI userDao;
+	private UserMapper userDao;
 	
 	@Autowired
-	private UtilDaoI utilDao;
+	private UtilMapper utilDao;
 
 	@Autowired
 	private RedisServiceI jedisService;
@@ -75,7 +76,11 @@ public class UserServiceImpl implements UserServiceI {
 				Map<String, String> map=new HashMap<String,String>();
 				for(User u:userList) {
 					//map.put(u.getUserID(),JSON.toJSONString(u, SerializerFeature.WriteNullStringAsEmpty));
-					map.put(u.getUserID(),JSON.toJSONString(u));
+					try {
+						map.put(u.getUserID(), JsonUtil.toJson((u)));
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
 				}
 				//System.err.println("*****************************************"+date+"*******************************");
 				if(map.size()>0) {
@@ -90,7 +95,7 @@ public class UserServiceImpl implements UserServiceI {
 				List<User> list=new ArrayList<User>();
 				User uuu=new User();
 				for(Object o:redisUser) {
-					list.add(JSON.parseObject(o.toString(),uuu.getClass()));
+					list.add(JsonUtil.fromJson(o.toString(),uuu.getClass()));
 				}
 				
 				Collections.sort(list);

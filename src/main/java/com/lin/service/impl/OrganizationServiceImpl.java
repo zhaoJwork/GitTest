@@ -1,5 +1,7 @@
 package com.lin.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.lin.util.JsonUtil;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,8 +15,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.lin.dao.OrganizationDaoI;
+import com.lin.mapper.OrganizationMapper;
 import com.lin.domain.OrgTer;
 import com.lin.domain.Organization;
 import com.lin.service.OrganizationServiceI;
@@ -31,7 +32,7 @@ import com.lin.util.JedisKey;
 public class OrganizationServiceImpl implements OrganizationServiceI {
 
 	@Autowired
-	private OrganizationDaoI organizationDao;
+	private OrganizationMapper organizationDao;
 
 	@Autowired
 	private RedisServiceI jedisService;
@@ -67,7 +68,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						List<Organization> organizationList = organizationDao.organizationByPID(organizationID);
 						Map<String, String> map = new LinkedHashMap<String, String>();
 						for (Organization o : organizationList) {
-							map.put(o.getOrganizationID(), JSON.toJSONString(o));
+							map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 						}
 						if (map.size() > 0) {
 							jedisService.save(JedisKey.UPORGANIZATIONKEY, map);
@@ -80,7 +81,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						List<Organization> list = new ArrayList<Organization>();
 						Organization ooo = new Organization();
 						for (Object re : redisOrganization) {
-							Organization organization = JSON.parseObject(re.toString(), ooo.getClass());
+							Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 							list.add(organization);
 						}
 						Collections.sort(list);
@@ -228,7 +229,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						List<Organization> organizationList = organizationDao.downOrganization(organizationID);
 						Map<String, String> map = new LinkedHashMap<String, String>();
 						for (Organization o : organizationList) {
-							map.put(o.getOrganizationID(), JSON.toJSONString(o));
+							map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 						}
 						if (map.size() > 0) {
 							if (organizationID.equals("1844641")) { // 1844641
@@ -372,7 +373,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						List<Organization> list = new ArrayList<Organization>();
 						Organization ooo = new Organization();
 						for (Object re : redisOrganization) {
-							Organization organization = JSON.parseObject(re.toString(), ooo.getClass());
+							Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 							list.add(organization);
 						}
 						Collections.sort(list);
@@ -394,7 +395,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						List<Organization> organizationList = organizationDao.organizationByPID(organizationID);
 						Map<String, String> map = new LinkedHashMap<String, String>();
 						for (Organization o : organizationList) {
-							map.put(o.getOrganizationID(), JSON.toJSONString(o));
+							map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 						}
 						if (map.size() > 0) {
 							jedisService.save(JedisKey.UPORGANIZATIONKEY, map);
@@ -407,7 +408,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						List<Organization> list = new ArrayList<Organization>();
 						Organization ooo = new Organization();
 						for (Object re : redisOrganization) {
-							Organization organization = JSON.parseObject(re.toString(), ooo.getClass());
+							Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 							list.add(organization);
 						}
 						Collections.sort(list);
@@ -554,7 +555,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 					List<Organization> organizationList = organizationDao.downOrganization(organizationID);
 					Map<String, String> map = new LinkedHashMap<String, String>();
 					for (Organization o : organizationList) {
-						map.put(o.getOrganizationID(), JSON.toJSONString(o));
+						map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 					}
 					if (map.size() > 0) {
 						if (organizationID.equals("1844641")) { // 1844641 集团总部
@@ -702,7 +703,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						List<Organization> list = new ArrayList<Organization>();
 						Organization ooo = new Organization();
 						for (Object re : redisOrganization) {
-							Organization organization = JSON.parseObject(re.toString(), ooo.getClass());
+							Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 							list.add(organization);
 						}
 						Collections.sort(list);
@@ -882,7 +883,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 							List<Organization> list = new ArrayList<Organization>();
 							Organization ooo = new Organization();
 							for (Object re : redisOrganization) {
-								Organization organization = JSON.parseObject(re.toString(), ooo.getClass());
+								Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 								list.add(organization);
 							}
 							Collections.sort(list);
@@ -893,6 +894,8 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 				}
 			}
 		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 		return organizationMap;
@@ -964,7 +967,11 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 			List<Organization> organizationList = organizationDao.fiveCityOrganization(loginID);
 			Map<String, String> map = new LinkedHashMap<String, String>();
 			for (Organization o : organizationList) {
-				map.put(o.getOrganizationID(), JSON.toJSONString(o));
+				try {
+					map.put(o.getOrganizationID(), JsonUtil.toJson(o));
+				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+				}
 			}
 			if (map.size() > 0) {
 				jedisService.save(JedisKey.FIVEORGANIZATIONKEY, map);
@@ -975,7 +982,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 			List<Organization> list = new ArrayList<Organization>();
 			Organization ooo = new Organization();
 			for (Object re : redisOrganization) {
-				Organization organization = JSON.parseObject(re.toString(), ooo.getClass());
+				Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 				list.add(organization);
 			}
 			Collections.sort(list);

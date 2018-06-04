@@ -5,9 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.lin.dao.DepartmentDaoI;
+import com.lin.mapper.DepartmentMapper;
 import com.lin.domain.Department;
-import com.lin.domain.Group;
 import com.lin.service.DepartmentServiceI;
 
 /**
@@ -19,7 +18,7 @@ import com.lin.service.DepartmentServiceI;
 public class DepartmentServiceImpl implements  DepartmentServiceI{
 
 	@Autowired
-	private DepartmentDaoI departmentDao;
+	private DepartmentMapper departmentDao;
 
 	/**
 	 * 查询所有部门

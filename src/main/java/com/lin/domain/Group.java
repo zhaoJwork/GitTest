@@ -1,6 +1,8 @@
 package com.lin.domain;
 
-import com.lin.util.PropUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Strings;
+
 /**
  * 分组实体类
  * 
@@ -8,7 +10,8 @@ import com.lin.util.PropUtil;
  * @date 2017年8月18日
  */
 public class Group {
-
+	@JsonIgnore
+	public static String picHttpIp;
 	// 分组ID
 	private String groupID;
 	// 分组名称
@@ -32,7 +35,9 @@ public class Group {
 		this.groupName = groupName;
 	}
 	public String getGroupImg() {
-		return PropUtil.PIC_HTTPIP+groupImg;
+		if(Strings.isNullOrEmpty(groupImg))
+			return groupImg;
+		return picHttpIp + groupImg;
 	}
 	public void setGroupImg(String groupImg) {
 		this.groupImg = groupImg;
