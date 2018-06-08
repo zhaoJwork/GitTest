@@ -1,0 +1,35 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.mapper.AddressBookMapper">
+	
+	<!-- 禁言添加 -->
+	<insert id="addBannedSay" parameterType="com.lin.domain.AddressBanned">
+		insert into appuser.address_bannedsay(row_id, bannedsay_loginid, 
+		bannedsay_userid, type, bannedsay_type, bannedsay_days, bannedsay_date, create_date)  
+ 		values(SEQ_APPUser_user.Nextval, ${bannedSayLoginId}, ${bannedSayUserId}, ${type}, ${bannedSayType}, 
+ 		${bannedSayDays}, to_date('${bannedSayDate}', 'yyyy-MM-dd'), to_date('${createDate}', 'yyyy-MM-dd'))
+	</insert>
+	
+	<!-- 禁言修改 -->
+	<update id="updateBannedSay"  parameterType="com.lin.domain.AddressBanned">
+		update appuser.address_bannedsay 
+		set bannedsay_type = ${bannedSayType}, update_date = to_date('${updateDate}', 'yyyy-MM-dd'), 
+		update_by = ${updateBy} where bannedsay_userid = ${bannedSayUserId}
+	</update>
+	
+	<!-- 收藏添加 -->
+	<insert id="addAddressCollection" parameterType="com.lin.domain.AddressCollection">
+		insert into appuser.address_collection(row_id, collection_loginid, collection_userid, 
+		type, collection_type,collection_createdate) 
+		values(SEQ_APPUser_user.Nextval, ${collectionLoginId}, ${collectionUserId}, ${type}, ${collectionType}, 
+		to_date('${collectionCreateDate}', 'yyyy-MM-dd'))
+	</insert>
+	
+	<!-- 收藏修改 -->
+	<update id="updateAddressCollection" parameterType="com.lin.domain.AddressCollection">
+		update appuser.address_collection set collection_type=${collectionType}, collection_updateby=${collectionLoginId}, 
+		collection_updatedate=to_date('${collectionUpdateDate}', 'yyyy-MM-dd')
+		where collection_userid=${collectionUserId} and collection_loginid=${collectionLoginId} 
+	</update>
+	
+</mapper>
