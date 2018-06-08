@@ -50,8 +50,11 @@ public class GroupServiceImpl implements GroupServiceI {
 	private UtilMapper utilDao;
 
 	@Override
-	public List<Group> selectAllGroupByLoginID(String loginID) {
-		List<Group> list = groupDao.selectAllGroupByLoginID(loginID);
+	public List<Group> selectAllGroupByLoginID(String loginID,String groupname) {
+		GroupBean gb = new GroupBean();
+		gb.setCreateUser(loginID);
+		gb.setGroupName(groupname);
+		List<Group> list = groupDao.selectAllGroupByLoginID(gb);
 		return list;
 	}
 

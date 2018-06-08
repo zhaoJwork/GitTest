@@ -75,13 +75,14 @@ public class CommunicationController {
 	 *           http://127.0.0.1:8080/app-addresslist/communication/grouplist
 	 *           请求实例：
 	 *           http://127.0.0.1:8080/app-addresslist/communication/grouplist?loginID=22295
+	 *           localhost:8866/app-addresslist/communication/grouplist?loginID=130376&groupname=
 	 *           返回实例：
 	 *           {"respCode":"1","respDesc":"正常返回数据","respMsg":[{"groupName":"各省分管领导","groupID":"111"},{"groupName":"各省政企主任","groupID":"222"},{"groupName":"重点50个本地网","groupID":"333"},{"groupName":"小组","groupID":"444"}]}
 	 * 
 	 */
 	@RequestMapping("grouplist")
 	@ResponseBody
-	public Result grouplist(HttpServletRequest req, String loginID) {
+	public Result grouplist(HttpServletRequest req, String loginID,String groupname) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "获取分组");
 		Result result = new Result();
 		if (loginID == null || loginID.trim().equals("")) {
@@ -91,7 +92,7 @@ public class CommunicationController {
 			return result;
 		}
 		try {
-			List<Group> list = groupService.selectAllGroupByLoginID(loginID);
+			List<Group> list = groupService.selectAllGroupByLoginID(loginID,groupname);
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(list);

@@ -1,9 +1,9 @@
 # 多环境配置文件激活属性
 spring:
   profiles:
-    active: dev
+    active: test
 
 server:
-  port: 8008
+  port: 8866
   servlet:
     path: /app-addresslist
