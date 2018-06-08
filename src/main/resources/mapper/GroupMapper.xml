@@ -3,16 +3,23 @@
 <mapper namespace="com.lin.mapper.GroupMapper">
 	
 	<!-- 根据登陆人 查找群组 zhangweijie -->
-	<select id="selectAllGroupByLoginID" parameterType="java.lang.String"
+	<select id="selectAllGroupByLoginID"  parameterType="com.lin.domain.GroupBean"
 		resultType="com.lin.domain.Group">
 		select tc.group_id groupID, tc.group_name groupName, tc.aa,tc.group_img groupImg
 		  from (select t.group_id, t.group_name,lower(substr(f_get_hzpy(t.group_name), 0, 1)) aa, t.create_date,t.group_img, decode(t.group_id,'5002','3','2') og
 		          from appuser.address_group t
 		         where t.CREATE_USER = '0'
+			<if test="groupName !='' and groupName !=null">
+				and t.group_name like '${groupName}%'
+			</if>
 		        union all
 		        select t1.group_id, t1.group_name, lower(substr(f_get_hzpy(t1.group_name), 0, 1)) aa, t1.create_date, t1.group_img,'1'og
 		          from appuser.address_group t1
-		         where t1.CREATE_USER = '${_parameter}') tc
+		         where t1.CREATE_USER = #{createUser}
+			<if test="groupName !='' and groupName !=null">
+				and t1.group_name like '${groupName}%'
+			</if>
+			  ) tc
 		      order by tc.og desc,REGEXP_SUBSTR(tc.aa, '[[:alpha:]]+'),cast(REGEXP_SUBSTR(tc.aa, '[0-9]+') as int)
 	</select>
 	

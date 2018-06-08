@@ -29,7 +29,7 @@
 		t.flagonline flagOnline,
 		t.sort_num sortNum,
 		t.order_num orderNum,
-		t.install
+		n.install
 		from appuser.address_user t
 		left join appuser.address_position p
 		on (t.pos_id = p.pos_id)

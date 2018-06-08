@@ -17,7 +17,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface GroupMapper {
 
-	List<Group> selectAllGroupByLoginID(String loginID);
+	List<Group> selectAllGroupByLoginID(GroupBean gb);
 	/**
 	 * 获取新分组ID
 	 * @return
