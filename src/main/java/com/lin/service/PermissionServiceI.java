@@ -10,7 +10,7 @@ import com.lin.util.Result;
  * @date 2018年6月7日
  *
  */
-public interface AddressBookServiceI {
+public interface PermissionServiceI {
 
 	// 禁言 能力指数查看权限
 	void getBannedSay(String loginId, Integer type, String userId, Result result);

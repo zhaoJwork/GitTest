@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
 import com.lin.domain.AddressInfLogBean;
-import com.lin.service.AddressBookServiceI;
 import com.lin.service.AddressInfLogServiceI;
+import com.lin.service.PermissionServiceI;
 import com.lin.util.Result;
 
 /**
@@ -23,14 +23,14 @@ import com.lin.util.Result;
  */
 
 @Controller
-@RequestMapping("/addressbook")
-public class AddressBookController {
+@RequestMapping("/permission")
+public class PermissionController {
 	
 	@Autowired
 	private AddressInfLogServiceI logService;
 	
 	@Autowired
-	private AddressBookServiceI addressBookService;
+	private PermissionServiceI permissionService;
 	
 	/**
 	 * @param req
@@ -71,7 +71,7 @@ public class AddressBookController {
 		}
 		
 		try {
-			this.addressBookService.getBannedSay(loginId, type, userId,result);
+			this.permissionService.getBannedSay(loginId, type, userId,result);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -130,7 +130,7 @@ public class AddressBookController {
 		}
 		
 		try {
-			this.addressBookService.addBannedSay(addressBanned, result);
+			this.permissionService.addBannedSay(addressBanned, result);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -189,7 +189,7 @@ public class AddressBookController {
 			return result;
 		}
 		try {
-			this.addressBookService.addressCollection(addressCollection, result);
+			this.permissionService.addressCollection(addressCollection, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());

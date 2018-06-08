@@ -1,6 +1,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.lin.mapper.AddressBookMapper">
+<mapper namespace="com.lin.mapper.PermissionMapper">
 	
 	<!-- 禁言添加 -->
 	<insert id="addBannedSay" parameterType="com.lin.domain.AddressBanned">

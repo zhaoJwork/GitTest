@@ -8,11 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
-import com.lin.mapper.AddressBookMapper;
-import com.lin.service.AddressBookServiceI;
+import com.lin.mapper.PermissionMapper;
+import com.lin.service.PermissionServiceI;
 import com.lin.util.Result;
-
-import sun.awt.datatransfer.DataTransferer.ReencodingInputStream;
 
 /**
  * 
@@ -21,12 +19,12 @@ import sun.awt.datatransfer.DataTransferer.ReencodingInputStream;
  * @date 2018年6年6月
  *
  */
-@Service("addressBookService")
-public class AddressBookServiceImpl implements AddressBookServiceI{
+@Service("permissionService")
+public class PermissionServiceImpl implements PermissionServiceI{
 
 	
 	@Autowired
-	private AddressBookMapper addressDao;
+	private PermissionMapper permissionDao;
 	
 	/**
 	 * 查询禁言权限和能力指数 权限
@@ -93,7 +91,7 @@ public class AddressBookServiceImpl implements AddressBookServiceI{
 				// 截至日期
 				addressBanned.setBannedSayDate(format.format(date.getTime()+(24*60*60*1000)*addressBanned.getBannedSayDays()));
 				
-				re = this.addressDao.addBannedSay(addressBanned);
+				re = this.permissionDao.addBannedSay(addressBanned);
 				if(re == 0) {
 					result.setRespCode("2");
 					result.setRespDesc("禁言添加失败");
@@ -110,7 +108,7 @@ public class AddressBookServiceImpl implements AddressBookServiceI{
 				// 修改人为当前登录人
 				addressBanned.setUpdateBy(addressBanned.getBannedSayLoginId());
 				
-				re = this.addressDao.updateBannedSay(addressBanned);
+				re = this.permissionDao.updateBannedSay(addressBanned);
 				if(re == 0) {
 					result.setRespCode("2");
 					result.setRespDesc("禁言修改失败");
@@ -153,7 +151,7 @@ public class AddressBookServiceImpl implements AddressBookServiceI{
 				// 创建日期
 				addressCollection.setCollectionCreateDate(format.format(date));
 				
-				re = this.addressDao.addAddressCollection(addressCollection);
+				re = this.permissionDao.addAddressCollection(addressCollection);
 				if(re == 0) {
 					result.setRespCode("2");
 					result.setRespDesc("收藏添加失败");
@@ -170,7 +168,7 @@ public class AddressBookServiceImpl implements AddressBookServiceI{
 				// 修改人为当前登录人
 				addressCollection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
 				
-				re = this.addressDao.updateAddressCollection(addressCollection);
+				re = this.permissionDao.updateAddressCollection(addressCollection);
 				if(re == 0) {
 					result.setRespCode("2");
 					result.setRespDesc("收藏修改失败");

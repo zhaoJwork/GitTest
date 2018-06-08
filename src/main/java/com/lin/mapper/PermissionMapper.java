@@ -3,7 +3,7 @@ package com.lin.mapper;
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
 
-public interface AddressBookMapper {
+public interface PermissionMapper {
 
 	// 添加禁言
 	Integer addBannedSay(AddressBanned addressBanned);
