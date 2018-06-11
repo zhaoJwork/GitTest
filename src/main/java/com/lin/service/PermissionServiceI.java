@@ -1,5 +1,7 @@
 package com.lin.service;
 
+import java.text.ParseException;
+
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
 import com.lin.util.Result;
@@ -16,7 +18,7 @@ public interface PermissionServiceI {
 	void getBannedSay(String loginId, Integer type, String userId, Result result);
 
 	// 添加或者取消禁言
-	void addBannedSay(AddressBanned addressBanned, Result result);
+	void addBannedSay(AddressBanned addressBanned, Result result) throws ParseException;
 
 	// 添加或者取消收藏
 	void addressCollection(AddressCollection addressCollection, Result result);

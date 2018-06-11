@@ -1,41 +1,72 @@
 package com.lin.domain;
 
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * 禁言实体类
  * @author liudongdong
  *
  */
-public class AddressBanned {
+@ApiModel(value="addressBanned", description="描述 ")
+@Entity
+@Table(name="address_bannedsay")
+public class AddressBanned implements Serializable{
 
 	// 主键
+	@ApiModelProperty(value = "主键")
+	@Id
+	@Column(name = "ROW_ID")
+//	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator="SEQ_APPUser_user")
+//	@SequenceGenerator(name="SEQ_APPUser_user", sequenceName="SEQ_APPUser_user")
 	private Integer rowId;
 	
 	// 禁言人id
+	@Column(name = "BANNEDSAY_LOGINID")
 	private Integer bannedSayLoginId;
 	
 	// 被禁言人id
+	@Column(name = "BANNEDSAY_USERID")
 	private Integer bannedSayUserId;
 	
 	// 类型    1禁言  2其他  默认0
+	@Column(name = "TYPE")
 	private Integer type;
 	
 	//  禁言类型  1禁言 2 取消禁言 默认0
+	@Column(name = "BANNEDSAY_TYPE")
 	private Integer bannedSayType;
 	
 	// 禁言天数
+	@Column(name = "BANNEDSAY_DAYS")
 	private Integer bannedSayDays;
 	
 	// 禁言截至日期
-	private String bannedSayDate;
+	@Column(name = "BANNEDSAY_DATE")
+	private Date bannedSayDate;
 	
 	// 修改日期
-	private String updateDate;
+	@Column(name = "UPDATE_DATE")
+	private Date updateDate;
 	
 	// 修改人
+	@Column(name = "UPDATE_BY")
 	private Integer updateBy;
 	
 	// 创建日期
-	private String createDate;
+	@Column(name = "CREATE_DATE")
+	private Date createDate;
 
 	public Integer getRowId() {
 		return rowId;
@@ -85,21 +116,6 @@ public class AddressBanned {
 		this.bannedSayDays = bannedSayDays;
 	}
 
-	public String getBannedSayDate() {
-		return bannedSayDate;
-	}
-
-	public void setBannedSayDate(String bannedSayDate) {
-		this.bannedSayDate = bannedSayDate;
-	}
-
-	public String getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(String updateDate) {
-		this.updateDate = updateDate;
-	}
 
 	public Integer getUpdateBy() {
 		return updateBy;
@@ -109,11 +125,28 @@ public class AddressBanned {
 		this.updateBy = updateBy;
 	}
 
-	public String getCreateDate() {
+
+	public Date getBannedSayDate() {
+		return bannedSayDate;
+	}
+
+	public void setBannedSayDate(Date bannedSayDate) {
+		this.bannedSayDate = bannedSayDate;
+	}
+
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
+
+	public Date getCreateDate() {
 		return createDate;
 	}
 
-	public void setCreateDate(String createDate) {
+	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
 	}
 
@@ -124,6 +157,7 @@ public class AddressBanned {
 				+ bannedSayDays + ", bannedSayDate=" + bannedSayDate + ", updateDate=" + updateDate + ", updateBy="
 				+ updateBy + ", createDate=" + createDate + "]";
 	}
+
 	
 	
 	

@@ -1,9 +1,11 @@
 package com.lin.controller;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -13,6 +15,8 @@ import com.lin.domain.AddressInfLogBean;
 import com.lin.service.AddressInfLogServiceI;
 import com.lin.service.PermissionServiceI;
 import com.lin.util.Result;
+
+import lombok.val;
 
 /**
  * 
@@ -95,7 +99,7 @@ public class PermissionController {
 	 */
 	@RequestMapping("/editorbannedsay")
 	@ResponseBody
-	public Result EditorBannedSay(HttpServletRequest req, AddressBanned addressBanned) {
+	public Result EditorBannedSay(HttpServletRequest req, AddressBanned addressBanned, BindingResult bindingResult) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加或修改禁言");
 		Result result = new Result();
 		if(addressBanned == null) {
