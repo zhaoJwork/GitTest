@@ -25,7 +25,7 @@
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>app-addresslist/conf</outputDirectory>
             <includes>
-                <include>*</include>
+                <include>**/*</include>
             </includes>
         </fileSet>
         <fileSet>
