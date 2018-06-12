@@ -1,7 +1,6 @@
 package com.lin.repository;
 
-import com.lin.domain.AddressInfLogBean;
-import com.lin.domain.OrganizationBlackDsl;
+import com.lin.domain.AddressInfLogDsl;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -10,6 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @author lwz
  * @date 2018.6.11
  */
-public interface AddressInfLogRepository extends PagingAndSortingRepository<AddressInfLogBean, String>,QuerydslPredicateExecutor<AddressInfLogRepository> {
+public interface AddressInfLogRepository extends PagingAndSortingRepository<AddressInfLogDsl, String>,QuerydslPredicateExecutor<AddressInfLogRepository> {
 
 }

@@ -2,8 +2,8 @@ package com.lin.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.AddressInfLogBean;
-import com.lin.domain.QAddressInfLogBean;
+import com.lin.domain.AddressInfLogDsl;
+import com.lin.domain.QAddressInfLogDsl;
 import com.lin.repository.AddressInfLogRepository;
 import com.lin.util.JsonUtil;
 import com.lin.util.Result;
@@ -14,18 +14,18 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Calendar;
 import java.util.List;
 
 
 /**
- *
+ *	日志
  * @author lwz
  * @date 2017年8月20日
  */
 @Service("addressInfLogServiceDsl")
-public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogBean,String> {
+public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogDsl,String> {
 
 	@Autowired
 	private AddressInfLogRepository repository;
@@ -53,48 +53,54 @@ public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogBe
 
 
 	@Override
-	public List<AddressInfLogBean> findByIds(String... strings) {
-		QAddressInfLogBean inflog = QAddressInfLogBean.addressInfLogBean;
+	public List<AddressInfLogDsl> findByIds(String... strings) {
+		QAddressInfLogDsl inflog = QAddressInfLogDsl.addressInfLogDsl;
 		JPAQueryFactory query = jpaQueryFactory();
 		return query.select(inflog).from(inflog).where(inflog.rowID.in(strings)).fetch();
 	}
 
-	public void saveAddressInfLog(AddressInfLogBean log, Result respJson) {
-		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String str = sdf.format(date);
+	/**
+	 * 保存日志信息
+	 * @param log
+	 * @param respJson
+	 */
+	public void saveAddressInfLog(AddressInfLogDsl log, Result respJson) {
 		String Json = null;
 		try {
-			Json = JsonUtil.toJson(respJson);
+			if(null == respJson){
+				Json ="test";
+			}else {
+				Json = JsonUtil.toJson(respJson);
+			}
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 
 		log.setRespJson(Json);
-		log.setEndDate(str);
-		//log.setRowID(utilDao.getSeqAppAddressInfLog());
-		if (null == log.getExpError()) {
+		log.setEndDate(Calendar.getInstance().getTime());
+		if (null == log.getExpError() || log.getExpError().equals("") ) {
 			log.setExpError("");
 		}
-		//addressInfLogDao.saveAddressInfLog(log);
+		repository.save(log);
 	}
 
-
-
-
-
-/*	@Override
-	public AddressInfLogBean getAddressInfLog(HttpServletRequest req, String infName) {
-		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String str = sdf.format(date);
-		AddressInfLogBean log = new AddressInfLogBean();
+	/**
+	 * 生成日志实体
+	 * @param req
+	 * @param infName
+	 * @return
+	 */
+	public AddressInfLogDsl getInfLog(HttpServletRequest req, String infName) {
+		AddressInfLogDsl log = new AddressInfLogDsl();
 		log.setAddName(infName);
-		log.setCreateDate(str);
-		String reqJson = req.getRequestURL().toString() + "?" + req.getQueryString();
-		log.setReqJson(reqJson);
+		log.setCreateDate(Calendar.getInstance().getTime());
+		if(null == req ){
+			log.setReqJson("test");
+		}else{
+			log.setReqJson(req.getRequestURL().toString() + "?" + req.getQueryString());
+		}
 		return log;
-	}*/
+	}
 
 
 
