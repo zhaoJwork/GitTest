@@ -94,13 +94,13 @@ public class PermissionController {
 	 * @return 0操作失败 1操作成功
 	 * @author liudongdong
 	 * @date 2018年6月6号
-	 * @describe 禁言添加和修改
+	 * @describe 禁言添加
 	 * 
 	 */
-	@RequestMapping("/editorbannedsay")
+	@RequestMapping("/addbannedsay")
 	@ResponseBody
-	public Result EditorBannedSay(HttpServletRequest req, AddressBanned addressBanned, BindingResult bindingResult) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "添加或修改禁言");
+	public Result addBannedSay(HttpServletRequest req, AddressBanned addressBanned, BindingResult bindingResult) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "添加禁言");
 		Result result = new Result();
 		if(addressBanned == null) {
 			result.setRespCode("2");
@@ -134,7 +134,68 @@ public class PermissionController {
 		}
 		
 		try {
+			
 			this.permissionService.addBannedSay(addressBanned, result);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.setExpError(e.toString());
+			result.setRespCode("2");
+			result.setRespDesc("失败");
+			result.setRespMsg("");
+		}
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param req
+	 * 		  addressBanned 禁言实体类
+	 * @return 0操作失败 1操作成功
+	 * @author liudongdong
+	 * @date 2018年6月6号
+	 * @describe 取消禁言
+	 * 
+	 */
+	@RequestMapping("/cancelbannedsay")
+	@ResponseBody
+	public Result cacelBannedSay(HttpServletRequest req, AddressBanned addressBanned, BindingResult bindingResult) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "取消禁言");
+		Result result = new Result();
+		if(addressBanned == null) {
+			result.setRespCode("2");
+			result.setRespDesc("addressBanned 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(addressBanned.getBannedSayLoginId()==null) {
+			result.setRespCode("2");
+			result.setRespDesc("bannedSayLoginId 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(addressBanned.getBannedSayUserId()==null) {
+			result.setRespCode("2");
+			result.setRespDesc("bannedSayUserId 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(addressBanned.getType()==null) {
+			result.setRespCode("2");
+			result.setRespDesc("type 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(addressBanned.getBannedSayType()==null) {
+			result.setRespCode("2");
+			result.setRespDesc("bannedSayType 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		
+		try {
+			
+			this.permissionService.cancelBannedSay(addressBanned, result);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -159,7 +220,7 @@ public class PermissionController {
 	 */
 	@RequestMapping("/addresscollection")
 	@ResponseBody
-	public Result AddCollection(HttpServletRequest req, AddressCollection addressCollection) {
+	public Result AddCollection(HttpServletRequest req, AddressCollection addressCollection, BindingResult bindingResult) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加或修改收藏");
 		Result result = new Result();
 		if(addressCollection == null) {

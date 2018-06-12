@@ -17,10 +17,14 @@ public interface PermissionServiceI {
 	// 禁言 能力指数查看权限
 	void getBannedSay(String loginId, Integer type, String userId, Result result);
 
-	// 添加或者取消禁言
+	// 添加禁言
 	void addBannedSay(AddressBanned addressBanned, Result result) throws ParseException;
 
+	// 取消禁言
+	void cancelBannedSay(AddressBanned addressBanned, Result result) throws ParseException;
+	
 	// 添加或者取消收藏
 	void addressCollection(AddressCollection addressCollection, Result result);
+
 
 }

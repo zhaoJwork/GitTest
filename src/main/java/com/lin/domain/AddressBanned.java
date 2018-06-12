@@ -28,8 +28,8 @@ public class AddressBanned implements Serializable{
 	@ApiModelProperty(value = "主键")
 	@Id
 	@Column(name = "ROW_ID")
-//	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator="SEQ_APPUser_user")
-//	@SequenceGenerator(name="SEQ_APPUser_user", sequenceName="SEQ_APPUser_user")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator="SEQ_APPUser_user")
+	@SequenceGenerator(name="SEQ_APPUser_user", sequenceName="seq_app_addresslist")
 	private Integer rowId;
 	
 	// 禁言人id
