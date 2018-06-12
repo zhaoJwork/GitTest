@@ -29,11 +29,6 @@ public class OrganizationServiceTest {
     OrganizationDsl dsl = new OrganizationDsl();
     dsl.setpID("0");
     List<OrganizationDsl> list = organizationServiceDsl.getOrganizationByDsl(dsl);
-    for (OrganizationDsl  oDsl : list){
-      System.out.println("-------------------------------------------------"+oDsl.getOrganizationName());
-    }
-
-    System.out.print("-------------------------------------------------"+list.size());
     Assert.assertNotNull(list);
   }
 }

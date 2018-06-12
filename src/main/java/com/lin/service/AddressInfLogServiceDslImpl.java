@@ -56,7 +56,7 @@ public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogDs
 	public List<AddressInfLogDsl> findByIds(String... strings) {
 		QAddressInfLogDsl inflog = QAddressInfLogDsl.addressInfLogDsl;
 		JPAQueryFactory query = jpaQueryFactory();
-		return query.select(inflog).from(inflog).where(inflog.rowID.in(strings)).fetch();
+		return query.select(inflog).from(inflog).where(inflog.addName.in(strings)).fetch();
 	}
 
 	/**
