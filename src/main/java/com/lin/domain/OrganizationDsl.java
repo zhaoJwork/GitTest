@@ -2,6 +2,7 @@ package com.lin.domain;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,10 +15,12 @@ import javax.persistence.Table;
  * @author lwz
  * @date 2018.6.11
  */
+
+
 @ApiModel(value = "OrganizationDSL", description = "组织部门")
 @Entity
 @Table(name = "address_organization")
-public class OrganizationDsl implements Comparable<OrganizationDsl> {
+public class OrganizationDsl{
 	@ApiModelProperty(value = "主键")
 	@Id
 	@Column(name = "ROW_ID")
@@ -38,7 +41,7 @@ public class OrganizationDsl implements Comparable<OrganizationDsl> {
 	 * 部门ID
 	 */
 	@Column(name = "PID")
-	private String pID;
+	private String pid;
 	// 人数
 	/**
 	 * 部门ID
@@ -77,6 +80,15 @@ public class OrganizationDsl implements Comparable<OrganizationDsl> {
 	@Column(name = "ORG_ORDER")
 	private Integer orderValue;
 
+
+	public String getRowID() {
+		return rowID;
+	}
+
+	public void setRowID(String rowID) {
+		this.rowID = rowID;
+	}
+
 	public String getOrganizationID() {
 		return organizationID;
 	}
@@ -93,12 +105,12 @@ public class OrganizationDsl implements Comparable<OrganizationDsl> {
 		this.organizationName = organizationName;
 	}
 
-	public String getpID() {
-		return pID;
+	public String getPid() {
+		return pid;
 	}
 
-	public void setpID(String pID) {
-		this.pID = pID;
+	public void setPid(String pid) {
+		this.pid = pid;
 	}
 
 	public String getUserCount() {
@@ -117,6 +129,14 @@ public class OrganizationDsl implements Comparable<OrganizationDsl> {
 		this.onlineCount = onlineCount;
 	}
 
+	public String getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(String updateDate) {
+		this.updateDate = updateDate;
+	}
+
 	public String getFlag() {
 		return flag;
 	}
@@ -133,14 +153,6 @@ public class OrganizationDsl implements Comparable<OrganizationDsl> {
 		this.type = type;
 	}
 
-	public String getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(String updateDate) {
-		this.updateDate = updateDate;
-	}
-
 	public String getZimuname() {
 		return zimuname;
 	}
@@ -149,28 +161,11 @@ public class OrganizationDsl implements Comparable<OrganizationDsl> {
 		this.zimuname = zimuname;
 	}
 
-	@Override
-	public int compareTo(OrganizationDsl o) {
-		int thisZ = this.orderValue;
-		
-		int paraZ = o.getOrderValue();
-		
-		if (thisZ>paraZ) {
-			return 1; // 正整数是大于
-		} else if (thisZ<paraZ) {
-			return -1;// 负整数是小于
-		} else {
-			return 0; // 0为等于
-		}
-	}
-
-	
 	public Integer getOrderValue() {
 		return orderValue;
 	}
 
-	public void setOrderValue(int orderValue) {
+	public void setOrderValue(Integer orderValue) {
 		this.orderValue = orderValue;
 	}
-
 }
