@@ -41,7 +41,7 @@ public class OrganizationDsl{
 	 * 部门ID
 	 */
 	@Column(name = "PID")
-	private String pid;
+	private String pID;
 	// 人数
 	/**
 	 * 部门ID
@@ -105,12 +105,12 @@ public class OrganizationDsl{
 		this.organizationName = organizationName;
 	}
 
-	public String getPid() {
-		return pid;
+	public String getpID() {
+		return pID;
 	}
 
-	public void setPid(String pid) {
-		this.pid = pid;
+	public void setpID(String pID) {
+		this.pID = pID;
 	}
 
 	public String getUserCount() {
