@@ -18,6 +18,7 @@ import com.lin.util.Result;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 
@@ -43,6 +44,51 @@ public class PermissionController {
 	 * @param req
 	 *  	  loginId 当前登入人id
 	 * 		  type 查看类型权限
+	 * @return Result 0 无权限 1有权限
+	 * @author liudongdong
+	 * @date 2018年6月6号
+	 * @describe 获取禁言权限查询
+	 * 			
+	 */
+	@ApiOperation(value="禁言权限查询",tags = {"3s"})
+	@ApiImplicitParams({
+	      @ApiImplicitParam(name = "loginId", value = "当前登入Id", required = true, dataType = "String"),
+	      @ApiImplicitParam(name = "type", value = "类型权限", required = true, dataType = "Integer")
+	  })
+	@GetMapping("/bannedsaycheck")
+	public Result getBannedSayCheck(HttpServletRequest req, String loginId, Integer type) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "禁言权限查询");
+		Result result = new Result();
+		if(loginId == null || loginId.trim().equals("")) {
+			result.setRespCode("2");
+			result.setRespDesc("loginID 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(type == null) {
+			result.setRespCode("2");
+			result.setRespDesc("type 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		
+		try {
+			this.permissionService.getBannedSayCheck(loginId, type,result);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.setExpError(e.toString());
+			result.setRespCode("2");
+			result.setRespDesc("失败");
+			result.setRespMsg("");
+		}
+		return result;
+	}
+	
+	/**
+	 * @param req
+	 *  	  loginId 当前登入人id
+	 * 		  type 查看类型权限
 	 *  	  userId  被查看人id
 	 * @return Result 0 无权限 1有权限
 	 * @author liudongdong
@@ -50,11 +96,15 @@ public class PermissionController {
 	 * @describe 获取禁言权限查询和指数权限查询
 	 * 			
 	 */
-	@ApiOperation(value="权限查看",tags = {"3s"})
-	@ApiImplicitParam()
-	@GetMapping("/bannedsay")
-	public Result getBannedSay(HttpServletRequest req, String loginId, Integer type, String userId) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "获取禁言权限查询和指数权限查询");
+	@ApiOperation(value="能力指数权限查询",tags = {"3s"})
+	@ApiImplicitParams({
+	      @ApiImplicitParam(name = "loginId", value = "当前登入Id", required = true, dataType = "String"),
+	      @ApiImplicitParam(name = "type", value = "类型权限", required = true, dataType = "Integer"),
+	      @ApiImplicitParam(name = "userId", value = "被查看Id", required = true, dataType = "String")
+	  })
+	@GetMapping("/abilitycheck")
+	public Result getAbilitycheck(HttpServletRequest req, String loginId, Integer type, String userId) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "能力指数权限查询");
 		Result result = new Result();
 		if(loginId == null || loginId.trim().equals("")) {
 			result.setRespCode("2");
@@ -76,7 +126,7 @@ public class PermissionController {
 		}
 		
 		try {
-			this.permissionService.getBannedSay(loginId, type, userId,result);
+			this.permissionService.getAbilitycheck(loginId, type, userId,result);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

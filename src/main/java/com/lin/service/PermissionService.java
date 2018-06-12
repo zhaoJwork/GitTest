@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Resource;
+import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,11 @@ import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
 import com.lin.domain.QAddressBanned;
 import com.lin.domain.QAddressCollection;
+import com.lin.domain.QUser;
+import com.lin.domain.User;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressCollectionRepository;
+import com.lin.repository.UserRepository;
 import com.lin.util.Result;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
@@ -35,6 +39,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	public PermissionService(AddressCollectionRepository addressCollectionRepository) {
 		super(addressCollectionRepository);
 	}
+	
+	private UserRepository userRepository;
 
 	@Resource
 	private AddressBannedRepository addressBannedRepository;
@@ -42,45 +48,71 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	@Resource
 	private AddressCollectionRepository addressCollectionRepository;
 	
+	@Autowired
+    private EntityManager entityManager;
+	
 	/**
-	 * 查询禁言权限和能力指数 权限
-	 * -- 能力指数  当前人 187207  查询人 121005  大于零有权限
-        select appuser.F_O_bannedsay(187207,121005) from dual;
-        
-        -- 禁言权限 当前人 136109 大于零有权限
-        select count(1) from appuser.address_user u where u.dep_id = '626' and u.user_id = '136109'
+	 * 禁言权限查询
+	 * @param loginId
+	 * @param type
+	 * @param userId
+	 * @param result
 	 * @author liudongdong
-	 * @date 2018年6年6月
+	 * @date 2018年6月12日
 	 */
-	public void getBannedSay(String loginId, Integer type, String userId, Result result) {
-		
-		Integer re  = 0;
+	public void getBannedSayCheck(String loginId, Integer type, Result result) {
 		// 根据type判断 要查询的是哪种权限  1为禁言 2为能力指数
 		if(type.equals(1)) {
-			// 权限的比较
 			// 查询是否有权限
-//				this.addressDao.get
-				re = 0;
-				// TODO
-				if(re == 0) {
-					result.setRespCode("2");
-					result.setRespDesc("权限");
-					result.setRespMsg(re);
-				}else {
-					result.setRespCode("1");
-					result.setRespDesc("正常返回数据");
-					result.setRespMsg(re);
-				}
-		}else if(type.equals(2)) {
-			// 能力指数的查看  如果角色为员工则没有权限进行下钻 
-//			this.addressDao.get
-			// 权限的比较
-			// TODO
-			re = 1;
-			if(re == 0) {
+			List<?> resultList = entityManager.createNativeQuery("select count(1) from appuser.address_user u where u.dep_id = '626' and u.user_id = ?")
+					.setParameter(1, loginId)
+					.getResultList();
+			if("1".equals(resultList.get(0).toString())) {
+				result.setRespCode("1");
+				result.setRespDesc("正常返回数据");
+				result.setRespMsg(1);
+			}else {
 				result.setRespCode("2");
-				result.setRespDesc("loginID 不能为空");
+				result.setRespDesc("没有禁言权限");
+				result.setRespMsg(0);
 			}
+		}else {
+			result.setRespCode("2");
+			result.setRespDesc("禁言权限查询失败");
+			result.setRespMsg(0);
+		}
+		
+	}
+	
+	/**
+	 * 能力指数权限查询
+	 * @param loginId
+	 * @param type
+	 * @param userId
+	 * @param result
+	 * @author liudongdong
+	 * @date 2018年6月12日
+	 */
+	public void getAbilitycheck(String loginId, Integer type, String userId, Result result) {
+		// 根据type判断 要查询的是哪种权限  1为禁言 2为能力指数
+		if(type.equals(2)) {
+			// 能力指数的查看  如果角色为员工则没有权限进行下钻  
+			List<?> resultList = entityManager.createNativeQuery("select appuser.F_O_bannedsay(?,?) from dual")
+					.setParameter(1, loginId).setParameter(2, userId)
+					.getResultList();
+			if("1".equals(resultList.get(0).toString())) {
+				result.setRespCode("1");
+				result.setRespDesc("正常返回数据");
+				result.setRespMsg(1);
+			}else {
+				result.setRespCode("2");
+				result.setRespDesc("没有指数查询权限");
+				result.setRespMsg(0);
+			}
+		}else {
+			result.setRespCode("2");
+			result.setRespDesc("指数能力权限查询失败");
+			result.setRespMsg(0);
 		}
 		
 	}
@@ -433,6 +465,11 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	
+
+
+	
 	
 	
 }
