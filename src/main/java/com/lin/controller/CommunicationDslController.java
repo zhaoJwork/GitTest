@@ -3,6 +3,8 @@ package com.lin.controller;
 import com.lin.domain.OrganizationDsl;
 import com.lin.service.OrganizationServiceDslImpl;
 import com.lin.util.Result;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +21,7 @@ import java.util.Map;
  *  @author  lwz 2018.6.11
  */
 
-
+@Api(description = "通讯录API")
 @Controller
 @RequestMapping("/communicationdsl")
 public class CommunicationDslController {
@@ -34,6 +36,7 @@ public class CommunicationDslController {
      * @param organ  当前登录人
      * @return
      */
+    @ApiOperation(value="查询组织部门",tags = {"1s"})
     @GetMapping("organizationlist")
     @ResponseBody
     public Result organizationlist(HttpServletRequest req, OrganizationDsl organ) {

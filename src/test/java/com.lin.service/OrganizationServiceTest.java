@@ -27,7 +27,7 @@ public class OrganizationServiceTest {
   @Test
   public void testLoad(){
     OrganizationDsl dsl = new OrganizationDsl();
-    dsl.setPid("0");
+    dsl.setpID("0");
     List<OrganizationDsl> list = organizationServiceDsl.getOrganizationByDsl(dsl);
     for (OrganizationDsl  oDsl : list){
       System.out.println("-------------------------------------------------"+oDsl.getOrganizationName());

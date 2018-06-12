@@ -48,7 +48,7 @@ public class OrganizationServiceDslImpl extends AbstractService<OrganizationDsl,
         QOrganizationBlackDsl blackDsl = QOrganizationBlackDsl.organizationBlackDsl;
 		Predicate predicate = null;
 		if(null != organ.getpID()&& !organ.getpID().equals("")){
-			predicate = QOrganizationDsl.organizationDsl.pid.eq(organ.getpID());
+			predicate = QOrganizationDsl.organizationDsl.pID.eq(organ.getpID());
 			return queryFactory.select(organDsl).from(organDsl).where(predicate)
 					.where(QOrganizationDsl.organizationDsl.organizationID.notIn(queryFactory.select(blackDsl.organizationID).from(blackDsl)))
 					.orderBy(QOrganizationDsl.organizationDsl.orderValue.asc()).fetch();
