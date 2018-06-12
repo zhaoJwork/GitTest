@@ -61,7 +61,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 				if (organizationID.equals("0")) {
 					organizationMap.put("name", "up");
 					/*** 最上级组织缓存key */
-					redisOrganization = jedisService.values(JedisKey.UPORGANIZATIONKEY);
+					//redisOrganization = jedisService.values(JedisKey.UPORGANIZATIONKEY);
 					if (redisOrganization == null || redisOrganization.size() == 0) {// 缓存中不存在
 						organizationMap.put("name", "up");
 						organizationMap.put("organizationDate", sdf.format(d));

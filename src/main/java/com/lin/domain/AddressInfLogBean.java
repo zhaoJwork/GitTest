@@ -1,19 +1,38 @@
 package com.lin.domain;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /**
  * 日志
- * @author lwz
+ * @author lwz 2018.6.12
  *
  */
+@ApiModel(value = "AddressInfLogBean", description = "通讯录日志")
+@Entity
+@Table(name = "address_inf_log")
 public class AddressInfLogBean {
-	
+	@ApiModelProperty(value = "主键")
+	@Id
+	@Column(name = "ROW_ID")
 	private String rowID;
-	private String addName;//类型，访问名称
+	@Column(name = "ADD_NAME")
+	private String addName;
+	@Column(name = "REQ_JSON")
 	private String reqJson;
+	@Column(name = "RESP_JSON")
 	private String respJson;
+	@Column(name = "CREATE_DATE")
 	private String createDate;
+	@Column(name = "END_DATE")
 	private String endDate;
-	private String expError;//错误原因
+	@Column(name = "EXP_ERROR")
+	private String expError;
 
 	public AddressInfLogBean() {
 	}

@@ -1,31 +1,18 @@
 package com.lin.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.lin.util.JsonUtil;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.lin.domain.*;
 import com.lin.mapper.UserMapper;
 import com.lin.mapper.UtilMapper;
-import com.lin.domain.ContextVo;
-import com.lin.domain.FieldVo;
-import com.lin.domain.Privilege;
-import com.lin.domain.Role;
-import com.lin.domain.User;
-import com.lin.domain.UserDetails;
-import com.lin.domain.UserOrder;
-import com.lin.domain.UserPower;
 import com.lin.service.RedisServiceI;
 import com.lin.service.UserServiceI;
 import com.lin.util.JedisKey;
+import com.lin.util.JsonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * TODO
