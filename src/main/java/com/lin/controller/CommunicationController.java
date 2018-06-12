@@ -47,9 +47,9 @@ import com.lin.util.Result;
 public class CommunicationController {
 
 	@Value("${application.pic_HttpIP}")
-	private String picHttpIp;
+	private String picHttpIp ;
 	@Autowired
-  private IntegralUtil integralUtil;
+    private IntegralUtil integralUtil;
 	@Autowired
 	private DepartmentServiceI departmentService;
 	@Autowired

@@ -30,7 +30,12 @@ done
 # echo Distributed
 # echo https://appAddresslistAPIthub.com/brucexx/heisenberg
 # echo brucest0078@gmail.com
-
+JAVA_HOME=/app/jdk1.8.0_151
+PATH=$JAVA_HOME/bin:$PATH
+CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export JAVA_HOME
+export PATH
+export CLASSPATH
 #check JAVA_HOME & java
 noJavaHome=false
 if [ -z "$JAVA_HOME" ] ; then
@@ -123,7 +128,8 @@ RUN_CMD="\"$JAVA_HOME/bin/java\""
 RUN_CMD="$RUN_CMD -DappName=appAddresslistAPI -DappAddresslistAPI_HOME=\"$appAddresslistAPI_HOME\""
 RUN_CMD="$RUN_CMD -classpath \"$appAddresslistAPI_CLASSPATH\""
 RUN_CMD="$RUN_CMD $JAVA_OPTS"
-RUN_CMD="$RUN_CMD cn.com.jamboree.search.Application $@"
+#RUN_CMD="$RUN_CMD cn.com.jamboree.search.Application $@"
+RUN_CMD="$RUN_CMD com.lin.AddressBookApplication $@"
 RUN_CMD="$RUN_CMD >> \"$appAddresslistAPI_HOME/logs/console.log\" 2>&1 &"
 echo $RUN_CMD
 eval $RUN_CMD
