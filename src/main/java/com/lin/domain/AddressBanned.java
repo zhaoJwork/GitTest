@@ -19,12 +19,11 @@ import io.swagger.annotations.ApiModelProperty;
  * @author liudongdong
  *
  */
-@ApiModel(value="addressBanned", description="描述 ")
+@ApiModel(value="addressBanned", description="禁言 ")
 @Entity
 @Table(name="address_bannedsay")
 public class AddressBanned implements Serializable{
 
-	// 主键
 	@ApiModelProperty(value = "主键")
 	@Id
 	@Column(name = "ROW_ID")

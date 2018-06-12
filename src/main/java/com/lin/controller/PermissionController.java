@@ -1,22 +1,24 @@
 package com.lin.controller;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
 import com.lin.domain.AddressInfLogBean;
 import com.lin.service.AddressInfLogServiceI;
-import com.lin.service.PermissionServiceI;
+import com.lin.service.PermissionService;
 import com.lin.util.Result;
 
-import lombok.val;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+
 
 /**
  * 
@@ -25,16 +27,16 @@ import lombok.val;
  * @date 2018年6年6月
  *
  */
-
-@Controller
+@Api(description = "通讯录API")
 @RequestMapping("/permission")
+@RestController
 public class PermissionController {
 	
 	@Autowired
 	private AddressInfLogServiceI logService;
 	
 	@Autowired
-	private PermissionServiceI permissionService;
+	private PermissionService permissionService;
 	
 	/**
 	 * @param req
@@ -97,9 +99,11 @@ public class PermissionController {
 	 * @describe 禁言添加
 	 * 
 	 */
+	@ApiOperation(value="添加禁言",tags = {"1s"})
+	@ApiImplicitParam(name = "addressBanned", required = false, dataType = "AddressBanned")
 	@RequestMapping("/addbannedsay")
 	@ResponseBody
-	public Result addBannedSay(HttpServletRequest req, AddressBanned addressBanned, BindingResult bindingResult) {
+	public Result addBannedSay(HttpServletRequest req,AddressBanned addressBanned) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加禁言");
 		Result result = new Result();
 		if(addressBanned == null) {
@@ -208,17 +212,15 @@ public class PermissionController {
 	}
 
 	/**
-	 * 添加收藏或者修改收藏
+	 * 添加收藏
 	 * @param req
 	 * 		  addressCollection 收藏实体类
 	 * @return 0 操作失败 1 操作成功
 	 * @author liudongdong
 	 * @date 2018年6月7日
 	 * @describe 添加收藏
-	 * 
-	 * 			修改收藏
 	 */
-	@RequestMapping("/addresscollection")
+	@RequestMapping("/addcollection")
 	@ResponseBody
 	public Result AddCollection(HttpServletRequest req, AddressCollection addressCollection, BindingResult bindingResult) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加或修改收藏");
@@ -254,7 +256,7 @@ public class PermissionController {
 			return result;
 		}
 		try {
-			this.permissionService.addressCollection(addressCollection, result);
+			this.permissionService.addAddressCollection(addressCollection, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
@@ -264,4 +266,61 @@ public class PermissionController {
 		}
 		return result;
 	}
+	
+	/**
+	 * 取消收藏
+	 * @param req
+	 * 		  addressCollection 收藏实体类
+	 * @return 0 操作失败 1 操作成功
+	 * @author liudongdong
+	 * @date 2018年6月7日
+	 * @describe 取消收藏
+	 */
+	@RequestMapping("/cancelcollection")
+	@ResponseBody
+	public Result cancelCollection(HttpServletRequest req, AddressCollection addressCollection, BindingResult bindingResult) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "添加或修改收藏");
+		Result result = new Result();
+		if(addressCollection == null) {
+			result.setRespCode("2");
+			result.setRespDesc("addressCollection 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(addressCollection.getCollectionLoginId() == null) {
+			result.setRespCode("2");
+			result.setRespDesc("collectionLoginId 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(addressCollection.getCollectionUserId() == null) {
+			result.setRespCode("2");
+			result.setRespDesc("collectionUserId 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(addressCollection.getType() == null) {
+			result.setRespCode("2");
+			result.setRespDesc("type 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(addressCollection.getCollectionType() == null) {
+			result.setRespCode("2");
+			result.setRespDesc("collectionType 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		try {
+			this.permissionService.cancelAddressCollection(addressCollection, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.setExpError(e.toString());
+			result.setRespCode("2");
+			result.setRespDesc("失败");
+			result.setRespMsg("");
+		}
+		return result;
+	}
+	
 }

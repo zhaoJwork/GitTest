@@ -1,9 +1,9 @@
-package com.lin.service.impl;
+package com.lin.service;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Resource;
@@ -11,15 +11,14 @@ import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
 import com.lin.domain.QAddressBanned;
-import com.lin.mapper.PermissionMapper;
-import com.lin.mapper.UtilMapper;
+import com.lin.domain.QAddressCollection;
 import com.lin.repository.AddressBannedRepository;
-import com.lin.service.PermissionServiceI;
+import com.lin.repository.AddressCollectionRepository;
 import com.lin.util.Result;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -30,17 +29,18 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Service("permissionService")
-public class PermissionServiceImpl implements PermissionServiceI{
+public class PermissionService extends AbstractService<AddressCollection,String>{
 
-	
 	@Autowired
-	private PermissionMapper permissionDao;
-	
-	@Autowired
-	private UtilMapper utilDao;
-	
+	public PermissionService(AddressCollectionRepository addressCollectionRepository) {
+		super(addressCollectionRepository);
+	}
+
 	@Resource
 	private AddressBannedRepository addressBannedRepository;
+	
+	@Resource
+	private AddressCollectionRepository addressCollectionRepository;
 	
 	/**
 	 * 查询禁言权限和能力指数 权限
@@ -52,7 +52,6 @@ public class PermissionServiceImpl implements PermissionServiceI{
 	 * @author liudongdong
 	 * @date 2018年6年6月
 	 */
-	@Override
 	public void getBannedSay(String loginId, Integer type, String userId, Result result) {
 		
 		Integer re  = 0;
@@ -93,7 +92,6 @@ public class PermissionServiceImpl implements PermissionServiceI{
 	 * @throws ParseException 
 	 * @date 2018年6月6号
 	 */
-	@Override
 	public void addBannedSay(AddressBanned addressBanned, Result result) throws ParseException {
 		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
 		BooleanExpression eq = qAddressBanned.bannedSayUserId.eq(addressBanned.getBannedSayUserId());
@@ -221,7 +219,6 @@ public class PermissionServiceImpl implements PermissionServiceI{
 	 * @throws ParseException 
 	 * @date 2018年6月11号
 	 */
-	@Override
 	public void cancelBannedSay(AddressBanned addressBanned, Result result) throws ParseException {
 		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
 		BooleanExpression eq = qAddressBanned.bannedSayUserId.eq(addressBanned.getBannedSayUserId());
@@ -289,51 +286,67 @@ public class PermissionServiceImpl implements PermissionServiceI{
 	}
 
 
+	
 	/**
-	 * 添加或者取消收藏
+	 * 添加收藏
 	 * @author liudongdong
 	 * @date 2018年6月7日
 	 */
-	@Override
-	public void addressCollection(AddressCollection addressCollection, Result result) {
-		Integer re = 1;
-		Date date = new Date();
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	public void addAddressCollection(AddressCollection addressCollection, Result result) {
+		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
+		
+		Date date = Calendar.getInstance().getTime();
 		// 1收藏 2其它 默认0
 		if(addressCollection.getType().equals(1)) {
 			
 			// 1收藏  2取消收藏 0不处理
 			if(addressCollection.getCollectionType().equals(1)) {
-				// 创建日期
-				addressCollection.setCollectionCreateDate(format.format(date));
-				
-				re = this.permissionDao.addAddressCollection(addressCollection);
-				if(re == 0) {
-					result.setRespCode("2");
-					result.setRespDesc("收藏添加失败");
-					result.setRespMsg(0);
+				BooleanExpression eq = qAddressCollection.collectionLoginId.eq(addressCollection.getCollectionLoginId())
+						.and(qAddressCollection.collectionUserId.eq(addressCollection.getCollectionUserId()));
+				Optional<AddressCollection> findOne = addressCollectionRepository.findOne(eq);
+				if(findOne.toString().equals("Optional.empty")) {
+					// 创建日期
+					addressCollection.setCollectionCreateDate(date);
+					
+					AddressCollection save = addressCollectionRepository.save(addressCollection);
+					if(save == null) {
+						result.setRespCode("2");
+						result.setRespDesc("收藏添加失败");
+						result.setRespMsg(0);
+					}else {
+						result.setRespCode("1");
+						result.setRespDesc("正常返回数据");
+						result.setRespMsg(1);
+					}
 				}else {
-					result.setRespCode("1");
-					result.setRespDesc("正常返回数据");
-					result.setRespMsg(1);
+					AddressCollection collection = findOne.get();
+					if(collection.getCollectionType().equals(2)) {
+						addressCollection.setRowId(collection.getRowId());
+						addressCollection.setCollectionCreateDate(collection.getCollectionCreateDate());
+						// 修改日期
+						addressCollection.setCollectionUpdateDate(date);
+						// 修改人为当前登录人
+						addressCollection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
+						
+						AddressCollection save = addressCollectionRepository.save(addressCollection);
+						if(save == null) {
+							result.setRespCode("2");
+							result.setRespDesc("收藏修改失败");
+							result.setRespMsg(0);
+						}else {
+							result.setRespCode("1");
+							result.setRespDesc("正常返回数据");
+							result.setRespMsg(1);
+						}
+					}else {
+						result.setRespCode("2");
+						result.setRespDesc("用户已经处于收藏状态");
+						result.setRespMsg(0);
+					}
+					
 				}
 				
-			}else if(addressCollection.getCollectionType().equals(2)) {
-				// 修改日期
-				addressCollection.setCollectionUpdateDate(format.format(date));
-				// 修改人为当前登录人
-				addressCollection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
 				
-				re = this.permissionDao.updateAddressCollection(addressCollection);
-				if(re == 0) {
-					result.setRespCode("2");
-					result.setRespDesc("收藏修改失败");
-					result.setRespMsg(0);
-				}else {
-					result.setRespCode("1");
-					result.setRespDesc("正常返回数据");
-					result.setRespMsg(1);
-				}
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("收藏操作失败");
@@ -347,7 +360,78 @@ public class PermissionServiceImpl implements PermissionServiceI{
 			result.setRespMsg(0);
 		}
 		
+	}
+	
+	/**
+	 * 取消收藏
+	 * @author liudongdong
+	 * @date 2018年6月7日
+	 */
+	public void cancelAddressCollection(AddressCollection addressCollection, Result result) {
 		
+		Date date = Calendar.getInstance().getTime();
+		// 1收藏 2其它 默认0
+		if(addressCollection.getType().equals(1)) {
+			
+			// 1收藏  2取消收藏 0不处理
+			if(addressCollection.getCollectionType().equals(2)) {
+				QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
+				BooleanExpression eq = qAddressCollection.collectionLoginId.eq(addressCollection.getCollectionLoginId())
+					.and(qAddressCollection.collectionUserId.eq(addressCollection.getCollectionUserId()));
+				Optional<AddressCollection> findOne = addressCollectionRepository.findOne(eq);
+				
+				if(findOne.toString().equals("Optional.empty")) {
+					result.setRespCode("2");
+					result.setRespDesc("取消收藏用户，不处在收藏列");
+					result.setRespMsg(0);
+				}else {
+					AddressCollection collection = findOne.get();
+					addressCollection.setRowId(collection.getRowId());
+					addressCollection.setCollectionCreateDate(collection.getCollectionCreateDate());
+					// 修改日期
+					addressCollection.setCollectionUpdateDate(date);
+					// 修改人为当前登录人
+					addressCollection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
+					
+					AddressCollection save = addressCollectionRepository.save(addressCollection);
+					if(save == null) {
+						result.setRespCode("2");
+						result.setRespDesc("收藏修改失败");
+						result.setRespMsg(0);
+					}else {
+						result.setRespCode("1");
+						result.setRespDesc("正常返回数据");
+						result.setRespMsg(1);
+					}
+				}
+				
+			}else {
+				result.setRespCode("2");
+				result.setRespDesc("收藏操作失败");
+				result.setRespMsg(0);
+			}
+			
+		}else {
+			// TODO 其它待做
+			result.setRespCode("2");
+			result.setRespDesc("待做");
+			result.setRespMsg(0);
+		}
+		
+	}
+
+
+	@Override
+	public long deleteByIds(String... ids) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public List<AddressCollection> findByIds(String... ids) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	
