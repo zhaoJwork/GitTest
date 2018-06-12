@@ -1,5 +1,6 @@
 package com.lin.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -21,7 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value="addressCollection", description="收藏 ")
 @Entity
 @Table(name="address_collection")
-public class AddressCollection {
+public class AddressCollection implements Serializable{
 
 	@ApiModelProperty(value = "主键")
 	@Id
@@ -30,31 +31,31 @@ public class AddressCollection {
 	@SequenceGenerator(name="SEQ_APPUser_user", sequenceName="seq_app_addresslist")
 	private Integer rowId;
 	
-	// 收藏人id
+	@ApiModelProperty(value = "收藏人id")
 	@Column(name = "COLLECTION_LOGINID")
 	private Integer collectionLoginId;
 	
-	// 被收藏人id
+	@ApiModelProperty(value = "被收藏人id")
 	@Column(name = "COLLECTION_USERID")
 	private Integer collectionUserId;
 	
-	// 类型 1 收藏 2 其他 0 默认
+	@ApiModelProperty(value = "类型 1 收藏 2 其他 0 默认")
 	@Column(name = "TYPE")
 	private Integer type;
 	
-	// 收藏类型  1 收藏 2 取消收藏 0 默认
+	@ApiModelProperty(value = "收藏类型  1 收藏 2 取消收藏 0 默认")
 	@Column(name = "COLLECTION_TYPE")
 	private Integer collectionType;
 	
-	// 收藏创建时间
+	@ApiModelProperty(value = "收藏创建时间")
 	@Column(name = "COLLECTION_CREATEDATE")
 	private Date collectionCreateDate;
 	
-	// 收藏修改人id
+	@ApiModelProperty(value = "收藏修改人id")
 	@Column(name = "COLLECTION_UPDATEBY")
 	private Integer collectionUpdateBy;
 	
-	// 收藏修改时间
+	@ApiModelProperty(value = "收藏修改时间")
 	@Column(name = "COLLECTION_UPDATEDATE")
 	private Date collectionUpdateDate;
 

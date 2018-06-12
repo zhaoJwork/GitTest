@@ -31,39 +31,39 @@ public class AddressBanned implements Serializable{
 	@SequenceGenerator(name="SEQ_APPUser_user", sequenceName="seq_app_addresslist")
 	private Integer rowId;
 	
-	// 禁言人id
+	@ApiModelProperty(value = "禁言人id")
 	@Column(name = "BANNEDSAY_LOGINID")
 	private Integer bannedSayLoginId;
 	
-	// 被禁言人id
+	@ApiModelProperty(value = "被禁言人id")
 	@Column(name = "BANNEDSAY_USERID")
 	private Integer bannedSayUserId;
 	
-	// 类型    1禁言  2其他  默认0
+	@ApiModelProperty(value = "类型    1禁言  2其他  默认0")
 	@Column(name = "TYPE")
 	private Integer type;
 	
-	//  禁言类型  1禁言 2 取消禁言 默认0
+	@ApiModelProperty(value = "禁言类型  1禁言 2 取消禁言 默认0")
 	@Column(name = "BANNEDSAY_TYPE")
 	private Integer bannedSayType;
 	
-	// 禁言天数
+	@ApiModelProperty(value = "禁言天数")
 	@Column(name = "BANNEDSAY_DAYS")
 	private Integer bannedSayDays;
 	
-	// 禁言截至日期
+	@ApiModelProperty(value = "禁言截至日期")
 	@Column(name = "BANNEDSAY_DATE")
 	private Date bannedSayDate;
 	
-	// 修改日期
+	@ApiModelProperty(value = "修改日期")
 	@Column(name = "UPDATE_DATE")
 	private Date updateDate;
 	
-	// 修改人
+	@ApiModelProperty(value = "修改人")
 	@Column(name = "UPDATE_BY")
 	private Integer updateBy;
 	
-	// 创建日期
+	@ApiModelProperty(value = "创建日期")
 	@Column(name = "CREATE_DATE")
 	private Date createDate;
 

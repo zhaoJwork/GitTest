@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,13 +48,11 @@ public class PermissionController {
 	 * @author liudongdong
 	 * @date 2018年6月6号
 	 * @describe 获取禁言权限查询和指数权限查询
-	 * 		http://localhost:8008/app-addresslist/addressbook/bannedsay?loginId=22295&type=2
-	 * 		返回结果
-	 * 		{"respCode":"1","respDesc":"正常返回数据","respMsg":1}
 	 * 			
 	 */
-	@RequestMapping("/bannedsay")
-	@ResponseBody
+	@ApiOperation(value="权限查看",tags = {"3s"})
+	@ApiImplicitParam()
+	@GetMapping("/bannedsay")
 	public Result getBannedSay(HttpServletRequest req, String loginId, Integer type, String userId) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "获取禁言权限查询和指数权限查询");
 		Result result = new Result();
@@ -100,9 +99,8 @@ public class PermissionController {
 	 * 
 	 */
 	@ApiOperation(value="添加禁言",tags = {"1s"})
-	@ApiImplicitParam(name = "addressBanned", required = false, dataType = "AddressBanned")
-	@RequestMapping("/addbannedsay")
-	@ResponseBody
+	@ApiImplicitParam(name = "addressBanned", required = true, dataType = "AddressBanned")
+	@GetMapping("/addbannedsay")
 	public Result addBannedSay(HttpServletRequest req,AddressBanned addressBanned) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加禁言");
 		Result result = new Result();
@@ -161,8 +159,9 @@ public class PermissionController {
 	 * @describe 取消禁言
 	 * 
 	 */
-	@RequestMapping("/cancelbannedsay")
-	@ResponseBody
+	@ApiOperation(value="取消禁言",tags = {"1s"})
+	@ApiImplicitParam(name = "addressBanned", required = true, dataType = "AddressBanned")
+	@GetMapping("/cancelbannedsay")
 	public Result cacelBannedSay(HttpServletRequest req, AddressBanned addressBanned, BindingResult bindingResult) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "取消禁言");
 		Result result = new Result();
@@ -220,10 +219,11 @@ public class PermissionController {
 	 * @date 2018年6月7日
 	 * @describe 添加收藏
 	 */
-	@RequestMapping("/addcollection")
-	@ResponseBody
-	public Result AddCollection(HttpServletRequest req, AddressCollection addressCollection, BindingResult bindingResult) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "添加或修改收藏");
+	@ApiOperation(value="添加收藏",tags = {"2s"})
+	@ApiImplicitParam(name = "addressCollection", required = true, dataType = "AddressCollection")
+	@GetMapping("/addcollection")
+	public Result addCollection(HttpServletRequest req, AddressCollection addressCollection) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "添加收藏");
 		Result result = new Result();
 		if(addressCollection == null) {
 			result.setRespCode("2");
@@ -276,10 +276,11 @@ public class PermissionController {
 	 * @date 2018年6月7日
 	 * @describe 取消收藏
 	 */
-	@RequestMapping("/cancelcollection")
-	@ResponseBody
-	public Result cancelCollection(HttpServletRequest req, AddressCollection addressCollection, BindingResult bindingResult) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "添加或修改收藏");
+	@ApiOperation(value="取消收藏",tags = {"2s"})
+	@ApiImplicitParam(name = "addressCollection", required = true, dataType = "AddressCollection")
+	@GetMapping("/cancelcollection")
+	public Result cancelCollection(HttpServletRequest req, AddressCollection addressCollection) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "取消收藏");
 		Result result = new Result();
 		if(addressCollection == null) {
 			result.setRespCode("2");

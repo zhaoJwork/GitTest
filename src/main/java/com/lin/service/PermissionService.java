@@ -28,7 +28,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  * @date 2018年6年6月
  *
  */
-@Service("permissionService")
+@Service
 public class PermissionService extends AbstractService<AddressCollection,String>{
 
 	@Autowired
@@ -112,7 +112,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 					return;
 				}
 				// 判断是否已经被禁言  如果要禁言人  已经被禁言 则进行修改
-				if(findOne.toString().equals("Optional.empty")) {
+				if("Optional.empty".equals(findOne.toString())) {
 					// 禁言初始添加
 					bannedInitialAdd(addressBanned, cal, result);
 				}else {
@@ -228,7 +228,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		if(addressBanned.getType().equals(1)) {
 			
 			if(addressBanned.getBannedSayType().equals(2)) {
-				if(findOne.toString().equals("Optional.empty")) {
+				if("Optional.empty".equals(findOne.toString())) {
 					result.setRespCode("2");
 					result.setRespDesc("该用户无禁言记录，请先禁言！");
 					result.setRespMsg(0);
@@ -304,7 +304,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				BooleanExpression eq = qAddressCollection.collectionLoginId.eq(addressCollection.getCollectionLoginId())
 						.and(qAddressCollection.collectionUserId.eq(addressCollection.getCollectionUserId()));
 				Optional<AddressCollection> findOne = addressCollectionRepository.findOne(eq);
-				if(findOne.toString().equals("Optional.empty")) {
+				if("Optional.empty".equals(findOne.toString())) {
 					// 创建日期
 					addressCollection.setCollectionCreateDate(date);
 					
@@ -380,7 +380,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 					.and(qAddressCollection.collectionUserId.eq(addressCollection.getCollectionUserId()));
 				Optional<AddressCollection> findOne = addressCollectionRepository.findOne(eq);
 				
-				if(findOne.toString().equals("Optional.empty")) {
+				if("Optional.empty".equals(findOne.toString())) {
 					result.setRespCode("2");
 					result.setRespDesc("取消收藏用户，不处在收藏列");
 					result.setRespMsg(0);
