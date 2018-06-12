@@ -1,6 +1,8 @@
 package com.lin.controller;
 
+import com.lin.domain.AddressInfLogDsl;
 import com.lin.domain.OrganizationDsl;
+import com.lin.service.AddressInfLogServiceDslImpl;
 import com.lin.service.OrganizationServiceDslImpl;
 import com.lin.util.Result;
 import io.swagger.annotations.Api;
@@ -28,7 +30,8 @@ public class CommunicationDslController {
 
     @Autowired
     private OrganizationServiceDslImpl organizationServiceDslImpl;
-
+    @Autowired
+    private AddressInfLogServiceDslImpl logServiceDsl;
     /**
      * 查询组织部门
      * http://localhost:8866/app-addresslist/communicationdsl/organizationlist?pid=0
@@ -39,7 +42,8 @@ public class CommunicationDslController {
     @ApiOperation(value="查询组织部门",tags = {"1s"})
     @GetMapping("organizationlist")
     @ResponseBody
-    public Result organizationlist(HttpServletRequest req, OrganizationDsl organ) {
+    public Result organizationlist(HttpServletRequest req, OrganizationDsl organ,String loginID) {
+        AddressInfLogDsl log =  logServiceDsl.getInfLog(req,"组织部门");
         Result result = new Result();
         try {
             List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
@@ -48,12 +52,14 @@ public class CommunicationDslController {
             result.setRespCode("1");
             result.setRespDesc("正常返回数据");
             result.setRespMsg(orgtreeMap);
+            logServiceDsl.saveAddressInfLog(log,result);
         } catch (Exception e) {
             e.printStackTrace();
             ////log.setExpError(e.toString());
             result.setRespCode("2");
             result.setRespDesc("失败");
             result.setRespMsg("");
+            logServiceDsl.saveAddressInfLog(log,result);
         }
         return result;
     }
