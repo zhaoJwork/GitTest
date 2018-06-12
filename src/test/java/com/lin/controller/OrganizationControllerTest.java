@@ -40,38 +40,13 @@ public class OrganizationControllerTest {
 
   @Test
   public void A00_get() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.post("/communicationdsl/organizationlist")
+    /*mockMvc.perform(MockMvcRequestBuilders.post("/communicationdsl/organizationlist")
         .accept(MediaType.APPLICATION_FORM_URLENCODED).content("pid=0")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.result").value(true))
-        .andDo(print());
-/*
-    u.setId(2);
-    u.setAccount("yaloo1");
-    u.setCreateTime(new Date());
-    u.setEnable(true);
-
-
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(mapper.writeValueAsString(u)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.result").value(true))
-        .andDo(print());
-
-
-    u.setId(3);
-    u.setAccount("yaloo3");
-    u.setCreateTime(new Date());
-
-
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(mapper.writeValueAsString(u)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.result").value(true))
         .andDo(print());*/
+
   }
 
 
