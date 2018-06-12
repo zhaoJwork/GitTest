@@ -29,6 +29,7 @@ public class CommunicationDslController {
 
     /**
      * 查询组织部门
+     * http://localhost:8866/app-addresslist/communicationdsl/organizationlist?pid=0
      * @param req
      * @param organ  当前登录人
      * @return
