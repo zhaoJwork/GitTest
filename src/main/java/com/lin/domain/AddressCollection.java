@@ -46,6 +46,10 @@ public class AddressCollection implements Serializable{
 	@ApiModelProperty(value = "收藏类型  1 收藏 2 取消收藏 0 默认")
 	@Column(name = "COLLECTION_TYPE")
 	private Integer collectionType;
+
+	@ApiModelProperty(value = "来源  1 企业 2 客户 0 默认")
+	@Column(name = "SOURCE")
+	private Integer source;
 	
 	@ApiModelProperty(value = "收藏创建时间")
 	@Column(name = "COLLECTION_CREATEDATE")
@@ -124,6 +128,15 @@ public class AddressCollection implements Serializable{
 
 	public void setCollectionUpdateDate(Date collectionUpdateDate) {
 		this.collectionUpdateDate = collectionUpdateDate;
+	}
+
+
+	public Integer getSource() {
+		return source;
+	}
+
+	public void setSource(Integer source) {
+		this.source = source;
 	}
 
 	@Override
