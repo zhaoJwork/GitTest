@@ -116,6 +116,28 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		}
 		
 	}
+	
+	/**
+	 * 当前人是否已经被禁言查询
+	 * @param loginId
+	 * @param result
+	 * @author liudongdong
+	 * @date 2018年6月13日
+	 */
+	public void getIsBannedSay(String loginId, Result result) {
+		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
+		BooleanExpression eq = qAddressBanned.bannedSayLoginId.eq(Integer.parseInt(loginId));
+		Optional<AddressBanned> findOne = addressBannedRepository.findOne(eq);
+		if("Optional.empty".equals(findOne.toString())) {
+			result.setRespCode("1");
+			result.setRespDesc("该用户没有被禁言");
+			result.setRespMsg(1);
+		}else {
+			result.setRespCode("2");
+			result.setRespDesc("该用户已经被禁言");
+			result.setRespMsg(0);
+		}
+	}
 
 	
 	/**
@@ -465,6 +487,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	
 
 	
 
