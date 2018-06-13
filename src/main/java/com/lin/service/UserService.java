@@ -49,6 +49,11 @@ public class UserService extends AbstractService<User,String> {
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QAddressCollection coll = QAddressCollection.addressCollection;
 		QAddressBanned ban = QAddressBanned.addressBanned;
+		QContextDsl context = QContextDsl.contextDsl;
+		QUserContextDsl userContext = QUserContextDsl.userContextDsl;
+		QFieldDsl field = QFieldDsl.fieldDsl;
+		QUserFieldDsl userField = QUserFieldDsl.userFieldDsl;
+
         UserDetailsDsl userDetailsDsl =  jpaQueryFactory().select(Projections.bean(UserDetailsDsl.class,
 				user.userID,
 				user.userName,
@@ -81,12 +86,12 @@ public class UserService extends AbstractService<User,String> {
         }else {
             userDetailsDsl.setAbility("0");
         }
-        //// 是否可以禁言 notalk 1 是 0 否
-        List notalk = entityManager.createNativeQuery("select count(1) from appuser.address_user u where u.dep_id = '626' and u.user_id = ?")
+        //// 是否可以禁言 noTalk 1 是 0 否
+        List noTalk = entityManager.createNativeQuery("select count(1) from appuser.address_user u where u.dep_id = '626' and u.user_id = ?")
                 .setParameter(1, loginID)
                 .getResultList();
-        if(null != notalk && 0 < notalk.size() ) {
-            userDetailsDsl.setNotalk(notalk.get(0).toString());
+        if(null != noTalk && 0 < noTalk.size() ) {
+            userDetailsDsl.setNotalk(noTalk.get(0).toString());
         }else {
             userDetailsDsl.setNotalk("0");
         }
@@ -95,10 +100,14 @@ public class UserService extends AbstractService<User,String> {
                 .where(coll.collectionLoginId.eq(Integer.parseInt(loginID)).and(coll.collectionUserId.eq(Integer.parseInt(userID))).and(coll.type.eq(1)
                         .and(coll.collectionType.eq(1).and(coll.source.eq(1))))).fetchOne();
         userDetailsDsl.setCollection(collection+"");
-        ////禁言状态       talkstatus 1 是 0 否
-        Long talkstatus = jpaQueryFactory().select(ban.count()).from(ban)
+        ////禁言状态       talkStatus 1 是 0 否
+        Long talkStatus = jpaQueryFactory().select(ban.count()).from(ban)
                 .where(ban.bannedSayUserId.eq(Integer.parseInt(userID)).and(ban.bannedSayType.eq(1)).and(coll.type.eq(1))).fetchOne();
-        userDetailsDsl.setTalkstatus(talkstatus+"");
+        userDetailsDsl.setTalkstatus(talkStatus+"");
+		List<ContextVo> contextVo = jpaQueryFactory().select(Projections.bean(ContextVo.class)).from(context).leftJoin(userContext).on().where().fetch();
+		userDetailsDsl.setContext(contextVo);
+		List<FieldVo> fieldVo = jpaQueryFactory().select(Projections.bean(FieldVo.class)).from(field).leftJoin(userField).on().where().fetch();
+		userDetailsDsl.setField(fieldVo);
         return  userDetailsDsl;
 	}
 }
