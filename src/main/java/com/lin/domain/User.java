@@ -22,12 +22,6 @@ import javax.persistence.Table;
 public class User implements Serializable ,Comparable<User>{
   @JsonIgnore
   public static String picHttpIp;
-	/**
-	 * 擅长领域
-	 */
-	@Column(name = "USERTERRITORY")
-	private String field;
-
   @ApiModelProperty(value = "主键")
 	@Id
   @Column(name = "ROW_ID")
@@ -58,16 +52,23 @@ public class User implements Serializable ,Comparable<User>{
 	/**
 	 * 地址
 	 */
+	@Column(name = "ADDRESS")
 	private String address;
 	/**
 	 * 邮箱
 	 */
+	@Column(name = "EMAIL")
 	private String email;
 	/**
 	 * 工作内容
 	 */
 	@Column(name = "USERWORK")
 	private String context;
+	/**
+	 * 擅长领域
+	 */
+	@Column(name = "USERTERRITORY")
+	private String field;
 	/**
 	 * 组织ID
 	 */
@@ -96,18 +97,22 @@ public class User implements Serializable ,Comparable<User>{
 	/**
 	 * 姓名全拼
 	 */
+	@Column(name = "QUANPIN")
 	private String  quanPin;
 	/**
 	 * 姓名首字母
 	 */
+	@Column(name = "SHOUZIMU")
 	private String shouZiMu;
 	/**
 	 * 会议通账号
 	 */
+	@Column(name = "HYTACCOUNT")
 	private String hytAccount;
 	/**
 	 * CRM账号
 	 */
+	@Column(name = "CRMACCOUNT")
 	private String crmAccount;
 	/**
 	 * 是否在线 1 在线 2 不在线
@@ -183,9 +188,9 @@ public class User implements Serializable ,Comparable<User>{
 		this.post = post;
 	}
 	public String getUserPic() {
-	  if(Strings.isNullOrEmpty(userPic))
-	    return userPic;
-
+	  	if(Strings.isNullOrEmpty(userPic)) {
+		  	return userPic;
+	  	}
 		if (userPic.indexOf(picHttpIp)>-1){
 			return userPic;
 		}else{
