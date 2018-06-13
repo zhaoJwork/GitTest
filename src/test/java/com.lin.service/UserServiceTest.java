@@ -2,6 +2,8 @@ package com.lin.service;
 
 import com.lin.domain.User;
 import java.util.List;
+
+import com.lin.domain.UserDetailsDsl;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -21,6 +23,11 @@ public class UserServiceTest {
   @Test
   public void testLoad(){
     List<User> users = userService.findByIds("188218");
+    Assert.assertNotNull(users);
+  }
+  @Test
+  public void testByUserID(){
+    UserDetailsDsl users = userService.selectUserDetails("101948");
     Assert.assertNotNull(users);
   }
 }
