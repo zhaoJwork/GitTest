@@ -85,6 +85,44 @@ public class PermissionController {
 		return result;
 	}
 	
+	
+	/**
+	 * @param req
+	 *  	  loginId 当前登入人id
+	 * 		  type 查看类型权限
+	 * @return Result 0 无权限 1有权限
+	 * @author liudongdong
+	 * @date 2018年6月6号
+	 * @describe 获取禁言权限查询
+	 * 			
+	 */
+	@ApiOperation(value="当前人是否已经被禁言查询",tags = {"3s"})
+	@ApiImplicitParam(name = "loginId", value = "当前登入Id", required = true, dataType = "String")
+	@GetMapping("/isbannedsay")
+	public Result getIsBannedSay(HttpServletRequest req, String loginId) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "当前人是否已经被禁言查询");
+		Result result = new Result();
+		if(loginId == null || loginId.trim().equals("")) {
+			result.setRespCode("2");
+			result.setRespDesc("loginID 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		
+		try {
+			this.permissionService.getIsBannedSay(loginId, result);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.setExpError(e.toString());
+			result.setRespCode("2");
+			result.setRespDesc("失败");
+			result.setRespMsg("");
+		}
+		return result;
+	}
+	
+	
 	/**
 	 * @param req
 	 *  	  loginId 当前登入人id
