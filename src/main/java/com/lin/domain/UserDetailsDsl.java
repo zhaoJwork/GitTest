@@ -122,8 +122,9 @@ public class UserDetailsDsl {
 	}
 
 	public String getUserPic() {
-		if(Strings.isNullOrEmpty(userPic))
+		if(Strings.isNullOrEmpty(userPic)) {
 			return userPic;
+		}
 		if (userPic.indexOf(picHttpIp) > -1) {
 			return userPic;
 		} else {
@@ -262,4 +263,6 @@ public class UserDetailsDsl {
 	public void setTalkstatus(String talkstatus) {
 		this.talkstatus = talkstatus;
 	}
+
+
 }
