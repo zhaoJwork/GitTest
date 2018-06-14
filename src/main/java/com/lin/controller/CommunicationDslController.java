@@ -92,7 +92,7 @@ public class CommunicationDslController {
             return result;
         }else{
             try {
-            UserDetailsDsl uu = userService.selectUserDetails(userID);
+            UserDetailsDsl uu = userService.selectUserDetails(loginID,userID);
             if(null == uu){
                 result.setRespCode("2");
                 result.setRespDesc("该用户不在通讯录中,暂不提供人员信息");
