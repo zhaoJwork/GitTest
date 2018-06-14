@@ -49,6 +49,10 @@ public class UserService extends AbstractService<User,String> {
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QAddressCollection coll = QAddressCollection.addressCollection;
 		QAddressBanned ban = QAddressBanned.addressBanned;
+		QContextDsl context = QContextDsl.contextDsl;
+		QUserContextDsl userContext = QUserContextDsl.userContextDsl;
+		QFieldDsl field = QFieldDsl.fieldDsl;
+		QUserFieldDsl userField = QUserFieldDsl.userFieldDsl;
 
         UserDetailsDsl userDetailsDsl =  jpaQueryFactory().select(Projections.bean(UserDetailsDsl.class,
 				user.userID,
