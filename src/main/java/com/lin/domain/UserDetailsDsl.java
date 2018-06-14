@@ -43,7 +43,7 @@ public class UserDetailsDsl {
 	/**
 	 * 职务名称
 	 */
-	private String PostName;
+	private String postName;
 	/**
 	 * 电话
 	 */
@@ -72,15 +72,10 @@ public class UserDetailsDsl {
      * 擅长领域
 	 */
 	private String fields;
-	private String typpe;
-	private String loginID;
-	private String rowId;
 	/**
      * 1 登录过销售助手 0 没有登录过销售助手
 	 */
 	private int install;
-	@JsonIgnore
-	public static String picHttpIp;
 
 	/**
 	 * 是否可以查看能力详情    ability     1 是  0 否
@@ -99,6 +94,8 @@ public class UserDetailsDsl {
 	 */
 	private String talkstatus ;
 
+	@JsonIgnore
+	public static String picHttpIp;
 	
 	public int getInstall() {
 		return install;
@@ -106,30 +103,6 @@ public class UserDetailsDsl {
 
 	public void setInstall(int install) {
 		this.install = install;
-	}
-
-	public String getLoginID() {
-		return loginID;
-	}
-
-	public void setLoginID(String loginID) {
-		this.loginID = loginID;
-	}
-
-	public String getRowId() {
-		return rowId;
-	}
-
-	public void setRowId(String rowId) {
-		this.rowId = rowId;
-	}
-
-	public String getTyppe() {
-		return typpe;
-	}
-
-	public void setTyppe(String typpe) {
-		this.typpe = typpe;
 	}
 
 	public String getUserID() {
@@ -187,11 +160,11 @@ public class UserDetailsDsl {
 	}
 
 	public String getPostName() {
-		return PostName;
+		return postName;
 	}
 
 	public void setPostName(String postName) {
-		PostName = postName;
+		this.postName = postName;
 	}
 
 	public String getPhone() {
