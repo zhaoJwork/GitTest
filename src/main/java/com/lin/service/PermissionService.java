@@ -1,11 +1,13 @@
 package com.lin.service;
 
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
@@ -15,15 +17,22 @@ import org.springframework.stereotype.Service;
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
+import com.lin.domain.AutoCollection;
 import com.lin.domain.QAddressBanned;
 import com.lin.domain.QAddressCollection;
+import com.lin.domain.QPositionDsl;
 import com.lin.domain.QUser;
+import com.lin.domain.QUserNewAssistDsl;
 import com.lin.domain.User;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressCollectionRepository;
 import com.lin.repository.UserRepository;
 import com.lin.util.Result;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**
  * 
@@ -51,6 +60,13 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	@Autowired
     private EntityManager entityManager;
 	
+	private JPAQueryFactory queryFactory;  
+    
+    @PostConstruct  
+    public void init() {  
+       queryFactory = new JPAQueryFactory(entityManager);  
+    }
+	
 	/**
 	 * 禁言权限查询
 	 * @param loginId
@@ -70,16 +86,16 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			if("1".equals(resultList.get(0).toString())) {
 				result.setRespCode("1");
 				result.setRespDesc("正常返回数据");
-				result.setRespMsg(1);
+				result.setRespMsg("1");
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("没有禁言权限");
-				result.setRespMsg(0);
+				result.setRespMsg("0");
 			}
 		}else {
 			result.setRespCode("2");
 			result.setRespDesc("禁言权限查询失败");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 		
 	}
@@ -103,16 +119,16 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			if("1".equals(resultList.get(0).toString())) {
 				result.setRespCode("1");
 				result.setRespDesc("正常返回数据");
-				result.setRespMsg(1);
+				result.setRespMsg("1");
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("没有指数查询权限");
-				result.setRespMsg(0);
+				result.setRespMsg("0");
 			}
 		}else {
 			result.setRespCode("2");
 			result.setRespDesc("指数能力权限查询失败");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 		
 	}
@@ -131,11 +147,11 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		if("Optional.empty".equals(findOne.toString())) {
 			result.setRespCode("1");
 			result.setRespDesc("该用户没有被禁言");
-			result.setRespMsg(1);
+			result.setRespMsg("1");
 		}else {
 			result.setRespCode("2");
 			result.setRespDesc("该用户已经被禁言");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 	}
 
@@ -162,7 +178,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				}else if(addressBanned.getBannedSayDays()<0) {
 					result.setRespCode("2");
 					result.setRespDesc("bannedSayDays 值非法");
-					result.setRespMsg(0);
+					result.setRespMsg("0");
 					return;
 				}
 				// 判断是否已经被禁言  如果要禁言人  已经被禁言 则进行修改
@@ -178,14 +194,14 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("禁言操作失败");
-				result.setRespMsg(0);
+				result.setRespMsg("0");
 			}
 			
 		}else {
 			// TODO 其它待做
 			result.setRespCode("2");
 			result.setRespDesc("待做");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 		
 	}
@@ -210,11 +226,11 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		if(save != null) {
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
-			result.setRespMsg(1);
+			result.setRespMsg("1");
 		}else {
 			result.setRespCode("2");
 			result.setRespDesc("禁言添加失败");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 		
 	}
@@ -232,37 +248,35 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	private void autoBannedSay(AddressBanned addressBanned, Calendar cal, AddressBanned banned, Date date, Result result) {
 		// 根据当前时间进行判断是否已经禁言失效   如果失效 则禁言自动解封
 		if(date.getTime() >= banned.getBannedSayDate().getTime() || banned.getBannedSayType() == 2) {
-			addressBanned.setRowId(banned.getRowId());
-			addressBanned.setBannedSayDays(addressBanned.getBannedSayDays());
+			banned.setBannedSayDays(addressBanned.getBannedSayDays());
 			
 			cal.add(Calendar.DAY_OF_MONTH, addressBanned.getBannedSayDays());
-			addressBanned.setBannedSayDate(cal.getTime());
+			banned.setBannedSayDate(cal.getTime());
 			
-			addressBanned.setCreateDate(banned.getCreateDate());
-			addressBanned.setUpdateDate(date);
-			addressBanned.setUpdateBy(addressBanned.getBannedSayLoginId());
+			banned.setUpdateDate(date);
+			banned.setUpdateBy(addressBanned.getBannedSayLoginId());
 			
 			// 如果禁言 在已经解封的基础上继续禁言
 			long time = cal.getTime().getTime();
-			if(time<=date.getTime()) {
+			if(time > date.getTime()) {
 				// 自动解封
-				addressBanned.setBannedSayType(2);
+				banned.setBannedSayType(addressBanned.getBannedSayType());
 			}
 			// 修改
-			AddressBanned save = addressBannedRepository.save(addressBanned);
+			AddressBanned save = addressBannedRepository.save(banned);
 			if(save != null) {
 				result.setRespCode("1");
 				result.setRespDesc("正常返回数据");
-				result.setRespMsg(1);
+				result.setRespMsg("1");
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("禁言修改失败");
-				result.setRespMsg(0);
+				result.setRespMsg("0");
 			}
 		}else {
 			result.setRespCode("2");
 			result.setRespDesc("该用户已经被禁言");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 		
 	}
@@ -285,7 +299,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				if("Optional.empty".equals(findOne.toString())) {
 					result.setRespCode("2");
 					result.setRespDesc("该用户无禁言记录，请先禁言！");
-					result.setRespMsg(0);
+					result.setRespMsg("0");
 				}else {
 					AddressBanned banned = findOne.get();
 					// 进行取消禁言
@@ -294,14 +308,14 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("禁言操作失败");
-				result.setRespMsg(0);
+				result.setRespMsg("0");
 			}
 			
 		}else {
 			// TODO 其它待做
 			result.setRespCode("2");
 			result.setRespDesc("待做");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 		
 	}
@@ -316,25 +330,21 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 * @date 2018年6月12日
 	 */
 	private void updateAddressSay(AddressBanned addressBanned, AddressBanned banned, Calendar cal, Result result) {
+		banned.setBannedSayType(addressBanned.getBannedSayType());
 		// 修改日期
-		addressBanned.setUpdateDate(cal.getTime());
+		banned.setUpdateDate(cal.getTime());
 		// 修改人为当前登录人
-		addressBanned.setUpdateBy(addressBanned.getBannedSayLoginId());
+		banned.setUpdateBy(addressBanned.getBannedSayLoginId());
 		
-		addressBanned.setRowId(banned.getRowId());
-		addressBanned.setBannedSayDays(banned.getBannedSayDays());
-		addressBanned.setBannedSayDate(banned.getBannedSayDate());
-		addressBanned.setCreateDate(banned.getCreateDate());
-		
-		AddressBanned save = addressBannedRepository.save(addressBanned);
+		AddressBanned save = addressBannedRepository.save(banned);
 		if(save != null) {
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
-			result.setRespMsg(1);
+			result.setRespMsg("1");
 		}else {
 			result.setRespCode("2");
 			result.setRespDesc("禁言修改失败");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 		
 	}
@@ -366,36 +376,34 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 					if(save == null) {
 						result.setRespCode("2");
 						result.setRespDesc("收藏添加失败");
-						result.setRespMsg(0);
+						result.setRespMsg("0");
 					}else {
 						result.setRespCode("1");
 						result.setRespDesc("正常返回数据");
-						result.setRespMsg(1);
+						result.setRespMsg("1");
 					}
 				}else {
 					AddressCollection collection = findOne.get();
 					if(collection.getCollectionType().equals(2)) {
-						addressCollection.setRowId(collection.getRowId());
-						addressCollection.setCollectionCreateDate(collection.getCollectionCreateDate());
 						// 修改日期
-						addressCollection.setCollectionUpdateDate(date);
+						collection.setCollectionUpdateDate(date);
 						// 修改人为当前登录人
-						addressCollection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
-						
-						AddressCollection save = addressCollectionRepository.save(addressCollection);
+						collection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
+						collection.setCollectionType(addressCollection.getCollectionType());
+						AddressCollection save = addressCollectionRepository.save(collection);
 						if(save == null) {
 							result.setRespCode("2");
 							result.setRespDesc("收藏修改失败");
-							result.setRespMsg(0);
+							result.setRespMsg("0");
 						}else {
 							result.setRespCode("1");
 							result.setRespDesc("正常返回数据");
-							result.setRespMsg(1);
+							result.setRespMsg("1");
 						}
 					}else {
 						result.setRespCode("2");
 						result.setRespDesc("用户已经处于收藏状态");
-						result.setRespMsg(0);
+						result.setRespMsg("0");
 					}
 					
 				}
@@ -404,14 +412,14 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("收藏操作失败");
-				result.setRespMsg(0);
+				result.setRespMsg("0");
 			}
 			
 		}else {
 			// TODO 其它待做
 			result.setRespCode("2");
 			result.setRespDesc("待做");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
 		
 	}
@@ -437,40 +445,80 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				if("Optional.empty".equals(findOne.toString())) {
 					result.setRespCode("2");
 					result.setRespDesc("取消收藏用户，不处在收藏列");
-					result.setRespMsg(0);
+					result.setRespMsg("0");
 				}else {
 					AddressCollection collection = findOne.get();
-					addressCollection.setRowId(collection.getRowId());
-					addressCollection.setCollectionCreateDate(collection.getCollectionCreateDate());
 					// 修改日期
-					addressCollection.setCollectionUpdateDate(date);
+					collection.setCollectionUpdateDate(date);
 					// 修改人为当前登录人
-					addressCollection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
+					collection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
+					collection.setCollectionType(addressCollection.getCollectionType());
 					
-					AddressCollection save = addressCollectionRepository.save(addressCollection);
+					AddressCollection save = addressCollectionRepository.save(collection);
 					if(save == null) {
 						result.setRespCode("2");
 						result.setRespDesc("收藏修改失败");
-						result.setRespMsg(0);
+						result.setRespMsg("0");
 					}else {
 						result.setRespCode("1");
 						result.setRespDesc("正常返回数据");
-						result.setRespMsg(1);
+						result.setRespMsg("1");
 					}
 				}
 				
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("收藏操作失败");
-				result.setRespMsg(0);
+				result.setRespMsg("0");
 			}
 			
 		}else {
 			// TODO 其它待做
 			result.setRespCode("2");
 			result.setRespDesc("待做");
-			result.setRespMsg(0);
+			result.setRespMsg("0");
 		}
+		
+	}
+	
+	/**
+	 * 当前人收藏列表查询
+	 * @param loginId
+	 * @param result
+	 * @author liudongdong
+	 * @date 2018年6月13日
+	 */
+	public void getCollectionList(String loginId, Result result) {
+		QUser qUser = QUser.user;
+		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
+		QUserNewAssistDsl uass = QUserNewAssistDsl.userNewAssistDsl;
+		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
+		
+		List<AutoCollection> fetch = queryFactory.select(Projections.bean(AutoCollection.class,
+				qAddressCollection.rowId,qAddressCollection.source,
+				qUser.userID,qUser.userName,qUser.provinceID,qUser.phone,
+				qUser.email,qUser.address,qUser.organizationID,
+				new CaseBuilder()
+					.when(uass.portrait_url.isNull())
+					.then(qUser.userPic)
+					.otherwise(uass.portrait_url).as("userPic"),
+				qUser.type,qUser.context, qUser.field,qPositionDsl.posName,
+				qUser.deptype,qUser.quanPin,qUser.shouZiMu,qUser.hytAccount,
+				qUser.crmAccount,qUser.flagOnline,qUser.sortNum,
+				qUser.orderNum,uass.install
+				))
+		.from(qAddressCollection)
+		.leftJoin(qUser).on(qUser.userID.eq(qAddressCollection.collectionUserId.stringValue()))
+		.leftJoin(qPositionDsl).on(qUser.post.eq(qPositionDsl.posId))
+		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
+		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId))).fetch();
+		
+//		source 客户  cust_id
+		for (AutoCollection autoCollection : fetch) {
+			System.out.println(autoCollection);
+		}
+//		迪科接口 
+//		list 返回收藏 
 		
 	}
 
@@ -487,6 +535,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	
 
 	
 

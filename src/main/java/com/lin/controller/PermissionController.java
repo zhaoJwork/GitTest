@@ -412,4 +412,37 @@ public class PermissionController {
 		return result;
 	}
 	
+	/**
+	 * 收藏列表查询
+	 * @param req
+	 * 		  loginId 当前登入人
+	 * @return 0 操作失败 1 操作成功
+	 * @author liudongdong
+	 * @date 2018年6月13日
+	 * @describe 取消收藏
+	 */
+	@ApiOperation(value="收藏列表查询",tags = {"2s"})
+	@ApiImplicitParam(name = "loginId", required = true, dataType = "String")
+	@GetMapping("/collectionlist")
+	public Result getCollectionList(HttpServletRequest req,String loginId) {
+		AddressInfLogBean log = logService.getAddressInfLog(req, "收藏列表查询");
+		Result result = new Result();
+		if(loginId == null) {
+			result.setRespCode("2");
+			result.setRespDesc("loginId 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		try {
+			this.permissionService.getCollectionList(loginId, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.setExpError(e.toString());
+			result.setRespCode("2");
+			result.setRespDesc("失败");
+			result.setRespMsg("");
+		}
+		return result;
+	}
+	
 }
