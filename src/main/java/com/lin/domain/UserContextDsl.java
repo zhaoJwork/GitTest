@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 用户与工作内容关联
@@ -17,7 +18,7 @@ import java.io.Serializable;
 
 @ApiModel(value = "UserContextDsl", description = "用户与工作内容表")
 @Entity
-@Table(name = "address_user_new")
+@Table(name = "address_user_work")
 public class UserContextDsl implements Serializable {
 
   @ApiModelProperty(value = "主键")
@@ -28,47 +29,47 @@ public class UserContextDsl implements Serializable {
 	 * 用户ID
 	 */
   @Column(name = "USER_ID")
-	private String userid;
+	private String userID;
 	/**
-	 * 用户ID
+	 * 工作内容ID
 	 */
-	@Column(name = "PORTRAIT_URL")
-	private String portrait_url;
+	@Column(name = "WORK_ID")
+	private String workID;
 	/**
-	 * 用户ID
+	 * 时间
 	 */
-	@Column(name = "INSTALL")
-	private Integer install;
+	@Column(name = "CREATE_DATE")
+	private Date createDate;
 
-	public String getRowid() {
+	public String getRowId() {
 		return rowId;
 	}
 
-	public void setRowid(String rowId) {
+	public void setRowId(String rowId) {
 		this.rowId = rowId;
 	}
 
-	public String getUserid() {
-		return userid;
+	public String getUserID() {
+		return userID;
 	}
 
-	public void setUserid(String userid) {
-		this.userid = userid;
+	public void setUserID(String userID) {
+		this.userID = userID;
 	}
 
-	public String getPortrait_url() {
-		return portrait_url;
+	public String getWorkID() {
+		return workID;
 	}
 
-	public void setPortrait_url(String portrait_url) {
-		this.portrait_url = portrait_url;
+	public void setWorkID(String workID) {
+		this.workID = workID;
 	}
 
-	public Integer getInstall() {
-		return install;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
-	public void setInstall(Integer install) {
-		this.install = install;
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
 	}
 }

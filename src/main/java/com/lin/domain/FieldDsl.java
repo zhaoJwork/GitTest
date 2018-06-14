@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 擅长领域
@@ -17,58 +18,58 @@ import java.io.Serializable;
 
 @ApiModel(value = "FieldDsl", description = "擅长领域表")
 @Entity
-@Table(name = "address_user_new")
+@Table(name = "address_territory")
 public class FieldDsl implements Serializable {
 
   @ApiModelProperty(value = "主键")
   @Id
   @Column(name = "ROW_ID")
-  private String rowId;
+  private String rowID;
 	/**
-	 * 用户ID
+	 * 擅长领域ID
 	 */
-  @Column(name = "USER_ID")
-	private String userid;
+  @Column(name = "TER_ID")
+	private String terID;
 	/**
-	 * 用户ID
+	 * 擅长领域
 	 */
-	@Column(name = "PORTRAIT_URL")
-	private String portrait_url;
+	@Column(name = "TER_NAME")
+	private String terName;
 	/**
-	 * 用户ID
+	 * 创建时间
 	 */
-	@Column(name = "INSTALL")
-	private Integer install;
+	@Column(name = "CREATE_DATE")
+	private Date createDate;
 
-	public String getRowid() {
-		return rowId;
+	public String getRowID() {
+		return rowID;
 	}
 
-	public void setRowid(String rowId) {
-		this.rowId = rowId;
+	public void setRowID(String rowID) {
+		this.rowID = rowID;
 	}
 
-	public String getUserid() {
-		return userid;
+	public String getTerID() {
+		return terID;
 	}
 
-	public void setUserid(String userid) {
-		this.userid = userid;
+	public void setTerID(String terID) {
+		this.terID = terID;
 	}
 
-	public String getPortrait_url() {
-		return portrait_url;
+	public String getTerName() {
+		return terName;
 	}
 
-	public void setPortrait_url(String portrait_url) {
-		this.portrait_url = portrait_url;
+	public void setTerName(String terName) {
+		this.terName = terName;
 	}
 
-	public Integer getInstall() {
-		return install;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
-	public void setInstall(Integer install) {
-		this.install = install;
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
 	}
 }

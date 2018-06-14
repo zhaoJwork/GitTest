@@ -77,6 +77,9 @@ public class UserService extends AbstractService<User,String> {
 				.on(user.organizationID.eq(organ.organizationID))
                 .leftJoin(coll)
 				.where(user.userID.eq(userID)).fetchOne();
+        if (null == userDetailsDsl){
+			return null;
+		}
         //// 是否可以查看能力详情    ability     1 是  0 否
         List ability = entityManager.createNativeQuery("select appuser.F_O_bannedsay(?,?) from dual")
                 .setParameter(1, loginID).setParameter(2, userID)
@@ -104,10 +107,10 @@ public class UserService extends AbstractService<User,String> {
         Long talkStatus = jpaQueryFactory().select(ban.count()).from(ban)
                 .where(ban.bannedSayUserId.eq(Integer.parseInt(userID)).and(ban.bannedSayType.eq(1)).and(coll.type.eq(1))).fetchOne();
         userDetailsDsl.setTalkstatus(talkStatus+"");
-		List<ContextVo> contextVo = jpaQueryFactory().select(Projections.bean(ContextVo.class)).from(context).leftJoin(userContext).on().where().fetch();
-		userDetailsDsl.setContext(contextVo);
-		List<FieldVo> fieldVo = jpaQueryFactory().select(Projections.bean(FieldVo.class)).from(field).leftJoin(userField).on().where().fetch();
-		userDetailsDsl.setField(fieldVo);
+//		List<ContextVo> contextVo = jpaQueryFactory().select(Projections.bean(ContextVo.class)).from(context).leftJoin(userContext).on().where().fetch();
+//		userDetailsDsl.setContext(contextVo);
+//		List<FieldVo> fieldVo = jpaQueryFactory().select(Projections.bean(FieldVo.class)).from(field).leftJoin(userField).on().where().fetch();
+//		userDetailsDsl.setField(fieldVo);
         return  userDetailsDsl;
 	}
 }
