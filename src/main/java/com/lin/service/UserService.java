@@ -49,10 +49,6 @@ public class UserService extends AbstractService<User,String> {
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QAddressCollection coll = QAddressCollection.addressCollection;
 		QAddressBanned ban = QAddressBanned.addressBanned;
-		QContextDsl context = QContextDsl.contextDsl;
-		QUserContextDsl userContext = QUserContextDsl.userContextDsl;
-		QFieldDsl field = QFieldDsl.fieldDsl;
-		QUserFieldDsl userField = QUserFieldDsl.userFieldDsl;
 
         UserDetailsDsl userDetailsDsl =  jpaQueryFactory().select(Projections.bean(UserDetailsDsl.class,
 				user.userID,
@@ -75,7 +71,6 @@ public class UserService extends AbstractService<User,String> {
 				.on(posDsl.posId.eq(user.post))
 				.leftJoin(organ)
 				.on(user.organizationID.eq(organ.organizationID))
-                .leftJoin(coll)
 				.where(user.userID.eq(userID)).fetchOne();
         if (null == userDetailsDsl){
 			return null;
@@ -105,12 +100,32 @@ public class UserService extends AbstractService<User,String> {
         userDetailsDsl.setCollection(collection+"");
         ////禁言状态       talkStatus 1 是 0 否
         Long talkStatus = jpaQueryFactory().select(ban.count()).from(ban)
-                .where(ban.bannedSayUserId.eq(Integer.parseInt(userID)).and(ban.bannedSayType.eq(1)).and(coll.type.eq(1))).fetchOne();
+                .where(ban.bannedSayUserId.eq(Integer.parseInt(userID)).and(ban.bannedSayType.eq(1)).and(ban.type.eq(1))).fetchOne();
         userDetailsDsl.setTalkstatus(talkStatus+"");
-//		List<ContextVo> contextVo = jpaQueryFactory().select(Projections.bean(ContextVo.class)).from(context).leftJoin(userContext).on().where().fetch();
-//		userDetailsDsl.setContext(contextVo);
-//		List<FieldVo> fieldVo = jpaQueryFactory().select(Projections.bean(FieldVo.class)).from(field).leftJoin(userField).on().where().fetch();
-//		userDetailsDsl.setField(fieldVo);
+		List<ContextVo> contextVo = entityManager
+				.createNativeQuery("select ac.work_id contextID, ac.work_name context, decode(t.wid, '', '2', '1') flag " +
+										"  from appuser.address_work_content ac " +
+										"  left join (select ac.work_id wid " +
+										"               from appuser.address_work_content ac " +
+										"               left join appuser.address_user_work aw " +
+										"                 on aw.work_id = ac.work_id " +
+										"              where aw.user_id = ? ) t " +
+										"    on t.wid = ac.work_id")
+				.setParameter(1, loginID)
+				.getResultList();
+		userDetailsDsl.setContext(contextVo);
+		List<FieldVo> fieldVo = entityManager
+				.createNativeQuery("select tu.ter_id fieldID, tu.ter_name field, decode(t.wid, '', '2', '1') flag" +
+						"  from appuser.address_territory tu" +
+						"  left join (select t.ter_id  wid     " +
+						"            from appuser.address_territory t" +
+						"            left join appuser.address_user_territory atu" +
+						"              on atu.ter_id = t.ter_id" +
+						"             where atu.user_id = ? ) t" +
+						"    on t.wid = tu.ter_id")
+				.setParameter(1, loginID)
+				.getResultList();
+		userDetailsDsl.setField(fieldVo);
         return  userDetailsDsl;
 	}
 }

@@ -27,7 +27,7 @@ public class UserServiceTest {
   }
   @Test
   public void testByUserID(){
-    UserDetailsDsl users = userService.selectUserDetails("101948");
+    UserDetailsDsl users = userService.selectUserDetails("113420","101539");
     Assert.assertNotNull(users);
   }
 }
