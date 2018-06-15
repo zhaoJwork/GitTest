@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import org.springframework.util.Assert;
 
 /**
  * 功能概要：UserService接口类
@@ -26,6 +26,8 @@ public class UserService extends AbstractService<User,String> {
 	public UserService(UserRepository userRepository){
 		super(userRepository);
 	}
+
+	@Deprecated
 	@Override
 	public long deleteByIds(String... strings) {
 		return 0;
@@ -33,9 +35,9 @@ public class UserService extends AbstractService<User,String> {
 
 	@Override
 	public List<User> findByIds(String... strings) {
+		Assert.isNull(strings,"主键列表不能为空");
 		QUser user = QUser.user;
 		JPAQueryFactory query = jpaQueryFactory();
-
 		return query.select(user).from(user).where(user.userID.in(strings)).fetch();
 	}
 
@@ -64,7 +66,7 @@ public class UserService extends AbstractService<User,String> {
 				organ.organizationName,
 				user.post.as("postID"),
 				posDsl.posName.as("postName"),
-				user.phone.as("phone"),
+				user.phone,
 				user.email.as("email"),
 				user.address.as("address"),
 				user.context.as("contexts"),

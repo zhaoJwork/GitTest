@@ -19,3 +19,8 @@ spring:
         dialect: org.hibernate.dialect.Oracle10gDialect
   thymeleaf:
     cache: false
+
+
+#生产上关闭 swagger
+swagger:
+  show: false

@@ -52,3 +52,5 @@ application:
  #生产
  #sales_integral_add_score=/sales-integral/common/addScore
 
+swagger:
+  show: true

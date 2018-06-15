@@ -9,13 +9,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * 用户与工作内容关联
  * @author lwz
  * @date 2018.6.13
  */
-
+@Data
 @ApiModel(value = "UserContextDsl", description = "用户与工作内容表")
 @Entity
 @Table(name = "address_user_work")
@@ -40,36 +41,4 @@ public class UserContextDsl implements Serializable {
 	 */
 	@Column(name = "CREATE_DATE")
 	private Date createDate;
-
-	public String getRowId() {
-		return rowId;
-	}
-
-	public void setRowId(String rowId) {
-		this.rowId = rowId;
-	}
-
-	public String getUserID() {
-		return userID;
-	}
-
-	public void setUserID(String userID) {
-		this.userID = userID;
-	}
-
-	public String getWorkID() {
-		return workID;
-	}
-
-	public void setWorkID(String workID) {
-		this.workID = workID;
-	}
-
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
 }
