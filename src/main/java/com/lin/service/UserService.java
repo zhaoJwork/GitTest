@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 功能概要：UserService接口类
@@ -107,7 +108,7 @@ public class UserService extends AbstractService<User,String> {
         Long talkStatus = jpaQueryFactory().select(ban.count()).from(ban)
                 .where(ban.bannedSayUserId.eq(Integer.parseInt(userID)).and(ban.bannedSayType.eq(1)).and(ban.type.eq(1))).fetchOne();
         userDetailsDsl.setTalkstatus(talkStatus+"");
-		List<ContextVo> contextVo = entityManager
+		List contextVo = entityManager
 				.createNativeQuery("select ac.work_id contextID, ac.work_name context, decode(t.wid, '', '2', '1') flag " +
 										"  from appuser.address_work_content ac " +
 										"  left join (select ac.work_id wid " +
@@ -118,8 +119,20 @@ public class UserService extends AbstractService<User,String> {
 										"    on t.wid = ac.work_id")
 				.setParameter(1, loginID)
 				.getResultList();
-		userDetailsDsl.setContext(contextVo);
-		List<FieldVo> fieldVo = entityManager
+		
+		// entityManager.createNativeQuery  返回类型为  List<Object[]>  进行转型为 List<ContextVo>
+		List<ContextVo> listVo = new ArrayList<ContextVo>();
+		ContextVo contextVo2 = null;
+		for (Object object : contextVo) {
+			Object[] cell = (Object[])object;
+			contextVo2 = new ContextVo();
+			contextVo2.setContextID(cell[0].toString());
+			contextVo2.setContext(cell[1].toString());
+			contextVo2.setFlag(cell[2].toString());
+			listVo.add(contextVo2);
+		}
+		userDetailsDsl.setContext(listVo);
+		List fieldVo = entityManager
 				.createNativeQuery("select tu.ter_id fieldID, tu.ter_name field, decode(t.wid, '', '2', '1') flag" +
 						"  from appuser.address_territory tu" +
 						"  left join (select t.ter_id  wid     " +
@@ -130,7 +143,20 @@ public class UserService extends AbstractService<User,String> {
 						"    on t.wid = tu.ter_id")
 				.setParameter(1, loginID)
 				.getResultList();
-		userDetailsDsl.setField(fieldVo);
+		
+		// entityManager.createNativeQuery  返回类型为  List<Object[]>  进行转型为List<FieldVo>
+				List<FieldVo> listField = new ArrayList<FieldVo>();
+				FieldVo fieldVo2 = null;
+				for (Object object : fieldVo) {
+					Object[] cell = (Object[])object;
+					fieldVo2 = new FieldVo();
+					fieldVo2.setFieldID(cell[0].toString());
+					fieldVo2.setField(cell[1].toString());
+					fieldVo2.setFlag(cell[2].toString());
+					listField.add(fieldVo2);
+				}
+		
+		userDetailsDsl.setField(listField);
         return  userDetailsDsl;
 	}
 }
