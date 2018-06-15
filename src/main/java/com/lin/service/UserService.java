@@ -102,7 +102,7 @@ public class UserService extends AbstractService<User,String> {
         ////是否被收藏    collection  1 是 0 否
         Long collection = jpaQueryFactory().select(coll.count()).from(coll)
                 .where(coll.collectionLoginId.eq(Integer.parseInt(loginID)).and(coll.collectionUserId.eq(Integer.parseInt(userID))).and(coll.type.eq(1)
-                        .and(coll.collectionType.eq(1).and(coll.source.eq(1))))).fetchOne();
+                        .and(coll.collectionType.eq(1)))).fetchOne();
         userDetailsDsl.setCollection(collection+"");
         ////禁言状态       talkStatus 1 是 0 否
         Long talkStatus = jpaQueryFactory().select(ban.count()).from(ban)
