@@ -1,7 +1,9 @@
-package com.lin.domain;
+package com.lin.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
+import com.lin.domain.ContextVo;
+import com.lin.domain.FieldVo;
 import lombok.Data;
 
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
  *
  */
 @Data
-public class UserDetailsDsl {
+public class UserDetailsVo {
 
 	/**
 	 * 人员ID
@@ -229,7 +231,7 @@ public class UserDetailsDsl {
 	}
 
 	public static void setPicHttpIp(String picHttpIp) {
-		UserDetailsDsl.picHttpIp = picHttpIp;
+		UserDetailsVo.picHttpIp = picHttpIp;
 	}
 
 	public String getAbility() {

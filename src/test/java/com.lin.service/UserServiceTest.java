@@ -3,7 +3,7 @@ package com.lin.service;
 import com.lin.domain.User;
 import java.util.List;
 
-import com.lin.domain.UserDetailsDsl;
+import com.lin.vo.UserDetailsVo;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -27,7 +27,7 @@ public class UserServiceTest {
   }
   @Test
   public void testByUserID(){
-    UserDetailsDsl users = userService.selectUserDetails("113420","101539");
+    UserDetailsVo users = userService.selectUserDetails("113420","101539");
     Assert.assertNotNull(users);
   }
 }

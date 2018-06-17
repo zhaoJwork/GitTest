@@ -14,10 +14,10 @@ import javax.persistence.Table;
  * @author lwz
  * @date 2018.6.11
  */
-@ApiModel(value = "OrganizationBlackDsl", description = "组织部门黑名单")
+@ApiModel(value = "OrganizationBlack", description = "组织部门黑名单")
 @Entity
 @Table(name = "address_blackorglist")
-public class OrganizationBlackDsl  {
+public class OrganizationBlack {
 	@ApiModelProperty(value = "主键")
 	@Id
 	@Column(name = "ROW_ID")

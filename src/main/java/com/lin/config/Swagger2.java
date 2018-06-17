@@ -33,9 +33,9 @@ public class Swagger2 {
 
   private ApiInfo apiInfo() {
     return new ApiInfoBuilder()
-        .title("销售助手知识库搜索API")
-        .description("销售助手知识库搜索API")
-        .contact(new Contact("yaloo yang", "189.cn", "yaloo_yang@189.cn"))
+        .title("销售助手通讯录API")
+        .description("销售助手通讯录API")
+        .contact(new Contact("li_weizhi", "189.cn", "li_weizhi@189.cn"))
         .version("1.0")
         .build();
   }
