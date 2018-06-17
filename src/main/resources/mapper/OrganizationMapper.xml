@@ -5,7 +5,7 @@
 
 	<!-- 根据时间查询,查找大于此时间的数据 -->
 	<select id="getNewDateByUpdateTime" parameterType="java.lang.String"
-		resultType="com.lin.domain.Organization">
+		resultType="com.lin.domain.OrganizationBean">
 		select
        t.organ_id organizationID,
        t.organ_name organizationName,
@@ -70,7 +70,7 @@
 	</select>
 	
 	<select id="getOrganizationByOrganid" parameterType="java.lang.String"
-		resultType="com.lin.domain.Organization">
+		resultType="com.lin.domain.OrganizationBean">
 		select
        t.organ_id organizationID,
        t.organ_name organizationName,
@@ -86,7 +86,7 @@
 	</select>
 	
 	<select id="fiveCityOrganization" parameterType="java.lang.String"
-		resultType="com.lin.domain.Organization">
+		resultType="com.lin.domain.OrganizationBean">
 		   select tc.organizationID,
                tc.organizationName,
                tc.updateDate,
@@ -176,7 +176,7 @@
             order by tc.zimuname asc
 	</select>
 	<select id="organizationByPID" parameterType="java.lang.String"
-		resultType="com.lin.domain.Organization">
+		resultType="com.lin.domain.OrganizationBean">
 		select t.organ_id organizationID,
 			       t.organ_name organizationName,
 			       to_char(t.update_date,'yyyy-mm-dd hh24:mi:ss') updateDate,
@@ -196,7 +196,7 @@
 			order by t.org_order   
 	</select>
 	<select id="downOrganization" parameterType="java.lang.String"
-		resultType="com.lin.domain.Organization">
+		resultType="com.lin.domain.OrganizationBean">
 		select t.organ_id organizationID,
 			       t.organ_name organizationName,
 			       to_char(t.update_date,'yyyy-mm-dd hh24:mi:ss') updateDate,

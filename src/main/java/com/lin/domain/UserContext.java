@@ -17,10 +17,10 @@ import lombok.Data;
  * @date 2018.6.13
  */
 @Data
-@ApiModel(value = "UserContextDsl", description = "用户与工作内容表")
+@ApiModel(value = "UserContext", description = "用户与工作内容表")
 @Entity
 @Table(name = "address_user_work")
-public class UserContextDsl implements Serializable {
+public class UserContext implements Serializable {
 
   @ApiModelProperty(value = "主键")
   @Id

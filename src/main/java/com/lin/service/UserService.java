@@ -3,6 +3,7 @@ package com.lin.service;
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.UserRepository;
+import com.lin.vo.UserDetailsVo;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -46,19 +47,19 @@ public class UserService extends AbstractService<User,String> {
 	 * @param userID
 	 * @return
 	 */
-	public UserDetailsDsl selectUserDetails(String loginID ,String userID){
+	public UserDetailsVo selectUserDetails(String loginID , String userID){
 		QUser user = QUser.user;
 		QUserNewAssistDsl uass = QUserNewAssistDsl.userNewAssistDsl;
 		QPositionDsl posDsl = QPositionDsl.positionDsl;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QAddressCollection coll = QAddressCollection.addressCollection;
 		QAddressBanned ban = QAddressBanned.addressBanned;
-		QContextDsl context = QContextDsl.contextDsl;
-		QUserContextDsl userContext = QUserContextDsl.userContextDsl;
-		QFieldDsl field = QFieldDsl.fieldDsl;
-		QUserFieldDsl userField = QUserFieldDsl.userFieldDsl;
+		QContext context = QContext.context;
+		QUserContext userContext = QUserContext.userContext;
+		QField field = QField.field;
+		QUserField userField = QUserField.userField;
 
-        UserDetailsDsl userDetailsDsl =  jpaQueryFactory().select(Projections.bean(UserDetailsDsl.class,
+        UserDetailsVo userDetailsDsl =  jpaQueryFactory().select(Projections.bean(UserDetailsVo.class,
 				user.userID,
 				user.userName,
 				new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(user.userPic).otherwise(uass.portrait_url).as("userPic"),

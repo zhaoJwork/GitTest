@@ -2,7 +2,7 @@ package com.lin.service;
 
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.OrganizationDsl;
-import com.lin.domain.QOrganizationBlackDsl;
+import com.lin.domain.QOrganizationBlack;
 import com.lin.domain.QOrganizationDsl;
 import com.lin.repository.OrganizationRepository;
 import com.querydsl.core.types.Predicate;
@@ -22,7 +22,7 @@ import java.util.List;
  * @date 2017年8月19日
  */
 @Service("organizationServiceDsl")
-public class OrganizationServiceDslImpl extends AbstractService<OrganizationDsl,String> {
+public class OrganizationServiceImpl extends AbstractService<OrganizationDsl,String> {
 
 	@Autowired
 	private OrganizationRepository repository;
@@ -45,7 +45,7 @@ public class OrganizationServiceDslImpl extends AbstractService<OrganizationDsl,
 	 */
 	public List<OrganizationDsl> getOrganizationByDsl(OrganizationDsl organ) {
         QOrganizationDsl organDsl = QOrganizationDsl.organizationDsl;
-        QOrganizationBlackDsl blackDsl = QOrganizationBlackDsl.organizationBlackDsl;
+        QOrganizationBlack blackDsl = QOrganizationBlack.organizationBlack;
 		Predicate predicate = null;
 		if(null != organ.getpID()&& !organ.getpID().equals("")){
 			predicate = QOrganizationDsl.organizationDsl.pID.eq(organ.getpID());
@@ -62,7 +62,7 @@ public class OrganizationServiceDslImpl extends AbstractService<OrganizationDsl,
 	}
 
 	@Autowired
-	public OrganizationServiceDslImpl(OrganizationRepository repository){
+	public OrganizationServiceImpl(OrganizationRepository repository){
 		super(repository);
 	}
 

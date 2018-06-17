@@ -1,6 +1,6 @@
 package com.lin.repository;
 
-import com.lin.domain.OrganizationBlackDsl;
+import com.lin.domain.OrganizationBlack;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -9,6 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @author lwz
  * @date 2018.6.11
  */
-public interface OrganizationBlackRepository extends PagingAndSortingRepository<OrganizationBlackDsl, String>,QuerydslPredicateExecutor<OrganizationBlackDsl> {
+public interface OrganizationBlackRepository extends PagingAndSortingRepository<OrganizationBlack, String>,QuerydslPredicateExecutor<OrganizationBlack> {
 
 }

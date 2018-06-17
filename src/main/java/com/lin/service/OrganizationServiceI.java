@@ -1,10 +1,8 @@
 package com.lin.service;
 
-import java.util.List;
 import java.util.Map;
 
-import com.lin.domain.OrgTer;
-import com.lin.domain.Organization;
+import com.lin.domain.OrganizationBean;
 
 /**
  * 组织机构service
@@ -28,7 +26,7 @@ public interface OrganizationServiceI {
 	 * @param organid
 	 * @return
 	 */
-	Organization getOrganizationByOrganid(String organid);
+	OrganizationBean getOrganizationByOrganid(String organid);
 	
 	/**
 	 * 获取50地市组织 

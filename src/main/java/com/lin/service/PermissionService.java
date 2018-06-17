@@ -1,36 +1,7 @@
 package com.lin.service;
 
-import java.text.ParseException;
-import java.text.ParsePosition;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.Root;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.AddressBanned;
-import com.lin.domain.AddressCollection;
-import com.lin.domain.AutoCollection;
-import com.lin.domain.ContextVo;
-import com.lin.domain.QAddressBanned;
-import com.lin.domain.QAddressCollection;
-import com.lin.domain.QContextDsl;
-import com.lin.domain.QFieldDsl;
-import com.lin.domain.QOrganizationDsl;
-import com.lin.domain.QPositionDsl;
-import com.lin.domain.QUser;
-import com.lin.domain.QUserContextDsl;
-import com.lin.domain.QUserFieldDsl;
-import com.lin.domain.QUserNewAssistDsl;
-import com.lin.domain.User;
+import com.lin.domain.*;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressCollectionRepository;
 import com.lin.repository.UserRepository;
@@ -38,11 +9,18 @@ import com.lin.util.Result;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javafx.beans.binding.MapExpression;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * 

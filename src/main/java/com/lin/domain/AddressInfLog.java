@@ -14,11 +14,9 @@ import java.util.Date;
 @ApiModel(value = "AddressInfLogBean", description = "通讯录日志")
 @Entity
 @Table(name = "address_inf_log")
-@SequenceGenerator(name="sql_log", sequenceName="seq_app_addressinflog")
-public class AddressInfLogDsl {
+public class AddressInfLog {
 	@ApiModelProperty(value = "主键")
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator="sql_log")
 	@Column(name = "ROW_ID")
 	private Integer rowID;
 	@Column(name = "ADD_NAME")
@@ -34,11 +32,11 @@ public class AddressInfLogDsl {
 	@Column(name = "EXP_ERROR")
 	private String expError;
 
-	public AddressInfLogDsl() {
+	public AddressInfLog() {
 	}
 
-	public AddressInfLogDsl(Integer rowID, String addName, String reqJson, String respJson,
-							Date createDate, Date endDate, String expError) {
+	public AddressInfLog(Integer rowID, String addName, String reqJson, String respJson,
+                         Date createDate, Date endDate, String expError) {
 		this.rowID = rowID;
 		this.addName = addName;
 		this.reqJson = reqJson;

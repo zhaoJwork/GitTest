@@ -16,10 +16,10 @@ import java.util.Date;
  * @date 2018.6.13
  */
 
-@ApiModel(value = "UserFieldDsl", description = "用户与擅长领域表")
+@ApiModel(value = "UserField", description = "用户与擅长领域表")
 @Entity
 @Table(name = "ADDRESS_USER_TERRITORY")
-public class UserFieldDsl implements Serializable {
+public class UserField implements Serializable {
 
   @ApiModelProperty(value = "主键")
   @Id

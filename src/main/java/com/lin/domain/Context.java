@@ -16,10 +16,10 @@ import java.util.Date;
  * @date 2018.6.13
  */
 
-@ApiModel(value = "ContextDsl", description = "工作内容表")
+@ApiModel(value = "Context", description = "工作内容表")
 @Entity
 @Table(name = "address_user_work")
-public class ContextDsl implements Serializable {
+public class Context implements Serializable {
 
   @ApiModelProperty(value = "主键")
   @Id
