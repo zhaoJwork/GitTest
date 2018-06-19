@@ -10,7 +10,11 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,7 @@ import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
 import com.lin.domain.AutoCollection;
+import com.lin.domain.ContextDsl;
 import com.lin.domain.ContextVo;
 import com.lin.domain.QAddressBanned;
 import com.lin.domain.QAddressCollection;
@@ -556,6 +561,17 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				.leftJoin(userContext).on(context.workID.eq(userContext.workID))
 				.where(userContext.userID.eq(""))
 				)*/
+		// 查询语句构建工厂
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		// 条件查询语句且指定查询返回结果  select * 
+		CriteriaQuery<ContextVo> query = builder.createQuery(ContextVo.class);
+		Root<ContextVo> from = query.from(ContextVo.class);
+		query.select(from);
+		
+		// 子查询语句
+		Subquery<ContextDsl> subquery = query.subquery(ContextDsl.class);
+//		from.join("appuser.address_user_work").on(restriction)
+		
 	}
 
 
