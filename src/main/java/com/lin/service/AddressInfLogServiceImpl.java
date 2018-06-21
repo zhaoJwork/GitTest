@@ -1,22 +1,24 @@
 package com.lin.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.AddressInfLog;
-import com.lin.domain.QAddressInfLogDsl;
-import com.lin.repository.AddressInfLogRepository;
-import com.lin.util.JsonUtil;
-import com.lin.util.Result;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.util.Calendar;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
-import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ideal.wheel.common.AbstractService;
+import com.lin.domain.AddressInfLog;
+import com.lin.domain.QAddressInfLog;
+import com.lin.repository.AddressInfLogRepository;
+import com.lin.util.JsonUtil;
+import com.lin.util.Result;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 
 /**
@@ -54,7 +56,7 @@ public class AddressInfLogServiceImpl extends AbstractService<AddressInfLog,Stri
 
 	@Override
 	public List<AddressInfLog> findByIds(String... strings) {
-		QAddressInfLogDsl inflog = QAddressInfLogDsl.addressInfLogDsl;
+		QAddressInfLog inflog = QAddressInfLog.addressInfLog;
 		JPAQueryFactory query = jpaQueryFactory();
 		return query.select(inflog).from(inflog).where(inflog.addName.in(strings)).fetch();
 	}

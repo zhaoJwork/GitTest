@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+
 /**
  * 
  * 通讯录
@@ -508,32 +509,10 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 //		迪科接口 
 //		list 返回收藏 
 		
-		/*select ac.work_id contextID, ac.work_name context, decode(t.wid, '', '2', '1') flag " +
-		"  from appuser.address_work_content ac " +
-		"  left join (select ac.work_id wid " +
-		"               from appuser.address_work_content ac " +
-		"               left join appuser.address_user_work aw " +
-		"                 on aw.work_id = ac.work_id " +
-		"              where aw.user_id = ? ) t " +
-		"    on t.wid = ac.work_id
 		
-*/		
-		/*QAddressBanned ban = QAddressBanned.addressBanned;
-		QContextDsl context = QContextDsl.contextDsl;
-		QUserContextDsl userContext = QUserContextDsl.userContextDsl;
-		QFieldDsl field = QFieldDsl.fieldDsl;
-		QUserFieldDsl userField = QUserFieldDsl.userFieldDsl;
-//		Root<ContextVo> root = queryFactory.from(ContextVo.class);
-		queryFactory.select(Projections.bean(ContextVo.class,
-				context.workID.as("content"), context.workName.as("context")
-//				new CaseBuilder()
-//					.when(b)
-				))
-		.from(context)
-		.leftJoin(JPAExpressions.select(context.workID.as("wid")).from(context)
-				.leftJoin(userContext).on(context.workID.eq(userContext.workID))
-				.where(userContext.userID.eq(""))
-				)*/
+		
+		
+		
 	}
 
 

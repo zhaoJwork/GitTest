@@ -9,19 +9,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.lin.mapper.GroupMapper;
 import com.lin.mapper.UtilMapper;
+import com.lin.repository.AddressGroupRepository;
+import com.lin.domain.AddressGroup;
 import com.lin.domain.Group;
 import com.lin.domain.GroupBean;
 import com.lin.domain.GroupDetails;
 import com.lin.domain.GroupUserBean;
+import com.lin.domain.QAddressGroup;
+import com.lin.domain.QAddressGroupUser;
+import com.lin.domain.QUser;
+import com.lin.domain.QUserNewAssistDsl;
 import com.lin.domain.User;
 import com.lin.service.GroupServiceI;
 import com.lin.util.ImageUtil;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**
  *
@@ -48,6 +60,20 @@ public class GroupServiceImpl implements GroupServiceI {
 	private GroupMapper groupDao;
 	@Autowired
 	private UtilMapper utilDao;
+	
+	// sql 修改为jpa+querydsl 
+	
+	private AddressGroupRepository addressGroupRepository;
+	@Autowired
+    private EntityManager entityManager;
+	
+	private JPAQueryFactory queryFactory;  
+    
+    @PostConstruct  
+    public void init() {  
+       queryFactory = new JPAQueryFactory(entityManager);  
+    }
+	
 
 	@Override
 	public List<Group> selectAllGroupByLoginID(String loginID,String groupname) {
@@ -58,6 +84,111 @@ public class GroupServiceImpl implements GroupServiceI {
 		return list;
 	}
 
+	/**
+	 * 编辑个人分组 loginID=22295& groupID=& groupName=以小组分组& groupDesc=分组详情&
+	 * userIds=123_234_456& type=1增加人员 2 删除人员 3 删除组
+	 * 
+	 * @throws Exception
+	 */
+	/*@Override
+	public void editGroup(String loginID, String groupID, String groupName, String groupDesc, String userIds,
+			String type) throws Exception {
+		// 验证是否为新建组
+		if (null == groupID || "".equals(groupID)) {
+//			String seq = utilDao.getSeqAppAddresslist();
+			QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+//			select max(g.group_id) + 1 from appuser.address_group g
+			String fetchOne = queryFactory.select( 
+					qAddressGroup.groupId.max())
+					.from(qAddressGroup).fetchOne();
+			System.out.println(fetchOne);
+//			groupID = groupDao.getNGroupID();
+			GroupBean gb = new GroupBean();
+//			gb.setRowID(seq);
+			gb.setGroupID(groupID);
+			gb.setGroupName(groupName);
+			gb.setGroupDesc(groupDesc);
+			gb.setCreateUser(loginID);
+			groupDao.saveGroup(gb);
+			if (null != userIds && !"".equals(userIds)) {
+				String[] userID = userIds.split("_");
+				List<GroupUserBean> listGU = new ArrayList<GroupUserBean>();
+				for (int i = 0; i < userID.length; i++) {
+					GroupUserBean gu = new GroupUserBean();
+					String uid = userID[i];
+					String rowID = utilDao.getSeqAppGourpUser();
+					gu.setRowID(rowID);
+					gu.setGroupID(groupID);
+					gu.setGroupUser(uid);
+					listGU.add(gu);
+				}
+				groupDao.saveGroupUser(listGU);
+				// 创建群组 成功 生成群组头像 zhangWeiJie
+				editGroupImg(groupID);
+			}
+		} else {
+			if (null != type && !"".equals(type)) {
+				if (type.equals("1")) {// type=1增加人员
+					if (null != userIds && !"".equals(userIds)) {
+						String[] userID = userIds.split("_");
+						//不重复增加组人员
+						String groupUsers = groupDao.getGroupUserIDs(groupID);
+						List<GroupUserBean> listGU = new ArrayList<GroupUserBean>();
+						for (int i = 0; i < userID.length; i++) {
+							GroupUserBean gu = new GroupUserBean();
+							String uid = userID[i];
+							if(groupUsers.indexOf(uid) < 0){
+								String rowID = utilDao.getSeqAppGourpUser();
+								gu.setRowID(rowID);
+								gu.setGroupID(groupID);
+								gu.setGroupUser(uid);
+								listGU.add(gu);
+							}
+						}
+						groupDao.saveGroupUser(listGU);
+					}
+				} else if (type.equals("2")) {// 2 删除人员
+					if (null != userIds && !"".equals(userIds)) {
+						String[] userID = userIds.split("_");
+						GroupUserBean gu = new GroupUserBean();
+						String groupUser = "";
+						for (int i = 0; i < userID.length; i++) {
+							String uid = userID[i];
+							groupUser += "'" + uid + "',";
+						}
+						groupUser = groupUser.substring(0, groupUser.lastIndexOf(","));
+						gu.setGroupID(groupID);
+						gu.setGroupUser(groupUser);
+						
+//						queryFactory.delete(path)
+						
+						groupDao.deleteGroupUser(gu);
+					}
+				} else if (type.equals("3")) {// 3 删除组
+					groupDao.deleteGroup(groupID);
+					GroupUserBean gu = new GroupUserBean();
+					gu.setGroupID(groupID);
+					groupDao.deleteGroupUser(gu);
+				}
+				// 编辑群组人员，重新生成群组头像 zhangWeiJie
+				editGroupImg(groupID);
+			}
+			// groupName=以小组分组&
+			if (null != groupName && !"".equals(groupName)) {
+				GroupBean gb = new GroupBean();
+				gb.setGroupID(groupID);
+				gb.setGroupName(groupName);
+				groupDao.updateGroup(gb);
+			}
+			// groupDesc=分组详情
+			if (null != groupDesc && !"".equals(groupDesc)) {
+				GroupBean gb = new GroupBean();
+				gb.setGroupID(groupID);
+				gb.setGroupDesc(groupDesc);
+				groupDao.updateGroup(gb);
+			}
+		}
+	}*/
 	/**
 	 * 编辑个人分组 loginID=22295& groupID=& groupName=以小组分组& groupDesc=分组详情&
 	 * userIds=123_234_456& type=1增加人员 2 删除人员 3 删除组
@@ -201,12 +332,40 @@ public class GroupServiceImpl implements GroupServiceI {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public GroupDetails groupDetails(String loginID, String groupID) {
-		GroupDetails gd = new GroupDetails();
-		gd = groupDao.selectGroupBygroupID(groupID);
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		GroupDetails gd = queryFactory.select(
+				Projections.bean(
+						GroupDetails.class,
+						qAddressGroup.groupId.as("groupID"),
+						qAddressGroup.groupName,
+						qAddressGroup.groupImg,
+						qAddressGroup.groupDesc
+						)
+				)
+		.from(qAddressGroup)
+		.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+		
 		if (gd != null && !gd.getGroupID().equals("")) {
-			List<User> lu = new ArrayList<User>();
 			List<Map> lm = new ArrayList<Map>();
-			lu = groupDao.selectGroupUserBygroupID(groupID);
+			QUser qUser = QUser.user;
+			QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+			QUserNewAssistDsl qUserNewAssistDsl = QUserNewAssistDsl.userNewAssistDsl;
+			
+			List<User> lu = queryFactory.select(
+					Projections.bean(
+							User.class,
+							qUser.userID,
+							qUser.userName,
+							new CaseBuilder()
+								.when(qUserNewAssistDsl.portrait_url.isNull())
+								.then(qUser.userPic)
+								.otherwise(qUserNewAssistDsl.portrait_url).as("userPic")
+							)
+					)
+					.from(qAddressGroupUser)
+					.leftJoin(qUser).on(qAddressGroupUser.groupUser.eq(qUser.userID))
+					.leftJoin(qUserNewAssistDsl).on(qUserNewAssistDsl.userid.eq(qUser.userID))
+					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
 			if (lu.size() > 0) {
 				for (int i = 0; i < lu.size(); i++) {
 					User u = (User) lu.get(i);
