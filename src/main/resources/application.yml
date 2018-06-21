@@ -2,8 +2,15 @@
 spring:
   profiles:
     active: test
+  http:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
 
 server:
   port: 8866
   servlet:
     path: /app-addresslist
+  tomcat:
+    uri-encoding: UTF-8
