@@ -1,22 +1,24 @@
 package com.lin.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.AddressInfLogDsl;
-import com.lin.domain.QAddressInfLogDsl;
-import com.lin.repository.AddressInfLogRepository;
-import com.lin.util.JsonUtil;
-import com.lin.util.Result;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.util.Calendar;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
-import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ideal.wheel.common.AbstractService;
+import com.lin.domain.AddressInfLog;
+import com.lin.domain.QAddressInfLog;
+import com.lin.repository.AddressInfLogRepository;
+import com.lin.util.JsonUtil;
+import com.lin.util.Result;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 
 /**
@@ -25,7 +27,7 @@ import java.util.List;
  * @date 2017年8月20日
  */
 @Service("addressInfLogServiceDsl")
-public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogDsl,String> {
+public class AddressInfLogServiceImpl extends AbstractService<AddressInfLog,String> {
 
 	@Autowired
 	private AddressInfLogRepository repository;
@@ -42,7 +44,7 @@ public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogDs
 	}
 
 	@Autowired
-	public AddressInfLogServiceDslImpl(AddressInfLogRepository repository){
+	public AddressInfLogServiceImpl(AddressInfLogRepository repository){
 		super(repository);
 	}
 
@@ -53,8 +55,8 @@ public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogDs
 
 
 	@Override
-	public List<AddressInfLogDsl> findByIds(String... strings) {
-		QAddressInfLogDsl inflog = QAddressInfLogDsl.addressInfLogDsl;
+	public List<AddressInfLog> findByIds(String... strings) {
+		QAddressInfLog inflog = QAddressInfLog.addressInfLog;
 		JPAQueryFactory query = jpaQueryFactory();
 		return query.select(inflog).from(inflog).where(inflog.addName.in(strings)).fetch();
 	}
@@ -64,7 +66,7 @@ public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogDs
 	 * @param log
 	 * @param respJson
 	 */
-	public void saveAddressInfLog(AddressInfLogDsl log, Result respJson) {
+	public void saveAddressInfLog(AddressInfLog log, Result respJson) {
 		String Json = null;
 		try {
 			if(null == respJson){
@@ -90,10 +92,11 @@ public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogDs
 	 * @param infName
 	 * @return
 	 */
-	public AddressInfLogDsl getInfLog(HttpServletRequest req, String infName) {
-		AddressInfLogDsl log = new AddressInfLogDsl();
+	public AddressInfLog getInfLog(HttpServletRequest req, String infName) {
+		AddressInfLog log = new AddressInfLog();
 		log.setAddName(infName);
 		log.setCreateDate(Calendar.getInstance().getTime());
+		log.setRowID(seqLong());
 		if(null == req ){
 			log.setReqJson("test");
 		}else{
@@ -102,6 +105,18 @@ public class AddressInfLogServiceDslImpl extends AbstractService<AddressInfLogDs
 		return log;
 	}
 
+		private int seqLong (){
+	  		List list = entityManager.createNativeQuery("select appuser.seq_app_addressinflog.nextval from dual").getResultList();
+			return Integer.parseInt(list.get(0).toString());
+		}
 
+	public void saveError(Exception e,AddressInfLog log){
+		Result result = new Result();
+		result.setRespCode("2");
+		result.setRespDesc("失败");
+		result.setRespMsg("");
+		log.setExpError(e.toString());
+		saveAddressInfLog(log,result);
+	}
 
 }

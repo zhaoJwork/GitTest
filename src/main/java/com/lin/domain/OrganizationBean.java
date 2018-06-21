@@ -6,7 +6,7 @@ package com.lin.domain;
  * @author zhangWeiJie
  * @date 2017年8月19日
  */
-public class Organization implements Comparable<Organization> {
+public class OrganizationBean implements Comparable<OrganizationBean> {
 
 	// 部门ID
 	private String organizationID;
@@ -102,7 +102,7 @@ public class Organization implements Comparable<Organization> {
 	}
 
 	@Override
-	public int compareTo(Organization o) {
+	public int compareTo(OrganizationBean o) {
 		int thisZ = this.orderValue;
 		
 		int paraZ = o.getOrderValue();
@@ -117,7 +117,7 @@ public class Organization implements Comparable<Organization> {
 	}
 
 	/*@Override
-	public int compareTo(Organization o) {
+	public int compareTo(OrganizationBean o) {
 		String thisZ = this.zimuname;
 		if (thisZ == null) {
 			thisZ = "";

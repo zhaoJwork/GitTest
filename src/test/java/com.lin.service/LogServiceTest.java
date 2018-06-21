@@ -1,8 +1,5 @@
 package com.lin.service;
 
-import com.lin.domain.AddressInfLogDsl;
-import com.lin.domain.User;
-import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
+import com.lin.domain.AddressInfLog;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -19,10 +16,10 @@ import java.util.List;
 public class LogServiceTest {
 
   @Autowired
-  private AddressInfLogServiceDslImpl logServiceDsl;
+  private AddressInfLogServiceImpl logService;
   @Test
   public void testLoad(){
-    AddressInfLogDsl log =  logServiceDsl.getInfLog(null,"测试");
-    logServiceDsl.saveAddressInfLog(log,null);
+    AddressInfLog log =  logService.getInfLog(null,"测试");
+    logService.saveAddressInfLog(log,null);
   }
 }

@@ -1,7 +1,6 @@
 package com.lin.service;
 
 import com.lin.domain.OrganizationDsl;
-import com.lin.domain.User;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -19,7 +18,7 @@ import java.util.List;
 public class OrganizationServiceTest {
 
   @Autowired
-  private OrganizationServiceDslImpl organizationServiceDsl;
+  private OrganizationServiceImpl organizationServiceDsl;
 
   /**
    * 测试按上一级查询组织部门

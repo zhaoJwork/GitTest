@@ -3,6 +3,7 @@ package com.lin.service;
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.UserRepository;
+import com.lin.vo.UserDetailsVo;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import org.springframework.util.Assert;
 
 /**
  * 功能概要：UserService接口类
@@ -26,6 +27,8 @@ public class UserService extends AbstractService<User,String> {
 	public UserService(UserRepository userRepository){
 		super(userRepository);
 	}
+
+	@Deprecated
 	@Override
 	public long deleteByIds(String... strings) {
 		return 0;
@@ -33,9 +36,9 @@ public class UserService extends AbstractService<User,String> {
 
 	@Override
 	public List<User> findByIds(String... strings) {
+		Assert.isNull(strings,"主键列表不能为空");
 		QUser user = QUser.user;
 		JPAQueryFactory query = jpaQueryFactory();
-
 		return query.select(user).from(user).where(user.userID.in(strings)).fetch();
 	}
 
@@ -44,19 +47,19 @@ public class UserService extends AbstractService<User,String> {
 	 * @param userID
 	 * @return
 	 */
-	public UserDetailsDsl selectUserDetails(String loginID ,String userID){
+	public UserDetailsVo selectUserDetails(String loginID , String userID){
 		QUser user = QUser.user;
 		QUserNewAssistDsl uass = QUserNewAssistDsl.userNewAssistDsl;
 		QPositionDsl posDsl = QPositionDsl.positionDsl;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QAddressCollection coll = QAddressCollection.addressCollection;
 		QAddressBanned ban = QAddressBanned.addressBanned;
-		QContextDsl context = QContextDsl.contextDsl;
-		QUserContextDsl userContext = QUserContextDsl.userContextDsl;
-		QFieldDsl field = QFieldDsl.fieldDsl;
-		QUserFieldDsl userField = QUserFieldDsl.userFieldDsl;
+		QContext context = QContext.context;
+		QUserContext userContext = QUserContext.userContext;
+		QField field = QField.field;
+		QUserField userField = QUserField.userField;
 
-        UserDetailsDsl userDetailsDsl =  jpaQueryFactory().select(Projections.bean(UserDetailsDsl.class,
+        UserDetailsVo userDetailsDsl =  jpaQueryFactory().select(Projections.bean(UserDetailsVo.class,
 				user.userID,
 				user.userName,
 				new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(user.userPic).otherwise(uass.portrait_url).as("userPic"),
@@ -64,7 +67,7 @@ public class UserService extends AbstractService<User,String> {
 				organ.organizationName,
 				user.post.as("postID"),
 				posDsl.posName.as("postName"),
-				user.phone.as("phone"),
+				user.phone,
 				user.email.as("email"),
 				user.address.as("address"),
 				user.context.as("contexts"),
@@ -102,7 +105,7 @@ public class UserService extends AbstractService<User,String> {
         ////是否被收藏    collection  1 是 0 否
         Long collection = jpaQueryFactory().select(coll.count()).from(coll)
                 .where(coll.collectionLoginId.eq(Integer.parseInt(loginID)).and(coll.collectionUserId.eq(Integer.parseInt(userID))).and(coll.type.eq(1)
-                        .and(coll.collectionType.eq(1).and(coll.source.eq(1))))).fetchOne();
+                        .and(coll.collectionType.eq(1)))).fetchOne();
         userDetailsDsl.setCollection(collection+"");
         ////禁言状态       talkStatus 1 是 0 否
         Long talkStatus = jpaQueryFactory().select(ban.count()).from(ban)

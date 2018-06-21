@@ -11,30 +11,30 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户与工作内容关联
+ * 工作内容实体类
  * @author lwz
  * @date 2018.6.13
  */
 
-@ApiModel(value = "UserContextDsl", description = "用户与工作内容表")
+@ApiModel(value = "Context", description = "工作内容表")
 @Entity
 @Table(name = "address_user_work")
-public class UserContextDsl implements Serializable {
+public class Context implements Serializable {
 
   @ApiModelProperty(value = "主键")
   @Id
   @Column(name = "ROW_ID")
   private String rowId;
 	/**
-	 * 用户ID
-	 */
-  @Column(name = "USER_ID")
-	private String userID;
-	/**
 	 * 工作内容ID
 	 */
-	@Column(name = "WORK_ID")
+  @Column(name = "WORK_ID")
 	private String workID;
+	/**
+	 * 工作内容
+	 */
+	@Column(name = "WORK_NAME")
+	private String workName;
 	/**
 	 * 时间
 	 */
@@ -49,20 +49,20 @@ public class UserContextDsl implements Serializable {
 		this.rowId = rowId;
 	}
 
-	public String getUserID() {
-		return userID;
-	}
-
-	public void setUserID(String userID) {
-		this.userID = userID;
-	}
-
 	public String getWorkID() {
 		return workID;
 	}
 
 	public void setWorkID(String workID) {
 		this.workID = workID;
+	}
+
+	public String getWorkName() {
+		return workName;
+	}
+
+	public void setWorkName(String workName) {
+		this.workName = workName;
 	}
 
 	public Date getCreateDate() {

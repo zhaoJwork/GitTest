@@ -8,11 +8,18 @@ import com.lin.service.RedisServiceI;
 import com.lin.service.UserServiceI;
 import com.lin.util.JedisKey;
 import com.lin.util.JsonUtil;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 
 /**
  * TODO
@@ -30,6 +37,18 @@ public class UserServiceImpl implements UserServiceI {
 
 	@Autowired
 	private RedisServiceI jedisService;
+	
+	// mapper映射文件改为jpa+querydsl
+	@Autowired
+    private EntityManager entityManager;
+	
+	private JPAQueryFactory queryFactory;  
+    
+    @PostConstruct  
+    public void init() {  
+       queryFactory = new JPAQueryFactory(entityManager);  
+    }
+	
 	
 	@Override
 	public List<User> selectUserByFilter(HashMap<String, Object> paras) {
@@ -134,7 +153,37 @@ public class UserServiceImpl implements UserServiceI {
 	
 	@Override
 	public UserDetails SelectUserDetails(String userID) {
-		return userDao.SelectUserDetails(userID);
+		QUser qUser = QUser.user;
+		QOrganizationDsl qOrganizationDsl = QOrganizationDsl.organizationDsl;
+		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
+		QUserNewAssistDsl qUserNewAssistDsl = QUserNewAssistDsl.userNewAssistDsl;
+		
+		return queryFactory.select(
+				Projections.bean(
+						UserDetails.class,
+						qUser.userID,
+						qUser.userName,
+						new CaseBuilder()
+							.when(qUserNewAssistDsl.portrait_url.isNull())
+							.then(qUser.userPic)
+							.otherwise(qUserNewAssistDsl.portrait_url).as("userPic"),
+						qUser.organizationID,
+						qOrganizationDsl.organizationName,
+						qPositionDsl.posName.as("PostName"),
+						qUser.post.as("postID"),
+						qUser.phone,
+						qUser.email,
+						qUser.address,
+						qUser.context.as("contexts"),
+						qUser.field.as("fields"),
+						qUser.install
+						)
+				)
+		.from(qUser)
+		.leftJoin(qOrganizationDsl).on(qOrganizationDsl.organizationID.eq(qUser.organizationID))
+		.leftJoin(qPositionDsl).on(qPositionDsl.posId.eq(qUser.post))
+		.leftJoin(qUserNewAssistDsl).on(qUserNewAssistDsl.userid.eq(qUser.userID))
+		.where(qUser.userID.eq(userID)).fetchOne();
 	}
 
 	/**

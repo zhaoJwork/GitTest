@@ -26,7 +26,7 @@ public class JacksonConfig {
     objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {
       @Override
       public void serialize(Object o, JsonGenerator jsonGenerator,
-          SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
+          SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeString("");
       }
     });

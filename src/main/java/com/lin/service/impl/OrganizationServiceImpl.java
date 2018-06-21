@@ -1,6 +1,7 @@
 package com.lin.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.lin.domain.OrganizationBean;
 import com.lin.util.JsonUtil;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import com.lin.mapper.OrganizationMapper;
 import com.lin.domain.OrgTer;
-import com.lin.domain.Organization;
 import com.lin.service.OrganizationServiceI;
 import com.lin.service.RedisServiceI;
 import com.lin.util.JedisKey;
@@ -65,9 +65,9 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 					if (redisOrganization == null || redisOrganization.size() == 0) {// 缓存中不存在
 						organizationMap.put("name", "up");
 						organizationMap.put("organizationDate", sdf.format(d));
-						List<Organization> organizationList = organizationDao.organizationByPID(organizationID);
+						List<OrganizationBean> organizationList = organizationDao.organizationByPID(organizationID);
 						Map<String, String> map = new LinkedHashMap<String, String>();
-						for (Organization o : organizationList) {
+						for (OrganizationBean o : organizationList) {
 							map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 						}
 						if (map.size() > 0) {
@@ -78,10 +78,10 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						}
 					} else {
 						// 存在 则为首次同步数据 返回全部
-						List<Organization> list = new ArrayList<Organization>();
-						Organization ooo = new Organization();
+						List<OrganizationBean> list = new ArrayList<OrganizationBean>();
+						OrganizationBean ooo = new OrganizationBean();
 						for (Object re : redisOrganization) {
-							Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
+							OrganizationBean organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 							list.add(organization);
 						}
 						Collections.sort(list);
@@ -226,9 +226,9 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						jedisTime = jedisService.getValue(JedisKey.ZJORGANIZATIONKEY_DATE);
 					}
 					if (redisOrganization == null || redisOrganization.size() == 0) {// 缓存中不存在
-						List<Organization> organizationList = organizationDao.downOrganization(organizationID);
+						List<OrganizationBean> organizationList = organizationDao.downOrganization(organizationID);
 						Map<String, String> map = new LinkedHashMap<String, String>();
-						for (Organization o : organizationList) {
+						for (OrganizationBean o : organizationList) {
 							map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 						}
 						if (map.size() > 0) {
@@ -370,10 +370,10 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 							organizationMap.put("organizationList", organizationList);
 						}
 					} else {// 存在 则为首次同步数据 返回全部
-						List<Organization> list = new ArrayList<Organization>();
-						Organization ooo = new Organization();
+						List<OrganizationBean> list = new ArrayList<OrganizationBean>();
+						OrganizationBean ooo = new OrganizationBean();
 						for (Object re : redisOrganization) {
-							Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
+							OrganizationBean organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 							list.add(organization);
 						}
 						Collections.sort(list);
@@ -392,9 +392,9 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 					if (redisOrganization == null || redisOrganization.size() == 0) {// 缓存中不存在
 						organizationMap.put("name", "up");
 						organizationMap.put("organizationDate", sdf.format(d));
-						List<Organization> organizationList = organizationDao.organizationByPID(organizationID);
+						List<OrganizationBean> organizationList = organizationDao.organizationByPID(organizationID);
 						Map<String, String> map = new LinkedHashMap<String, String>();
-						for (Organization o : organizationList) {
+						for (OrganizationBean o : organizationList) {
 							map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 						}
 						if (map.size() > 0) {
@@ -405,10 +405,10 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						}
 					} else {
 						// 存在 则为首次同步数据 返回全部
-						List<Organization> list = new ArrayList<Organization>();
-						Organization ooo = new Organization();
+						List<OrganizationBean> list = new ArrayList<OrganizationBean>();
+						OrganizationBean ooo = new OrganizationBean();
 						for (Object re : redisOrganization) {
-							Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
+							OrganizationBean organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 							list.add(organization);
 						}
 						Collections.sort(list);
@@ -552,9 +552,9 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 					jedisTime = jedisService.getValue(JedisKey.ZJORGANIZATIONKEY_DATE);
 				}
 				if (redisOrganization == null || redisOrganization.size() == 0) {// 缓存中不存在
-					List<Organization> organizationList = organizationDao.downOrganization(organizationID);
+					List<OrganizationBean> organizationList = organizationDao.downOrganization(organizationID);
 					Map<String, String> map = new LinkedHashMap<String, String>();
-					for (Organization o : organizationList) {
+					for (OrganizationBean o : organizationList) {
 						map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 					}
 					if (map.size() > 0) {
@@ -700,10 +700,10 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 						organizationMap.put("name", "up");
 						jedisTime = jedisService.getValue(JedisKey.UPORGANIZATIONKEY_DATE);
 						redisOrganization = jedisService.values(JedisKey.UPORGANIZATIONKEY);
-						List<Organization> list = new ArrayList<Organization>();
-						Organization ooo = new Organization();
+						List<OrganizationBean> list = new ArrayList<OrganizationBean>();
+						OrganizationBean ooo = new OrganizationBean();
 						for (Object re : redisOrganization) {
-							Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
+							OrganizationBean organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 							list.add(organization);
 						}
 						Collections.sort(list);
@@ -876,14 +876,14 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 							jedisTime = jedisService.getValue(JedisKey.ZJORGANIZATIONKEY_DATE);
 						}
 						if (sdf.parse(jedisTime).getTime() - sdf.parse(orgtreeDate).getTime() <= 0) {// 时间相等，没有需要更新的数据
-							List<Organization> list = new ArrayList<Organization>();
+							List<OrganizationBean> list = new ArrayList<OrganizationBean>();
 							organizationMap.put("organizationList", list);
 							organizationMap.put("organizationDate", orgtreeDate);
 						} else {
-							List<Organization> list = new ArrayList<Organization>();
-							Organization ooo = new Organization();
+							List<OrganizationBean> list = new ArrayList<OrganizationBean>();
+							OrganizationBean ooo = new OrganizationBean();
 							for (Object re : redisOrganization) {
-								Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
+								OrganizationBean organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 								list.add(organization);
 							}
 							Collections.sort(list);
@@ -948,7 +948,7 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 	 * @param organid
 	 * @return
 	 */
-	public Organization getOrganizationByOrganid(String organid) {
+	public OrganizationBean getOrganizationByOrganid(String organid) {
 		return organizationDao.getOrganizationByOrganid(organid);
 	}
 
@@ -964,9 +964,9 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 		List<Object> redisOrganization = jedisService.values(JedisKey.FIVEORGANIZATIONKEY);
 		// 缓存中不存在
 		if (redisOrganization == null || redisOrganization.size() == 0) {
-			List<Organization> organizationList = organizationDao.fiveCityOrganization(loginID);
+			List<OrganizationBean> organizationList = organizationDao.fiveCityOrganization(loginID);
 			Map<String, String> map = new LinkedHashMap<String, String>();
-			for (Organization o : organizationList) {
+			for (OrganizationBean o : organizationList) {
 				try {
 					map.put(o.getOrganizationID(), JsonUtil.toJson(o));
 				} catch (JsonProcessingException e) {
@@ -979,10 +979,10 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 				organizationMap.put("organizationList", organizationList);
 			}
 		} else {// 存在 则为首次同步数据 返回全部
-			List<Organization> list = new ArrayList<Organization>();
-			Organization ooo = new Organization();
+			List<OrganizationBean> list = new ArrayList<OrganizationBean>();
+			OrganizationBean ooo = new OrganizationBean();
 			for (Object re : redisOrganization) {
-				Organization organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
+				OrganizationBean organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
 				list.add(organization);
 			}
 			Collections.sort(list);

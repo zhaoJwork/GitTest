@@ -1,10 +1,11 @@
 package com.lin.controller;
 
 import com.lin.domain.*;
-import com.lin.service.AddressInfLogServiceDslImpl;
-import com.lin.service.OrganizationServiceDslImpl;
+import com.lin.service.AddressInfLogServiceImpl;
+import com.lin.service.OrganizationServiceImpl;
 import com.lin.service.UserService;
 import com.lin.util.Result;
+import com.lin.vo.UserDetailsVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,9 @@ import java.util.Map;
 public class CommunicationDslController {
 
     @Autowired
-    private OrganizationServiceDslImpl organizationServiceDslImpl;
+    private OrganizationServiceImpl organizationServiceDslImpl;
     @Autowired
-    private AddressInfLogServiceDslImpl logServiceDsl;
+    private AddressInfLogServiceImpl logServiceDsl;
     @Autowired
     private UserService userService;
     /**
@@ -45,8 +46,14 @@ public class CommunicationDslController {
     @GetMapping("organizationlist")
     @ResponseBody
     public Result organizationlist(HttpServletRequest req, OrganizationDsl organ,String loginID) {
-        AddressInfLogDsl log =  logServiceDsl.getInfLog(req,"组织部门");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"组织部门");
         Result result = new Result();
+        if (null == loginID || "".equals(loginID)) {
+            result.setRespCode("2");
+            result.setRespDesc("loginID 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
         try {
             List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
             Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
@@ -77,7 +84,7 @@ public class CommunicationDslController {
     @RequestMapping("userdetails")
     @ResponseBody
     public Result userdetails(HttpServletRequest req, String loginID, String userID) {
-        AddressInfLogDsl log =  logServiceDsl.getInfLog(req,"个人详情");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"个人详情");
         Result result = new Result();
         if (null == loginID  || "".equals(loginID.trim())) {
             result.setRespCode("2");
@@ -92,7 +99,7 @@ public class CommunicationDslController {
             return result;
         }else{
             try {
-            UserDetailsDsl uu = userService.selectUserDetails(loginID,userID);
+            UserDetailsVo uu = userService.selectUserDetails(loginID,userID);
             if(null == uu){
                 result.setRespCode("2");
                 result.setRespDesc("该用户不在通讯录中,暂不提供人员信息");

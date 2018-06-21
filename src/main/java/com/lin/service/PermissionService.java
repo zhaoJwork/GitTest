@@ -1,41 +1,7 @@
 package com.lin.service;
 
-import java.text.ParseException;
-import java.text.ParsePosition;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.AddressBanned;
-import com.lin.domain.AddressCollection;
-import com.lin.domain.AutoCollection;
-import com.lin.domain.ContextDsl;
-import com.lin.domain.ContextVo;
-import com.lin.domain.QAddressBanned;
-import com.lin.domain.QAddressCollection;
-import com.lin.domain.QContextDsl;
-import com.lin.domain.QFieldDsl;
-import com.lin.domain.QOrganizationDsl;
-import com.lin.domain.QPositionDsl;
-import com.lin.domain.QUser;
-import com.lin.domain.QUserContextDsl;
-import com.lin.domain.QUserFieldDsl;
-import com.lin.domain.QUserNewAssistDsl;
-import com.lin.domain.User;
+import com.lin.domain.*;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressCollectionRepository;
 import com.lin.repository.UserRepository;
@@ -43,11 +9,19 @@ import com.lin.util.Result;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javafx.beans.binding.MapExpression;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 
 /**
  * 
@@ -535,42 +509,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 //		迪科接口 
 //		list 返回收藏 
 		
-		/*select ac.work_id contextID, ac.work_name context, decode(t.wid, '', '2', '1') flag " +
-		"  from appuser.address_work_content ac " +
-		"  left join (select ac.work_id wid " +
-		"               from appuser.address_work_content ac " +
-		"               left join appuser.address_user_work aw " +
-		"                 on aw.work_id = ac.work_id " +
-		"              where aw.user_id = ? ) t " +
-		"    on t.wid = ac.work_id
 		
-*/		
-		/*QAddressBanned ban = QAddressBanned.addressBanned;
-		QContextDsl context = QContextDsl.contextDsl;
-		QUserContextDsl userContext = QUserContextDsl.userContextDsl;
-		QFieldDsl field = QFieldDsl.fieldDsl;
-		QUserFieldDsl userField = QUserFieldDsl.userFieldDsl;
-//		Root<ContextVo> root = queryFactory.from(ContextVo.class);
-		queryFactory.select(Projections.bean(ContextVo.class,
-				context.workID.as("content"), context.workName.as("context")
-//				new CaseBuilder()
-//					.when(b)
-				))
-		.from(context)
-		.leftJoin(JPAExpressions.select(context.workID.as("wid")).from(context)
-				.leftJoin(userContext).on(context.workID.eq(userContext.workID))
-				.where(userContext.userID.eq(""))
-				)*/
-		// 查询语句构建工厂
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		// 条件查询语句且指定查询返回结果  select * 
-		CriteriaQuery<ContextVo> query = builder.createQuery(ContextVo.class);
-		Root<ContextVo> from = query.from(ContextVo.class);
-		query.select(from);
 		
-		// 子查询语句
-		Subquery<ContextDsl> subquery = query.subquery(ContextDsl.class);
-//		from.join("appuser.address_user_work").on(restriction)
+		
 		
 	}
 
