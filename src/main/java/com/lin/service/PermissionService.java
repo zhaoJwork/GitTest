@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static javafx.scene.input.KeyCode.Q;
+
 
 /**
  * 
@@ -504,37 +506,62 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
-		
-	/*	List<AutoCollectionVo> fetch = queryFactory.select(Projections.bean(AutoCollectionVo.class,
-				qAddressCollection.rowId,qAddressCollection.source,
-				qUser.userID,qUser.userName,qUser.provinceID,qUser.phone,
-				qUser.email,qUser.address,qUser.organizationID,
+		QAddressColAuxiliary auxiliary = QAddressColAuxiliary.addressColAuxiliary;
+		List<AutoCollectionVo> fetch = queryFactory.select(Projections.bean(AutoCollectionVo.class,
+				qAddressCollection.rowId,
+				qAddressCollection.source,
+				qUser.userID,
+				qUser.userName,
+				qUser.provinceID,
+				qUser.phone,
+				qUser.email,
+				qUser.address,
+				qUser.organizationID,
 				new CaseBuilder()
 					.when(uass.portrait_url.isNull())
 					.then(qUser.userPic)
 					.otherwise(uass.portrait_url).as("userPic"),
-				qUser.type,qUser.context, qUser.field,qPositionDsl.posName,
-				qUser.deptype,qUser.quanPin,qUser.shouZiMu,qUser.hytAccount,
-				qUser.crmAccount,qUser.flagOnline,qUser.sortNum,
-				qUser.orderNum,uass.install
+				qPositionDsl.posName,
+				qUser.deptype,
+				qUser.quanPin,
+				qUser.shouZiMu,
+				qUser.hytAccount,
+				qUser.crmAccount,
+				qUser.flagOnline,
+				uass.install,
+				qAddressCollection.collectionUserId.as("colAuxContactID"),
+				auxiliary.name.as("colAuxContactName"),
+				auxiliary.mobile.as("colAuxContactMobile"),
+				auxiliary.quanPin.as("colAuxQanPin"),
+				auxiliary.shouZiMu.as("colAuxShouZiMu")
 				))
 		.from(qAddressCollection)
 		.leftJoin(qUser).on(qUser.userID.eq(qAddressCollection.collectionUserId.stringValue()))
 		.leftJoin(qPositionDsl).on(qUser.post.eq(qPositionDsl.posId))
 		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
-		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId))).fetch();
+		.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
+		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)))
+		.orderBy(auxiliary.shouZiMu.asc()).fetch();
 		
 //		source 客户  cust_id
-		for (AutoCollection autoCollection : fetch) {
-			System.out.println(autoCollection);
-		}*/
+		String custIDs = "";
+		for (AutoCollectionVo autoCollection : fetch) {
+			if(2 == autoCollection.getSource()){
+				custIDs += autoCollection.getColAuxContactID()+";";
+			}
+		}
+		custIDs = custIDs.substring(0,custIDs.length());
+
 //		迪科接口 
 //		list 返回收藏 
-		
-		
-		
-		
-		
+
+//		根据迪克数据封装返回值
+
+//		手机号变更更新appuser.ADDRESS_COLAUXILIARY ;
+
+		result.setRespCode("1");
+		result.setRespDesc("正常返回数据");
+		result.setRespMsg(fetch);
 	}
 
 
