@@ -15,10 +15,10 @@ import java.io.Serializable;
  * @date 2018.6.13
  */
 
-@ApiModel(value = "UserNewAssistDsl", description = "用户辅助表")
+@ApiModel(value = "UserNewAssist", description = "用户辅助表")
 @Entity
 @Table(name = "address_user_new")
-public class UserNewAssistDsl implements Serializable {
+public class UserNewAssist implements Serializable {
 
   @ApiModelProperty(value = "主键")
   @Id

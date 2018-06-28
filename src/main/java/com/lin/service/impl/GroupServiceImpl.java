@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 
+import com.lin.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,16 +20,6 @@ import org.springframework.stereotype.Service;
 import com.lin.mapper.GroupMapper;
 import com.lin.mapper.UtilMapper;
 import com.lin.repository.AddressGroupRepository;
-import com.lin.domain.AddressGroup;
-import com.lin.domain.Group;
-import com.lin.domain.GroupBean;
-import com.lin.domain.GroupDetails;
-import com.lin.domain.GroupUserBean;
-import com.lin.domain.QAddressGroup;
-import com.lin.domain.QAddressGroupUser;
-import com.lin.domain.QUser;
-import com.lin.domain.QUserNewAssistDsl;
-import com.lin.domain.User;
 import com.lin.service.GroupServiceI;
 import com.lin.util.ImageUtil;
 import com.querydsl.core.types.Projections;
@@ -236,12 +227,20 @@ public class GroupServiceImpl implements GroupServiceI {
 						for (int i = 0; i < userID.length; i++) {
 							GroupUserBean gu = new GroupUserBean();
 							String uid = userID[i];
-							if(groupUsers.indexOf(uid) < 0){
+							if(null == groupUsers || "".equals(groupUsers)){
 								String rowID = utilDao.getSeqAppGourpUser();
 								gu.setRowID(rowID);
 								gu.setGroupID(groupID);
 								gu.setGroupUser(uid);
 								listGU.add(gu);
+							}else {
+								if(groupUsers.indexOf(uid) < 0){
+									String rowID = utilDao.getSeqAppGourpUser();
+									gu.setRowID(rowID);
+									gu.setGroupID(groupID);
+									gu.setGroupUser(uid);
+									listGU.add(gu);
+								}
 							}
 						}
 						groupDao.saveGroupUser(listGU);
@@ -349,7 +348,7 @@ public class GroupServiceImpl implements GroupServiceI {
 			List<Map> lm = new ArrayList<Map>();
 			QUser qUser = QUser.user;
 			QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
-			QUserNewAssistDsl qUserNewAssistDsl = QUserNewAssistDsl.userNewAssistDsl;
+			QUserNewAssist qUserNewAssist = QUserNewAssist.userNewAssist;
 			
 			List<User> lu = queryFactory.select(
 					Projections.bean(
@@ -357,14 +356,14 @@ public class GroupServiceImpl implements GroupServiceI {
 							qUser.userID,
 							qUser.userName,
 							new CaseBuilder()
-								.when(qUserNewAssistDsl.portrait_url.isNull())
+								.when(qUserNewAssist.portrait_url.isNull())
 								.then(qUser.userPic)
-								.otherwise(qUserNewAssistDsl.portrait_url).as("userPic")
+								.otherwise(qUserNewAssist.portrait_url).as("userPic")
 							)
 					)
 					.from(qAddressGroupUser)
 					.leftJoin(qUser).on(qAddressGroupUser.groupUser.eq(qUser.userID))
-					.leftJoin(qUserNewAssistDsl).on(qUserNewAssistDsl.userid.eq(qUser.userID))
+					.leftJoin(qUserNewAssist).on(qUserNewAssist.userid.eq(qUser.userID))
 					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
 			if (lu.size() > 0) {
 				for (int i = 0; i < lu.size(); i++) {
