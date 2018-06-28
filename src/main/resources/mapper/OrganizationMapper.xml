@@ -39,12 +39,7 @@
 	<select id="selectOrgName" parameterType="java.lang.String"
 		resultMap="OrganzResul">
 		    select organ_id, organ_name
-      from (select decode(o.organ_id,
-                          '1844641',
-                          '1944640',
-                          '1844643',
-                          '1950134',
-                          o.organ_id) organ_id,
+      from (select o.organ_id,
                    o.organ_name
               from appuser.address_organization o
              where o.pid = '0'
@@ -52,15 +47,6 @@
                       from appuser.address_blackorglist b
                      where b.org_id = o.organ_id)
              order by org_order)
-<!--      select organ_id,organ_name  from (
-		select o.organ_id,o.organ_name
-		  from appuser.address_organization o
-		 where o.pid = '0'
-		 and not exists (
-		      select 1 from appuser.address_blackorglist b
-		      where b.org_id = o.organ_id
-		) 
-		order by org_order) -->
 	</select>
 	
 	<!--查询领域  -->

@@ -156,7 +156,7 @@ public class UserServiceImpl implements UserServiceI {
 		QUser qUser = QUser.user;
 		QOrganizationDsl qOrganizationDsl = QOrganizationDsl.organizationDsl;
 		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
-		QUserNewAssistDsl qUserNewAssistDsl = QUserNewAssistDsl.userNewAssistDsl;
+		QUserNewAssist qUserNewAssist = QUserNewAssist.userNewAssist;
 		
 		return queryFactory.select(
 				Projections.bean(
@@ -164,9 +164,9 @@ public class UserServiceImpl implements UserServiceI {
 						qUser.userID,
 						qUser.userName,
 						new CaseBuilder()
-							.when(qUserNewAssistDsl.portrait_url.isNull())
+							.when(qUserNewAssist.portrait_url.isNull())
 							.then(qUser.userPic)
-							.otherwise(qUserNewAssistDsl.portrait_url).as("userPic"),
+							.otherwise(qUserNewAssist.portrait_url).as("userPic"),
 						qUser.organizationID,
 						qOrganizationDsl.organizationName,
 						qPositionDsl.posName.as("PostName"),
@@ -182,7 +182,7 @@ public class UserServiceImpl implements UserServiceI {
 		.from(qUser)
 		.leftJoin(qOrganizationDsl).on(qOrganizationDsl.organizationID.eq(qUser.organizationID))
 		.leftJoin(qPositionDsl).on(qPositionDsl.posId.eq(qUser.post))
-		.leftJoin(qUserNewAssistDsl).on(qUserNewAssistDsl.userid.eq(qUser.userID))
+		.leftJoin(qUserNewAssist).on(qUserNewAssist.userid.eq(qUser.userID))
 		.where(qUser.userID.eq(userID)).fetchOne();
 	}
 

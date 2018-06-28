@@ -2,6 +2,7 @@ package com.lin.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.lin.vo.AddressCollectionVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -310,7 +311,7 @@ public class PermissionController {
 	@ApiOperation(value="添加收藏",tags = {"2s"})
 	@ApiImplicitParam(name = "addressCollection", required = true, dataType = "AddressCollection")
 	@GetMapping("/addcollection")
-	public Result addCollection(HttpServletRequest req, AddressCollection addressCollection) {
+	public Result addCollection(HttpServletRequest req, AddressCollectionVo addressCollection) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加收藏");
 		Result result = new Result();
 		if(addressCollection == null) {
@@ -340,6 +341,24 @@ public class PermissionController {
 		if(addressCollection.getCollectionType() == null) {
 			result.setRespCode("2");
 			result.setRespDesc("collectionType 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(null == addressCollection.getSource()) {
+			result.setRespCode("2");
+			result.setRespDesc("source 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(null == addressCollection.getQuanPin()) {
+			result.setRespCode("2");
+			result.setRespDesc("quanPin 不能为空");
+			logService.saveAddressInfLog(log, result);
+			return result;
+		}
+		if(null == addressCollection.getShouZiMu()) {
+			result.setRespCode("2");
+			result.setRespDesc("shouZiMu 不能为空");
 			logService.saveAddressInfLog(log, result);
 			return result;
 		}
@@ -400,6 +419,7 @@ public class PermissionController {
 			logService.saveAddressInfLog(log, result);
 			return result;
 		}
+
 		try {
 			this.permissionService.cancelAddressCollection(addressCollection, result);
 		} catch (Exception e) {

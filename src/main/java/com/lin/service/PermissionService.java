@@ -3,9 +3,12 @@ package com.lin.service;
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.AddressBannedRepository;
+import com.lin.repository.AddressColAuxiliaryRepository;
 import com.lin.repository.AddressCollectionRepository;
 import com.lin.repository.UserRepository;
 import com.lin.util.Result;
+import com.lin.vo.AddressCollectionVo;
+import com.lin.vo.AutoCollectionVo;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -45,7 +48,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	
 	@Resource
 	private AddressCollectionRepository addressCollectionRepository;
-	
+
+	@Resource
+	private AddressColAuxiliaryRepository addressColAuxiliaryRepository;
 	@Autowired
     private EntityManager entityManager;
 	
@@ -345,23 +350,30 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 * @author liudongdong
 	 * @date 2018年6月7日
 	 */
-	public void addAddressCollection(AddressCollection addressCollection, Result result) {
+	public void addAddressCollection(AddressCollectionVo collectionVo, Result result) {
+		AddressCollection collection = new AddressCollection();
+		collection.setCollectionLoginId(collectionVo.getCollectionLoginId());
+		collection.setCollectionUserId(collectionVo.getCollectionUserId());
+		collection.setType(collectionVo.getType());
+		collection.setCollectionType(collectionVo.getCollectionType());
+		collection.setSource(collectionVo.getSource());
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
-		
+		QAddressColAuxiliary auxiliary = QAddressColAuxiliary.addressColAuxiliary;
 		Date date = Calendar.getInstance().getTime();
 		// 1收藏 2其它 默认0
-		if(addressCollection.getType().equals(1)) {
+		if(collection.getType().equals(1)) {
 			
 			// 1收藏  2取消收藏 0不处理
-			if(addressCollection.getCollectionType().equals(1)) {
-				BooleanExpression eq = qAddressCollection.collectionLoginId.eq(addressCollection.getCollectionLoginId())
-						.and(qAddressCollection.collectionUserId.eq(addressCollection.getCollectionUserId()));
+			if(collection.getCollectionType().equals(1)) {
+				BooleanExpression eq = qAddressCollection.collectionLoginId.eq(collection.getCollectionLoginId())
+						.and(qAddressCollection.collectionUserId.eq(collection.getCollectionUserId()));
 				Optional<AddressCollection> findOne = addressCollectionRepository.findOne(eq);
 				if("Optional.empty".equals(findOne.toString())) {
 					// 创建日期
-					addressCollection.setCollectionCreateDate(date);
+					collection.setCollectionCreateDate(date);
 					
-					AddressCollection save = addressCollectionRepository.save(addressCollection);
+					AddressCollection save = addressCollectionRepository.save(collection);
+					collectionVo.setRowId(save.getRowId());
 					if(save == null) {
 						result.setRespCode("2");
 						result.setRespDesc("收藏添加失败");
@@ -372,14 +384,15 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 						result.setRespMsg("1");
 					}
 				}else {
-					AddressCollection collection = findOne.get();
-					if(collection.getCollectionType().equals(2)) {
+					AddressCollection collectionOne = findOne.get();
+					if(collectionOne.getCollectionType().equals(2)) {
 						// 修改日期
-						collection.setCollectionUpdateDate(date);
+						collectionOne.setCollectionUpdateDate(date);
 						// 修改人为当前登录人
-						collection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
-						collection.setCollectionType(addressCollection.getCollectionType());
-						AddressCollection save = addressCollectionRepository.save(collection);
+						collectionOne.setCollectionUpdateBy(collection.getCollectionLoginId());
+						collectionOne.setCollectionType(collection.getCollectionType());
+						AddressCollection save = addressCollectionRepository.save(collectionOne);
+						collectionVo.setRowId(save.getRowId());
 						if(save == null) {
 							result.setRespCode("2");
 							result.setRespDesc("收藏修改失败");
@@ -396,8 +409,17 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 					}
 					
 				}
-				
-				
+
+				if("1".equals(result.getRespCode())){
+					AddressColAuxiliary auxVo = new AddressColAuxiliary();
+					auxVo.setRowId(collectionVo.getRowId());
+					addressColAuxiliaryRepository.delete(auxVo);
+					auxVo.setQuanPin(collectionVo.getQuanPin());
+					auxVo.setShouZiMu(collectionVo.getShouZiMu());
+					auxVo.setName(collectionVo.getName());
+					auxVo.setMobile(collectionVo.getMobile());
+					addressColAuxiliaryRepository.save(auxVo);
+				}
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("收藏操作失败");
@@ -480,10 +502,10 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	public void getCollectionList(String loginId, Result result) {
 		QUser qUser = QUser.user;
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
-		QUserNewAssistDsl uass = QUserNewAssistDsl.userNewAssistDsl;
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
 		
-		List<AutoCollection> fetch = queryFactory.select(Projections.bean(AutoCollection.class,
+	/*	List<AutoCollectionVo> fetch = queryFactory.select(Projections.bean(AutoCollectionVo.class,
 				qAddressCollection.rowId,qAddressCollection.source,
 				qUser.userID,qUser.userName,qUser.provinceID,qUser.phone,
 				qUser.email,qUser.address,qUser.organizationID,
@@ -505,7 +527,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 //		source 客户  cust_id
 		for (AutoCollection autoCollection : fetch) {
 			System.out.println(autoCollection);
-		}
+		}*/
 //		迪科接口 
 //		list 返回收藏 
 		
