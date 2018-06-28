@@ -14,6 +14,11 @@ public class AutoCollectionVo {
 
 	/**
 	 * address_collection
+	 *
+	 */
+	private Integer rowId;
+	/**
+	 * address_collection
 	 * 数据来源 1企业 2 客户
 	 */
 	private Integer source;
@@ -31,7 +36,7 @@ public class AutoCollectionVo {
 	 * address_user
 	 * 所在省
 	 */
-	private String provinceId;
+	private String provinceID;
 	/**
 	 * address_user
 	 * 电话
@@ -41,7 +46,7 @@ public class AutoCollectionVo {
 	 * address_user
 	 * 手机
 	 */
-	private String emaile;
+	private String email;
 	/**
 	 * address_user
 	 * 地址
@@ -51,7 +56,7 @@ public class AutoCollectionVo {
 	 * address_user
 	 * 部门
 	 */
-	private String organizationId;
+	private String organizationID;
 	/**
 	 * address_user
 	 * 图片
@@ -66,7 +71,7 @@ public class AutoCollectionVo {
 	 * address_user
 	 * 是否为领导
 	 */
-	private String positionype;
+	private String deptype;
 	/**
 	 * address_user
 	 * 全拼
