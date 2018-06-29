@@ -222,7 +222,8 @@ public class GroupServiceImpl implements GroupServiceI {
 					if (null != userIds && !"".equals(userIds)) {
 						String[] userID = userIds.split("_");
 						//不重复增加组人员
-						String groupUsers = groupDao.getGroupUserIDs(groupID);
+						String groupUsers = "";
+						groupUsers = groupDao.getGroupUserIDs(groupID);
 						List<GroupUserBean> listGU = new ArrayList<GroupUserBean>();
 						for (int i = 0; i < userID.length; i++) {
 							GroupUserBean gu = new GroupUserBean();

@@ -147,6 +147,168 @@ public class AutoCollectionVo {
 	 * 首字母
 	 */
 	private String colAuxShouZiMu;
+	public Integer getRowId() {
+		return rowId;
+	}
+	public void setRowId(Integer rowId) {
+		this.rowId = rowId;
+	}
+	public Integer getSource() {
+		return source;
+	}
+	public void setSource(Integer source) {
+		this.source = source;
+	}
+	public String getUserID() {
+		return userID;
+	}
+	public void setUserID(String userID) {
+		this.userID = userID;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public String getProvinceID() {
+		return provinceID;
+	}
+	public void setProvinceID(String provinceID) {
+		this.provinceID = provinceID;
+	}
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public String getOrganizationID() {
+		return organizationID;
+	}
+	public void setOrganizationID(String organizationID) {
+		this.organizationID = organizationID;
+	}
+	public String getUserPic() {
+		return userPic;
+	}
+	public void setUserPic(String userPic) {
+		this.userPic = userPic;
+	}
+	public String getPosName() {
+		return posName;
+	}
+	public void setPosName(String posName) {
+		this.posName = posName;
+	}
+	public String getDeptype() {
+		return deptype;
+	}
+	public void setDeptype(String deptype) {
+		this.deptype = deptype;
+	}
+	public String getQuanPin() {
+		return quanPin;
+	}
+	public void setQuanPin(String quanPin) {
+		this.quanPin = quanPin;
+	}
+	public String getShouZiMu() {
+		return shouZiMu;
+	}
+	public void setShouZiMu(String shouZiMu) {
+		this.shouZiMu = shouZiMu;
+	}
+	public String getHytAccount() {
+		return hytAccount;
+	}
+	public void setHytAccount(String hytAccount) {
+		this.hytAccount = hytAccount;
+	}
+	public String getCrmAccount() {
+		return crmAccount;
+	}
+	public void setCrmAccount(String crmAccount) {
+		this.crmAccount = crmAccount;
+	}
+	public String getFlagOnline() {
+		return flagOnline;
+	}
+	public void setFlagOnline(String flagOnline) {
+		this.flagOnline = flagOnline;
+	}
+	public Integer getInstall() {
+		return install;
+	}
+	public void setInstall(Integer install) {
+		this.install = install;
+	}
+	public Integer getColAuxContactID() {
+		return colAuxContactID;
+	}
+	public void setColAuxContactID(Integer colAuxContactID) {
+		this.colAuxContactID = colAuxContactID;
+	}
+	public String getColAuxContactName() {
+		return colAuxContactName;
+	}
+	public void setColAuxContactName(String colAuxContactName) {
+		this.colAuxContactName = colAuxContactName;
+	}
+	public String getColAuxContactMobile() {
+		return colAuxContactMobile;
+	}
+	public void setColAuxContactMobile(String colAuxContactMobile) {
+		this.colAuxContactMobile = colAuxContactMobile;
+	}
+	public String getColAuxContactEmail() {
+		return colAuxContactEmail;
+	}
+	public void setColAuxContactEmail(String colAuxContactEmail) {
+		this.colAuxContactEmail = colAuxContactEmail;
+	}
+	public String getColAuxContactDept() {
+		return colAuxContactDept;
+	}
+	public void setColAuxContactDept(String colAuxContactDept) {
+		this.colAuxContactDept = colAuxContactDept;
+	}
+	public String getColAuxContactPOST() {
+		return colAuxContactPOST;
+	}
+	public void setColAuxContactPOST(String colAuxContactPOST) {
+		this.colAuxContactPOST = colAuxContactPOST;
+	}
+	public String getColAuxImg() {
+		return colAuxImg;
+	}
+	public void setColAuxImg(String colAuxImg) {
+		this.colAuxImg = colAuxImg;
+	}
+	public String getColAuxQanPin() {
+		return colAuxQanPin;
+	}
+	public void setColAuxQanPin(String colAuxQanPin) {
+		this.colAuxQanPin = colAuxQanPin;
+	}
+	public String getColAuxShouZiMu() {
+		return colAuxShouZiMu;
+	}
+	public void setColAuxShouZiMu(String colAuxShouZiMu) {
+		this.colAuxShouZiMu = colAuxShouZiMu;
+	}
 
 
 

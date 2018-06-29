@@ -1,7 +1,32 @@
 package com.lin.service.impl;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.lin.domain.*;
+import com.lin.domain.ContextVo;
+import com.lin.domain.FieldVo;
+import com.lin.domain.Privilege;
+import com.lin.domain.QOrganizationDsl;
+import com.lin.domain.QPositionDsl;
+import com.lin.domain.QUser;
+import com.lin.domain.QUserNewAssist;
+import com.lin.domain.Role;
+import com.lin.domain.User;
+import com.lin.domain.UserDetails;
+import com.lin.domain.UserOrder;
+import com.lin.domain.UserPower;
 import com.lin.mapper.UserMapper;
 import com.lin.mapper.UtilMapper;
 import com.lin.service.RedisServiceI;
@@ -11,15 +36,6 @@ import com.lin.util.JsonUtil;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
 
 /**
  * TODO
@@ -298,9 +314,93 @@ public class UserServiceImpl implements UserServiceI {
 	public UserPower userPower(String userID){
 		UserPower up = new UserPower(); 
 		up  = userDao.userPower(userID);
+		
+		/*
+		 * select s.staff_id staff_id,
+		       s.staff_name staff_name,
+		       s.org_id org_id,
+		       jo.org_name org_name,
+		       s.department_id department_id,
+		       (select o.org_code
+		          from jtuser.organization o
+		         where o.org_id = s.department_id) department_code,
+		       (select o.org_name
+		          from jtuser.organization o
+		         where o.org_id = s.department_id) department_name,
+		       pic.pic_url pic_url,
+		       tcr.common_region_id region_id,
+		       tcr.region_name region_name
+		  from jtuser.staff s
+		  left join jtorder.staff_user_pic pic
+		    on pic.staff_id = s.staff_id
+		  join jtuser.organization jo
+		    on s.org_id = jo.org_id
+		  left join jtuser.common_region tcr
+		    on jo.common_region_id = tcr.common_region_id
+		 where s.staff_id = #{_parameter}
+		 */
+		/*QUserStaff qUserStaff = QUserStaff.userStaff;
+		QUserStaffPic qUserStaffPic = QUserStaffPic.userStaffPic;
+		QUserOrganization qUserOrganization = QUserOrganization.userOrganization;
+		QCommonRegion qCommonRegion = QCommonRegion.commonRegion;
+		
+		UserPower up = queryFactory.select(Projections.bean(
+				UserPower.class,
+				qUserStaff.staffID,
+				qUserStaff.staffName,
+				qUserStaff.orgID,
+				qUserOrganization.orgName,
+				qUserStaff.departmentID,
+				JPAExpressions.select(
+						qUserOrganization.orgCode.as("departmentCode")
+						)
+					.from(qUserOrganization)
+					.where(qUserOrganization.orgID.eq(qUserStaff.departmentID)),
+				JPAExpressions.select(
+						qUserOrganization.orgName.as("departmentName")
+						)
+					.from(qUserOrganization)
+					.where(qUserOrganization.orgID.eq(qUserStaff.departmentID)),
+				qUserStaffPic.picUrl.as("img"),
+				qCommonRegion.commonRegionID.as("regionID"),
+				qCommonRegion.regionName
+				))
+		.from(qUserStaff)
+		.leftJoin(qUserStaffPic).on(qUserStaffPic.staffID.eq(qUserStaff.staffID.stringValue()))
+		.leftJoin(qUserOrganization).on(qUserStaff.orgID.eq(qUserOrganization.orgID))
+		.leftJoin(qCommonRegion).on(qUserOrganization.commonRegionId.eq(qCommonRegion.commonRegionID))
+		.where(qUserStaff.staffID.eq(Integer.parseInt(userID)))
+		.fetchOne();*/
+		
+				
+				
+				
+		
+		
 		List<Privilege> listp = new ArrayList<Privilege>();
 		List<Role> listr = new ArrayList<Role>();
 		listp = userDao.getPrivilege(userID);
+		/*select pr.privilege_id row_id,
+	       pr.privilege_name row_name,
+	       pr.privilege_code row_code
+	  from jtuser.privilege pr
+	  left join jtuser.staff_limit li
+	    on li.privilege_id = pr.privilege_id
+	  left join jtuser.system_user s
+	    on s.system_user_id = li.system_user_id
+	 where s.staff_id = #{_parameter}
+	 
+	 <resultMap id="privilegeBean" type="com.lin.domain.Privilege">
+		<result property="privilegeID" column="row_id" />
+		<result property="privilegeCode" column="row_code" />
+		<result property="privilegeName" column="row_name" />
+	</resultMap>
+	 */
+		
+//		queryFactory.select(Projections.bean(
+//				Privilege.class, 
+//				))
+		
 		listr = userDao.getRole(userID);
 		if(listp != null && listp.size() > 0)
 			up.setPrivilegeList(listp);

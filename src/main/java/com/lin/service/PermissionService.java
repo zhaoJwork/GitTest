@@ -1,11 +1,33 @@
 package com.lin.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.*;
+import com.lin.domain.AddressBanned;
+import com.lin.domain.AddressColAuxiliary;
+import com.lin.domain.AddressCollection;
+import com.lin.domain.QAddressBanned;
+import com.lin.domain.QAddressColAuxiliary;
+import com.lin.domain.QAddressCollection;
+import com.lin.domain.QPositionDsl;
+import com.lin.domain.QUser;
+import com.lin.domain.QUserNewAssist;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressColAuxiliaryRepository;
 import com.lin.repository.AddressCollectionRepository;
-import com.lin.repository.UserRepository;
 import com.lin.util.Result;
 import com.lin.vo.AddressCollectionVo;
 import com.lin.vo.AutoCollectionVo;
@@ -13,19 +35,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import static javafx.scene.input.KeyCode.Q;
 
 
 /**
@@ -43,10 +52,14 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		super(addressCollectionRepository);
 	}
 	
-	private UserRepository userRepository;
-
 	@Resource
 	private AddressBannedRepository addressBannedRepository;
+	
+	@Value("${application.ADDB_DK}")
+	private String addressBookDKUrl;
+	
+	private static String DEFAULT_FORMAT = "yyyyMMddHHmmssSSS";
+	private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DEFAULT_FORMAT);
 	
 	@Resource
 	private AddressCollectionRepository addressCollectionRepository;
@@ -495,6 +508,24 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	}
 	
 	/**
+	 * 判断是否已经被收藏
+	 * @param loginId
+	 * @param custId
+	 * @return 1 已被收藏  0  未被收藏
+	 */
+	public String getIsCollection(String contactId) {
+		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
+		AddressCollection collection = queryFactory.selectFrom(qAddressCollection)
+		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(contactId)))
+		.fetchOne();
+		if(collection != null) {
+			return "1";
+		}else {
+			return "0";
+		}
+	}
+	
+	/**
 	 * 当前人收藏列表查询
 	 * @param loginId
 	 * @param result
@@ -518,7 +549,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				qUser.address,
 				qUser.organizationID,
 				new CaseBuilder()
-					.when(uass.portrait_url.isNull())
+					.when(uass.portrait_url.isNull().and(uass.portrait_url.isEmpty()))
 					.then(qUser.userPic)
 					.otherwise(uass.portrait_url).as("userPic"),
 				qPositionDsl.posName,
@@ -554,6 +585,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 
 //		迪科接口 
 //		list 返回收藏 
+
 
 //		根据迪克数据封装返回值
 
