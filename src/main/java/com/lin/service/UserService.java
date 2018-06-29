@@ -72,7 +72,9 @@ public class UserService extends AbstractService<User,String> {
 				user.address.as("address"),
 				user.context.as("contexts"),
 				user.field.as("fields"),
-				uass.install.as("install")
+				uass.install.as("install"),
+				user.quanPin,
+				user.shouZiMu
 		)).from(user)
 				.leftJoin(uass)
 				.on(user.userID.eq(uass.userid))
