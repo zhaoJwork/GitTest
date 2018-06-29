@@ -131,7 +131,7 @@ public class CustomerService  {
 				}
 				map.put("collection", isCollection);
 				
-				 
+				   
 				// 全拼  首字母  select f_get_hzpy('123张三sss')   from dual
 				List<?> resultList = entityManager.createNativeQuery("select f_get_hzpy(?)   from dual")
 		    	.setParameter(1, contactName).getResultList();
