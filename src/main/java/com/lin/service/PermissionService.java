@@ -1,26 +1,42 @@
 package com.lin.service;
 
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+
+import org.dom4j.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.chtq.crm.sales.common.Xml2Bean;
+import com.cthq.crm.webservice.sales.SalesPADServiceLocator;
+import com.cthq.crm.webservice.sales.SalesPADSoapBindingStub;
 import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.*;
+import com.lin.domain.AddressBanned;
+import com.lin.domain.AddressCollection;
+import com.lin.domain.AutoCollection;
+import com.lin.domain.QAddressBanned;
+import com.lin.domain.QAddressCollection;
+import com.lin.domain.QPositionDsl;
+import com.lin.domain.QUser;
+import com.lin.domain.QUserNewAssistDsl;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressCollectionRepository;
-import com.lin.repository.UserRepository;
 import com.lin.util.Result;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -38,10 +54,14 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		super(addressCollectionRepository);
 	}
 	
-	private UserRepository userRepository;
-
 	@Resource
 	private AddressBannedRepository addressBannedRepository;
+	
+	@Value("${application.ADDB_DK}")
+	private String addressBookDKUrl;
+	
+	private static String DEFAULT_FORMAT = "yyyyMMddHHmmssSSS";
+	private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DEFAULT_FORMAT);
 	
 	@Resource
 	private AddressCollectionRepository addressCollectionRepository;
@@ -471,6 +491,24 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	}
 	
 	/**
+	 * 判断是否已经被收藏
+	 * @param loginId
+	 * @param custId
+	 * @return 1 已被收藏  0  未被收藏
+	 */
+	public String getIsCollection(String contactId) {
+		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
+		AddressCollection collection = queryFactory.selectFrom(qAddressCollection)
+		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(contactId)))
+		.fetchOne();
+		if(collection != null) {
+			return "1";
+		}else {
+			return "0";
+		}
+	}
+	
+	/**
 	 * 当前人收藏列表查询
 	 * @param loginId
 	 * @param result
@@ -488,7 +526,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				qUser.userID,qUser.userName,qUser.provinceID,qUser.phone,
 				qUser.email,qUser.address,qUser.organizationID,
 				new CaseBuilder()
-					.when(uass.portrait_url.isNull())
+					.when(uass.portrait_url.isNull().and(uass.portrait_url.isEmpty()))
 					.then(qUser.userPic)
 					.otherwise(uass.portrait_url).as("userPic"),
 				qUser.type,qUser.context, qUser.field,qPositionDsl.posName,
@@ -508,11 +546,64 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		}
 //		迪科接口 
 //		list 返回收藏 
+		//准备调用DK参数
+		String busiCode = "CustOmer";
+		
+		String STATUS = "2";//2精确查询   5查询当前客户树子节点详细信息（扩展到五级)
+		String NUMBER = "1";
+		String PAGENUM = "10";
+		String ORDERBY = "1";// 降序
+		
+		SalesPADServiceLocator locator = new SalesPADServiceLocator();
+		URL url;
+		try {
+//			url = new java.net.URL("http://172.16.1.112:9080/CRM-PAD/services/SalesPAD?wsdl");
+			url = new URL(addressBookDKUrl);
+			/*SalesPADSoapBindingStub stub = new SalesPADSoapBindingStub(url,locator);
+			getReqXml(busiCode, loginName, fileName, fileurl, fileSize, error)
+
+			String salesPADService = stub.salesPADService(reqXml);
+			System.out.println(salesPADService);
+			
+			Document resultDoc = Xml2Bean.createDoc(salesPADService);
+			String fileUrl = Xml2Bean.selectElementText(resultDoc,"//SvcCont/RespInfo/data/pic/fileUrl");*/
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		
+	}
+	
+	/*
+	 * 根据保存的附件生成对应的请求报文
+	 */
+	private String getReqXml(String type,String loginName,String fileName,String fileurl,Long fileSize,String error){
+		StringBuffer ret = new StringBuffer();
+		ret.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+		ret.append("<ContractRoot>");
+		ret.append("<TcpCont>");
+		ret.append("<BusCode>OPP10212</BusCode>");
+		String d = simpleDateFormat.format(new Date());//格式为：yyyyMMddHHmmssSSS(17位)
+		int num = new Random().nextInt(89)+10;//产生10-98之间的随机数(2位)
+		ret.append("<TransactionID>" + d + num + "</TransactionID>");//得到长度为19位的交易编码
+		ret.append("<TimeStamp>" + d + "</TimeStamp>");
+		ret.append("</TcpCont>");
+		ret.append("<SvcCont>");
+		ret.append("<ReqInfo>");
 		
+		ret.append("<Type>"+type+"</Type>");
+		ret.append("<LoginName>"+loginName+"</LoginName>");
+		ret.append("<SystemID>1212</SystemID>");
+		ret.append("<FileName>" + fileName + "</FileName>");
+		ret.append("<FileUrl>" + fileurl + "</FileUrl>");
+		ret.append("<FileSize>" + fileSize + "</FileSize>");
+		ret.append("<Error>" + error + "</Error>");
 		
-		
+		ret.append("</ReqInfo>");
+		ret.append("</SvcCont>");
+		ret.append("</ContractRoot>");
+		return ret.toString();
 	}
 
 

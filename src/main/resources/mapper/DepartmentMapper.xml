@@ -2,7 +2,7 @@
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lin.mapper.DepartmentMapper">
 	<!-- 查询人员部门 -->
-	<resultMap id="DepartmentMap" type="com.lin.domain.Department">
+	<!-- <resultMap id="DepartmentMap" type="com.lin.domain.Department">
 		<id column="DEP_ID" property="departmentID" jdbcType="CHAR" />
 		<result column="DEP_NAME" property="departmentName" jdbcType="CHAR" />
 	</resultMap>
@@ -12,5 +12,5 @@
 		appuser.address_organization t where t.pid =(
 		select o.pid from appuser.address_organization o
 		where o.organ_id = #{0})
-	</select>
+	</select> -->
 </mapper>

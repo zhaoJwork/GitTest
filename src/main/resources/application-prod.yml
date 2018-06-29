@@ -19,8 +19,15 @@ spring:
         dialect: org.hibernate.dialect.Oracle10gDialect
   thymeleaf:
     cache: false
-
-
+    
+application:
+ #生产
+ sales_integral_add_score=/sales-integral/common/addScore
+ #生产
+ ADDB_DK: http://10.128.87.58:8101/CRM-PAD/services/SalesPAD?wsdl
+ #生产  图片地址
+ CUST_IMG: http://42.99.16.176/mpi/plist_dir/plist_dir/custLogo/150_noword/
+ 
 #生产上关闭 swagger
 swagger:
   show: false
