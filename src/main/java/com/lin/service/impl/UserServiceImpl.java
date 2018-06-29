@@ -18,14 +18,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lin.domain.ContextVo;
 import com.lin.domain.FieldVo;
 import com.lin.domain.Privilege;
-import com.lin.domain.QCommonRegion;
 import com.lin.domain.QOrganizationDsl;
 import com.lin.domain.QPositionDsl;
 import com.lin.domain.QUser;
-import com.lin.domain.QUserNewAssistDsl;
-import com.lin.domain.QUserOrganization;
-import com.lin.domain.QUserStaff;
-import com.lin.domain.QUserStaffPic;
+import com.lin.domain.QUserNewAssist;
 import com.lin.domain.Role;
 import com.lin.domain.User;
 import com.lin.domain.UserDetails;
@@ -39,7 +35,6 @@ import com.lin.util.JedisKey;
 import com.lin.util.JsonUtil;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**

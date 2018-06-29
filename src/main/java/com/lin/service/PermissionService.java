@@ -1,35 +1,30 @@
 package com.lin.service;
 
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
-import org.dom4j.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.chtq.crm.sales.common.Xml2Bean;
-import com.cthq.crm.webservice.sales.SalesPADServiceLocator;
-import com.cthq.crm.webservice.sales.SalesPADSoapBindingStub;
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.AddressBanned;
+import com.lin.domain.AddressColAuxiliary;
 import com.lin.domain.AddressCollection;
-import com.lin.domain.AutoCollection;
 import com.lin.domain.QAddressBanned;
+import com.lin.domain.QAddressColAuxiliary;
 import com.lin.domain.QAddressCollection;
 import com.lin.domain.QPositionDsl;
 import com.lin.domain.QUser;
-import com.lin.domain.QUserNewAssistDsl;
+import com.lin.domain.QUserNewAssist;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressColAuxiliaryRepository;
 import com.lin.repository.AddressCollectionRepository;
@@ -40,8 +35,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-
-import static javafx.scene.input.KeyCode.Q;
 
 
 /**

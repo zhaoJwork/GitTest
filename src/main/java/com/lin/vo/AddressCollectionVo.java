@@ -48,4 +48,94 @@ public class AddressCollectionVo implements Serializable{
 
 	@ApiModelProperty(value = "名称")
 	private String name;
+
+	public Integer getRowId() {
+		return rowId;
+	}
+
+	public void setRowId(Integer rowId) {
+		this.rowId = rowId;
+	}
+
+	public Integer getCollectionLoginId() {
+		return collectionLoginId;
+	}
+
+	public void setCollectionLoginId(Integer collectionLoginId) {
+		this.collectionLoginId = collectionLoginId;
+	}
+
+	public Integer getCollectionUserId() {
+		return collectionUserId;
+	}
+
+	public void setCollectionUserId(Integer collectionUserId) {
+		this.collectionUserId = collectionUserId;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
+	}
+
+	public Integer getCollectionType() {
+		return collectionType;
+	}
+
+	public void setCollectionType(Integer collectionType) {
+		this.collectionType = collectionType;
+	}
+
+	public Integer getSource() {
+		return source;
+	}
+
+	public void setSource(Integer source) {
+		this.source = source;
+	}
+
+	public Integer getCollectionUpdateBy() {
+		return collectionUpdateBy;
+	}
+
+	public void setCollectionUpdateBy(Integer collectionUpdateBy) {
+		this.collectionUpdateBy = collectionUpdateBy;
+	}
+
+	public String getQuanPin() {
+		return quanPin;
+	}
+
+	public void setQuanPin(String quanPin) {
+		this.quanPin = quanPin;
+	}
+
+	public String getShouZiMu() {
+		return shouZiMu;
+	}
+
+	public void setShouZiMu(String shouZiMu) {
+		this.shouZiMu = shouZiMu;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	
 }
