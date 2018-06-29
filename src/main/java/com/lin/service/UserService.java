@@ -49,7 +49,7 @@ public class UserService extends AbstractService<User,String> {
 	 */
 	public UserDetailsVo selectUserDetails(String loginID , String userID){
 		QUser user = QUser.user;
-		QUserNewAssistDsl uass = QUserNewAssistDsl.userNewAssistDsl;
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QPositionDsl posDsl = QPositionDsl.positionDsl;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QAddressCollection coll = QAddressCollection.addressCollection;

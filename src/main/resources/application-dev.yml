@@ -5,7 +5,7 @@ spring:
     timeout: 3000
   datasource:
     name: Oracle
-    url:  jdbc:oracle:thin:@//10.128.49.65:56128/saleshdb
+    url:  jdbc:oracle:thin:@//10.128.57.25:3436/saleshdb
     username: sales_app
     password: sales_app
     driver-class-name: oracle.jdbc.OracleDriver
