@@ -133,7 +133,7 @@ public class CustomerService  {
 				resultMap.put("img", "");
 				
 				// 该联系人是否收藏    true 已被收藏    false未被收藏
-				resultMap.put("collection", permission.getIsCollection(contactId));
+				resultMap.put("collection", permission.getIsCollection(loginId,contactId));
 				
 				   
 				// 全拼  首字母  select f_get_hzpy('123张三sss')   from dual

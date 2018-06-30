@@ -27,8 +27,6 @@ public class AddressCollection implements Serializable{
 	@ApiModelProperty(value = "主键")
 	@Id
 	@Column(name = "ROW_ID")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator="SEQ_ADDRESS_COLLECTION")
-	@SequenceGenerator(name="SEQ_ADDRESS_COLLECTION", sequenceName="seq_app_addresslist")
 	private Integer rowId;
 	
 	@ApiModelProperty(value = "收藏人id")
