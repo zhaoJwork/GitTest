@@ -1,5 +1,7 @@
 package com.lin.vo;
 
+import org.mockito.internal.matchers.CompareTo;
+
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -10,7 +12,7 @@ import lombok.Data;
  */
 @ApiModel(value="AutoCollectionVo", description="收藏列表 ")
 @Data
-public class AutoCollectionVo {
+public class AutoCollectionVo implements Comparable<AutoCollectionVo>{
 
 	/**
 	 * address_collection
@@ -311,6 +313,12 @@ public class AutoCollectionVo {
 	}
 
 
+	
+	
+	@Override
+	public int compareTo(AutoCollectionVo o) {
+		return o.getColAuxShouZiMu().compareTo(this.colAuxShouZiMu);
+	}
 
 	
 
