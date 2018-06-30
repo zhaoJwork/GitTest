@@ -154,7 +154,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 */
 	public void getIsBannedSay(String loginId, Result result) {
 		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
-		BooleanExpression eq = qAddressBanned.bannedSayLoginId.eq(Integer.parseInt(loginId)).and(qAddressBanned.bannedSayType.eq(1));
+		BooleanExpression eq = qAddressBanned.bannedSayLoginId.eq(Integer.parseInt(loginId))
+				.and(qAddressBanned.bannedSayType.eq(1)
+				.and(qAddressBanned.type.eq(1)));
 		Optional<AddressBanned> findOne = addressBannedRepository.findOne(eq);
 		if("Optional.empty".equals(findOne.toString())) {
 			result.setRespCode("1");
@@ -521,7 +523,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		AddressCollection collection = queryFactory.selectFrom(qAddressCollection)
 		.where(qAddressCollection.collectionUserId.eq(Integer.parseInt(contactId))
 				.and(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)))
-				.and(qAddressCollection.collectionType.eq(1)))
+				.and(qAddressCollection.collectionType.eq(1))
+				.and(qAddressCollection.type.eq(1)))
 		.fetchOne();
 		if(collection != null) {
 			return "1";
