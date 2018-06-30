@@ -96,6 +96,18 @@ public class UserDetailsVo {
 	 */
 	private String talkstatus ;
 
+	/**
+	 * address_user
+	 * 全拼
+	 */
+	private String quanPin;
+	/**
+	 * address_user
+	 * 首字母
+	 */
+	private String shouZiMu;
+
+
 	@JsonIgnore
 	public static String picHttpIp;
 	
@@ -267,4 +279,19 @@ public class UserDetailsVo {
 	}
 
 
+	public String getQuanPin() {
+		return quanPin;
+	}
+
+	public void setQuanPin(String quanPin) {
+		this.quanPin = quanPin;
+	}
+
+	public String getShouZiMu() {
+		return shouZiMu;
+	}
+
+	public void setShouZiMu(String shouZiMu) {
+		this.shouZiMu = shouZiMu;
+	}
 }

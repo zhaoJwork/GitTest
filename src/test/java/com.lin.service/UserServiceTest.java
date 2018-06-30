@@ -20,11 +20,11 @@ public class UserServiceTest {
 
   @Autowired
   private UserService userService;
-  @Test
+ /* @Test
   public void testLoad(){
     List<User> users = userService.findByIds("188218");
     Assert.assertNotNull(users);
-  }
+  }*/
   @Test
   public void testByUserID(){
     UserDetailsVo users = userService.selectUserDetails("113420","101539");
