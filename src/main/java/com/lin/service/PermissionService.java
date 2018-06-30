@@ -2,15 +2,20 @@ package com.lin.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
+import org.hibernate.dialect.identity.GetGeneratedKeysDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,16 +30,21 @@ import com.lin.domain.QAddressCollection;
 import com.lin.domain.QPositionDsl;
 import com.lin.domain.QUser;
 import com.lin.domain.QUserNewAssist;
+import com.lin.domain.QUserStaff;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressColAuxiliaryRepository;
 import com.lin.repository.AddressCollectionRepository;
 import com.lin.util.Result;
+import com.lin.util.XmlReqAndRes;
 import com.lin.vo.AddressCollectionVo;
 import com.lin.vo.AutoCollectionVo;
+import com.querydsl.core.types.CollectionExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sun.xml.internal.fastinfoset.algorithm.FloatEncodingAlgorithm;
 
 
 /**
@@ -47,25 +57,25 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 @Service
 public class PermissionService extends AbstractService<AddressCollection,String>{
 
+	private static final String String = null;
+
 	@Autowired
 	public PermissionService(AddressCollectionRepository addressCollectionRepository) {
 		super(addressCollectionRepository);
 	}
 	
-	@Resource
-	private AddressBannedRepository addressBannedRepository;
-	
 	@Value("${application.ADDB_DK}")
 	private String addressBookDKUrl;
-	
-	private static String DEFAULT_FORMAT = "yyyyMMddHHmmssSSS";
-	private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DEFAULT_FORMAT);
-	
+
+	@Resource
+	private AddressBannedRepository addressBannedRepository;
+
 	@Resource
 	private AddressCollectionRepository addressCollectionRepository;
 
 	@Resource
 	private AddressColAuxiliaryRepository addressColAuxiliaryRepository;
+
 	@Autowired
     private EntityManager entityManager;
 	
@@ -509,7 +519,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	
 	/**
 	 * 判断是否已经被收藏
-	 * @param contactId
+	 * @param loginId
+	 * @param custId
 	 * @return 1 已被收藏  0  未被收藏
 	 */
 	public String getIsCollection(String contactId) {
@@ -531,7 +542,12 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 * @author liudongdong
 	 * @date 2018年6月13日
 	 */
-	public void getCollectionList(String loginId, Result result) {
+	@SuppressWarnings("unchecked")
+	public void getCollectionList(String loginId, String pageSize, String pageNum, Result result) {
+		List<AutoCollectionVo> resultList = new ArrayList<AutoCollectionVo>();
+
+		String NUMBER = (pageNum == null || pageNum == "") ? "10000" : pageNum; // 条数
+		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //页数
 		QUser qUser = QUser.user;
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
@@ -571,28 +587,187 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
 		.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
 		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
-		.orderBy(auxiliary.shouZiMu.asc()).fetch();
-		
+		.orderBy(auxiliary.shouZiMu.asc())
+//		.offset(Long.parseLong(PAGENUM)*(Long.parseLong(NUMBER)-1))
+//		.limit(Long.parseLong(PAGENUM))
+		.fetch();
+
+		if(fetch == null || fetch.size() == 0) {
+			result.setRespCode("1");
+			result.setRespDesc("列表查询成功");
+			result.setRespMsg(resultList);
+			return;
+		}
 //		source 客户  cust_id
-		String custIDs = "";
+		String contactIDs = "";
 		for (AutoCollectionVo autoCollection : fetch) {
-			if(2 == autoCollection.getSource()){
-				custIDs += autoCollection.getColAuxContactID()+";";
+			if(autoCollection.getSource() != null && 2 == autoCollection.getSource()){
+				contactIDs += autoCollection.getColAuxContactID()+";";
 			}
 		}
-		custIDs = custIDs.substring(0,custIDs.length());
 
-//		迪科接口 
-//		list 返回收藏 
+		if(!"".equals(contactIDs)) {
+	//		迪科接口
+	//		list 返回收藏
+			// 获取部门
+	    	QUserStaff qUserStaff = QUserStaff.userStaff;
+	    	Integer deptId = queryFactory.select(qUserStaff.departmentID).from(qUserStaff)
+	    	.where(qUserStaff.staffID.eq(Integer.parseInt(loginId))).fetchOne();
+
+	    	//准备调用DK参数
+			String busiCode = "CustOmer";
+
+			String OLD_PARTY_CODE = "";// 客户编码
+			String STATUS = "12";// 11模糊查询、12精确查询
+			String ORDERBY = "1";// 降序
 
 
-//		根据迪克数据封装返回值
+			Map<String,Object> map = new HashMap<>();
+			map.put("OLD_PARTY_CODE", OLD_PARTY_CODE);
+			map.put("STAFF_ID", loginId);
+			map.put("DEPARTMENT_ID", deptId);
+			map.put("CUSTCONTACT_NAME", "");
+			map.put("CONTACT_ID", contactIDs);
+			map.put("STATUS", STATUS);
+			map.put("NUMBER", NUMBER);
+			map.put("PAGENUM", PAGENUM);
+			map.put("ORDERBY", ORDERBY);
 
-//		手机号变更更新appuser.ADDRESS_COLAUXILIARY ;
+			// 获取远程数据
+			Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
 
-		result.setRespCode("1");
-		result.setRespDesc("正常返回数据");
-		result.setRespMsg(fetch);
+
+			if(!"999".equals(((Map<?, ?>)xmlMap.get("TcpCont")).get("ResultCode"))) {
+
+				Map<?, ?> mapp = ((Map<?, ?>)xmlMap.get("SvcCont"));
+				Object object = mapp.get("ADD_CUST_CONTACTS");
+				List<Map<?, ?>> list = null;
+				if(object instanceof List) {
+					list = (List<Map<?, ?>>)object;
+				}else {
+					list = new ArrayList<>();
+					list.add((Map<?, ?>)object);
+				}
+				// 根据迪克数据封装返回值 以迪科为准
+				for(int i = 0; i < fetch.size(); i++) {
+
+					// 0 为正常不处理  1为修改  2为删除
+					int flag = 0;
+					for(int j = 0; j < list.size(); j++) {
+						Map<?, ?> m = (Map<?, ?>)list.get(j);
+						String oldPartyCode = (String)m.get("OLD_PARTY_CODE");
+						if(oldPartyCode.equals(fetch.get(i).getColAuxContactID().toString())) {
+							if(!((String)m.get("CONTACT_NAME")).equals(fetch.get(i).getUserName()) ||
+									!((String)m.get("MOBILE_PHONE")).equals(fetch.get(i).getPhone())) {
+
+								// 本地数据和迪科数据不一致  进行修改本地数据
+								flag = 1;
+
+								// 全拼  首字母  select f_get_hzpy('123张三sss')   from dual
+								List<?> name = entityManager.createNativeQuery("select f_get_hzpy(?)   from dual")
+										.setParameter(1, (String)m.get("CONTACT_NAME")).getResultList();
+								/*select tto.row_id
+						          from appuser.address_collection tto
+						         where tto.collection_userid = ''*/
+
+								List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
+								.from(qAddressCollection)
+								.where(qAddressCollection.collectionUserId.eq(fetch.get(i).getColAuxContactID()))
+								.fetch();
+
+								Number [] auxiNum = new Number[fetch2.size()];
+								for(int n = 0; n < fetch2.size(); n++) {
+									auxiNum[n] = (Number)fetch2.get(n);
+								}
+
+								// 修改   手机号变更更新appuser.ADDRESS_COLAUXILIARY ;
+								String mobile = (String)m.get("MOBILE_PHONE");
+								String contactName = (String)m.get("CONTACT_NAME");
+								String quanPin = name.get(0).toString();
+								String shouZiMu = name.get(0).toString().substring(0,1).toUpperCase();
+								long execute = queryFactory.update(auxiliary)
+								.set(auxiliary.mobile, mobile)
+								.set(auxiliary.name, contactName)
+								.set(auxiliary.quanPin, quanPin)
+								.set(auxiliary.shouZiMu, shouZiMu)
+								.where(auxiliary.rowId.in(auxiNum))
+								.execute();
+
+								AutoCollectionVo vo = fetch.get(j);
+								vo.setColAuxContactMobile(mobile);
+								vo.setColAuxContactName(contactName);
+								vo.setColAuxQanPin(quanPin);
+								vo.setColAuxShouZiMu(shouZiMu);
+								resultList.add(vo);
+							}
+						}else {
+							flag = 2;
+						}
+					}
+					if(flag == 2) {
+						// 删除   迪科  本地都有数据数据的情况下   数据进行和迪科数据同步
+						autoDele(contactIDs, qAddressCollection, auxiliary);
+					}else if(flag == 0){
+						resultList.add(fetch.get(i));
+					}
+				}
+				result.setRespCode("1");
+				result.setRespDesc("列表查询成功");
+				result.setRespMsg(resultList);
+			}else {
+				// 迪科没有数据  本地有数据  进行本地数据客户删除
+				String str = "";
+				for (AutoCollectionVo autoCollection : fetch) {
+					if(2 == autoCollection.getSource()){
+						str += autoCollection.getColAuxContactID()+";";
+					}else {
+						resultList.add(autoCollection);
+					}
+				}
+				if(str != "") {
+					autoDele(str, qAddressCollection, auxiliary);
+				}
+
+				result.setRespCode("1");
+				result.setRespDesc("列表查询成功");
+				result.setRespMsg(resultList);
+			}
+
+		}else {
+			// 本地没有客户数据  直接返回本地查询企业数据
+			result.setRespCode("1");
+			result.setRespDesc("列表查询成功");
+			result.setRespMsg(fetch);
+		}
+
+	}
+
+	// 本地迪科数据同步
+	private void autoDele(String contactIDs, QAddressCollection qAddressCollection, QAddressColAuxiliary auxiliary) {
+		String[] contactId = contactIDs.substring(0, contactIDs.length()-1).split(";");
+		Number [] contactNum = new Number[contactId.length];
+		for(int m = 0; m < contactId.length; m++) {
+			contactNum[m] = (Number)Long.parseLong(contactId[m]);
+		}
+
+		List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
+		.from(qAddressCollection)
+		.where(qAddressCollection.collectionUserId.in(contactNum)).fetch();
+
+
+		Number [] auxiNum = new Number[fetch2.size()];
+		for(int n = 0; n < fetch2.size(); n++) {
+			auxiNum[n] = (Number)fetch2.get(n);
+		}
+
+
+		long execute = queryFactory.delete(auxiliary)
+		.where(auxiliary.rowId.in(auxiNum))
+		.execute();
+
+		long execute2 = queryFactory.delete(qAddressCollection)
+		.where(qAddressCollection.collectionUserId.in(contactNum))
+		.execute();
 	}
 
 
