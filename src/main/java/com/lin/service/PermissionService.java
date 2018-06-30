@@ -509,8 +509,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	
 	/**
 	 * 判断是否已经被收藏
-	 * @param loginId
-	 * @param custId
+	 * @param contactId
 	 * @return 1 已被收藏  0  未被收藏
 	 */
 	public String getIsCollection(String contactId) {
@@ -571,7 +570,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		.leftJoin(qPositionDsl).on(qUser.post.eq(qPositionDsl.posId))
 		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
 		.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
-		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)))
+		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
 		.orderBy(auxiliary.shouZiMu.asc()).fetch();
 		
 //		source 客户  cust_id
