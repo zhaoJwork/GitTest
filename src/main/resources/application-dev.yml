@@ -1,11 +1,11 @@
 spring:
   redis:
-    host: 192.168.56.101
+    host: 10.1.11.32
     port: 6379
-    timeout: 3000
+    timeout: 30000
   datasource:
     name: Oracle
-    url:  jdbc:oracle:thin:@//10.128.57.25:3436/saleshdb
+    url:  jdbc:oracle:thin:@//10.128.49.65:56128/saleshdb
     username: sales_app
     password: sales_app
     driver-class-name: oracle.jdbc.OracleDriver
@@ -31,11 +31,8 @@ mybatis:
 logging:
   config: classpath:log4j2-dev.xml
 
-
 application:
  pic_HttpIP: http://42.99.16.145:19491
- #sc
- #pic_HttpIP=http://42.99.16.176:19491
  #生成群组头像 图片 暂存地址 群组中所有人的头像地址
  pic_group_temp_img: /cfiles/sales/appkms/2/public/addresslist/group/temp/
  #pic_group_temp_img=E:\\test\\
@@ -49,12 +46,8 @@ application:
  pic_group_db_img_root: /cfiles/sales/appkms
  #体验
  sales_integral_add_score: http://10.128.49.65:20060/sales-integral/common/addScore
- #生产
- #sales_integral_add_score=/sales-integral/common/addScore
  #体验
  ADDB_DK: http://10.128.49.81:9083/CRM-PAD/services/SalesPAD?wsdl
- #生产
- #ADDB_DK: http://10.128.87.58:8101/CRM-PAD/services/SalesPAD?wsdl
  #测试  图片地址
  CUST_IMG: http://42.99.16.145/mpi/plist_dir/plist_dir/custLogo/150_noword/
  

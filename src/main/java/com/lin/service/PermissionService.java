@@ -66,16 +66,16 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	
 	@Value("${application.ADDB_DK}")
 	private String addressBookDKUrl;
-	
+
 	@Resource
 	private AddressBannedRepository addressBannedRepository;
-	
+
 	@Resource
 	private AddressCollectionRepository addressCollectionRepository;
-	
+
 	@Resource
 	private AddressColAuxiliaryRepository addressColAuxiliaryRepository;
-	
+
 	@Autowired
     private EntityManager entityManager;
 	
@@ -545,7 +545,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	@SuppressWarnings("unchecked")
 	public void getCollectionList(String loginId, String pageSize, String pageNum, Result result) {
 		List<AutoCollectionVo> resultList = new ArrayList<AutoCollectionVo>();
-		
+
 		String NUMBER = (pageNum == null || pageNum == "") ? "10000" : pageNum; // 条数
 		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //页数
 		QUser qUser = QUser.user;
@@ -586,12 +586,12 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		.leftJoin(qPositionDsl).on(qUser.post.eq(qPositionDsl.posId))
 		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
 		.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
-		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)))
+		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
 		.orderBy(auxiliary.shouZiMu.asc())
 //		.offset(Long.parseLong(PAGENUM)*(Long.parseLong(NUMBER)-1))
 //		.limit(Long.parseLong(PAGENUM))
 		.fetch();
-		
+
 		if(fetch == null || fetch.size() == 0) {
 			result.setRespCode("1");
 			result.setRespDesc("列表查询成功");
@@ -605,23 +605,23 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				contactIDs += autoCollection.getColAuxContactID()+";";
 			}
 		}
-		
+
 		if(!"".equals(contactIDs)) {
-	//		迪科接口 
-	//		list 返回收藏 
+	//		迪科接口
+	//		list 返回收藏
 			// 获取部门
 	    	QUserStaff qUserStaff = QUserStaff.userStaff;
 	    	Integer deptId = queryFactory.select(qUserStaff.departmentID).from(qUserStaff)
 	    	.where(qUserStaff.staffID.eq(Integer.parseInt(loginId))).fetchOne();
-	    	
+
 	    	//准备调用DK参数
 			String busiCode = "CustOmer";
-			
+
 			String OLD_PARTY_CODE = "";// 客户编码
 			String STATUS = "12";// 11模糊查询、12精确查询
 			String ORDERBY = "1";// 降序
-			
-			
+
+
 			Map<String,Object> map = new HashMap<>();
 			map.put("OLD_PARTY_CODE", OLD_PARTY_CODE);
 			map.put("STAFF_ID", loginId);
@@ -632,13 +632,13 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			map.put("NUMBER", NUMBER);
 			map.put("PAGENUM", PAGENUM);
 			map.put("ORDERBY", ORDERBY);
-			
+
 			// 获取远程数据
 			Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
-			
-			
+
+
 			if(!"999".equals(((Map<?, ?>)xmlMap.get("TcpCont")).get("ResultCode"))) {
-				
+
 				Map<?, ?> mapp = ((Map<?, ?>)xmlMap.get("SvcCont"));
 				Object object = mapp.get("ADD_CUST_CONTACTS");
 				List<Map<?, ?>> list = null;
@@ -650,7 +650,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				}
 				// 根据迪克数据封装返回值 以迪科为准
 				for(int i = 0; i < fetch.size(); i++) {
-					
+
 					// 0 为正常不处理  1为修改  2为删除
 					int flag = 0;
 					for(int j = 0; j < list.size(); j++) {
@@ -659,27 +659,27 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 						if(oldPartyCode.equals(fetch.get(i).getColAuxContactID().toString())) {
 							if(!((String)m.get("CONTACT_NAME")).equals(fetch.get(i).getUserName()) ||
 									!((String)m.get("MOBILE_PHONE")).equals(fetch.get(i).getPhone())) {
-								
+
 								// 本地数据和迪科数据不一致  进行修改本地数据
 								flag = 1;
-								
+
 								// 全拼  首字母  select f_get_hzpy('123张三sss')   from dual
 								List<?> name = entityManager.createNativeQuery("select f_get_hzpy(?)   from dual")
 										.setParameter(1, (String)m.get("CONTACT_NAME")).getResultList();
 								/*select tto.row_id
 						          from appuser.address_collection tto
 						         where tto.collection_userid = ''*/
-								
+
 								List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
 								.from(qAddressCollection)
 								.where(qAddressCollection.collectionUserId.eq(fetch.get(i).getColAuxContactID()))
 								.fetch();
-								
+
 								Number [] auxiNum = new Number[fetch2.size()];
 								for(int n = 0; n < fetch2.size(); n++) {
 									auxiNum[n] = (Number)fetch2.get(n);
 								}
-								
+
 								// 修改   手机号变更更新appuser.ADDRESS_COLAUXILIARY ;
 								String mobile = (String)m.get("MOBILE_PHONE");
 								String contactName = (String)m.get("CONTACT_NAME");
@@ -692,7 +692,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 								.set(auxiliary.shouZiMu, shouZiMu)
 								.where(auxiliary.rowId.in(auxiNum))
 								.execute();
-								
+
 								AutoCollectionVo vo = fetch.get(j);
 								vo.setColAuxContactMobile(mobile);
 								vo.setColAuxContactName(contactName);
@@ -705,7 +705,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 						}
 					}
 					if(flag == 2) {
-						// 删除   迪科  本地都有数据数据的情况下   数据进行和迪科数据同步  
+						// 删除   迪科  本地都有数据数据的情况下   数据进行和迪科数据同步
 						autoDele(contactIDs, qAddressCollection, auxiliary);
 					}else if(flag == 0){
 						resultList.add(fetch.get(i));
@@ -727,21 +727,21 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				if(str != "") {
 					autoDele(str, qAddressCollection, auxiliary);
 				}
-				
+
 				result.setRespCode("1");
 				result.setRespDesc("列表查询成功");
 				result.setRespMsg(resultList);
 			}
-			
+
 		}else {
 			// 本地没有客户数据  直接返回本地查询企业数据
 			result.setRespCode("1");
 			result.setRespDesc("列表查询成功");
 			result.setRespMsg(fetch);
 		}
-		
+
 	}
-	
+
 	// 本地迪科数据同步
 	private void autoDele(String contactIDs, QAddressCollection qAddressCollection, QAddressColAuxiliary auxiliary) {
 		String[] contactId = contactIDs.substring(0, contactIDs.length()-1).split(";");
@@ -749,22 +749,22 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		for(int m = 0; m < contactId.length; m++) {
 			contactNum[m] = (Number)Long.parseLong(contactId[m]);
 		}
-		
+
 		List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
 		.from(qAddressCollection)
 		.where(qAddressCollection.collectionUserId.in(contactNum)).fetch();
-		
-		
+
+
 		Number [] auxiNum = new Number[fetch2.size()];
 		for(int n = 0; n < fetch2.size(); n++) {
 			auxiNum[n] = (Number)fetch2.get(n);
 		}
-		
-		
+
+
 		long execute = queryFactory.delete(auxiliary)
 		.where(auxiliary.rowId.in(auxiNum))
 		.execute();
-		
+
 		long execute2 = queryFactory.delete(qAddressCollection)
 		.where(qAddressCollection.collectionUserId.in(contactNum))
 		.execute();

@@ -1,10 +1,15 @@
 spring:
+  redis:
+    host: 10.128.49.138
+    port: 6379
+    timeout: 30000
   datasource:
     name: Oracle
-    url:  jdbc:oracle:thin:@//10.128.32.5:3436/uamdb
-    username: jtuam
-    password: fdc97354
+    url:  jdbc:oracle:thin:@(description=(address_list=(address=(host=10.128.57.20)(protocol=tcp)(port=3436))(address=(host=10.128.57.21)(protocol=tcp)(port=3436))(load_balance=no)(failover=yes))(connect_data=(service_name= wlwdbpr)))
+    username: sales_app
+    password: sales#0724
     driver-class-name: oracle.jdbc.driver.OracleDriver
+    type: com.alibaba.druid.pool.DruidDataSource
   jpa:
     show-sql: true
     generate-ddl: false
@@ -14,20 +19,37 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
-        default_schema: jtuam
+        default_schema: appuser
         format_sql: true
         dialect: org.hibernate.dialect.Oracle10gDialect
-  thymeleaf:
-    cache: false
-    
+
+mybatis:
+  # 重要配置
+  type-aliases-package: com.lin.domain
+  mapper-locations: classpath:mapper/*.xml
+
+logging:
+  config: classpath:log4j2-prod.xml
+
 application:
+ pic_HttpIP: http://42.99.16.176:19491
+ #生成群组头像 图片 暂存地址 群组中所有人的头像地址
+ pic_group_temp_img: /cfiles/sales/appkms/2/public/addresslist/group/temp/
+ #pic_group_temp_img=E:\\test\\
+ #群组头像生成完成 保存到服务器地址
+ pic_group_img: /cfiles/sales/appkms/2/public/addresslist/group/
+ #pic_group_img=E:\\test\\
+ #保存数据库地址
+ pic_group_db_img: /2/public/addresslist/group/
+ #pic_group_db_img=E:\\test\\
+ #拷贝图像 补全文件路径
+ pic_group_db_img_root: /cfiles/sales/appkms
  #生产
- sales_integral_add_score=/sales-integral/common/addScore
+ sales_integral_add_score: /sales-integral/common/addScore
  #生产
  ADDB_DK: http://10.128.87.58:8101/CRM-PAD/services/SalesPAD?wsdl
- #生产  图片地址
+ #测试  图片地址
  CUST_IMG: http://42.99.16.176/mpi/plist_dir/plist_dir/custLogo/150_noword/
- 
-#生产上关闭 swagger
+
 swagger:
   show: false
