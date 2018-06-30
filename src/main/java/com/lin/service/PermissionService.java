@@ -84,7 +84,6 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 * 禁言权限查询
 	 * @param loginId
 	 * @param type
-	 * @param userId
 	 * @param result
 	 * @author liudongdong
 	 * @date 2018年6月12日
@@ -155,7 +154,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 */
 	public void getIsBannedSay(String loginId, Result result) {
 		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
-		BooleanExpression eq = qAddressBanned.bannedSayLoginId.eq(Integer.parseInt(loginId));
+		BooleanExpression eq = qAddressBanned.bannedSayLoginId.eq(Integer.parseInt(loginId)).and(qAddressBanned.bannedSayType.eq(1));
 		Optional<AddressBanned> findOne = addressBannedRepository.findOne(eq);
 		if("Optional.empty".equals(findOne.toString())) {
 			result.setRespCode("1");
@@ -390,7 +389,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				if("Optional.empty".equals(findOne.toString())) {
 					// 创建日期
 					collection.setCollectionCreateDate(date);
-					
+					collection.setRowId(getSeq());
 					AddressCollection save = addressCollectionRepository.save(collection);
 					collectionVo.setRowId(save.getRowId());
 					if(save == null) {
@@ -514,13 +513,15 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	/**
 	 * 判断是否已经被收藏
 	 * @param loginId
-	 * @param custId
+	 * @param contactId
 	 * @return 1 已被收藏  0  未被收藏
 	 */
-	public String getIsCollection(String contactId) {
+	public String getIsCollection(String loginId,String contactId) {
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
 		AddressCollection collection = queryFactory.selectFrom(qAddressCollection)
-		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(contactId)))
+		.where(qAddressCollection.collectionUserId.eq(Integer.parseInt(contactId))
+				.and(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)))
+				.and(qAddressCollection.collectionType.eq(1)))
 		.fetchOne();
 		if(collection != null) {
 			return "1";
@@ -780,7 +781,11 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 
 	
 
-	
+	private Integer getSeq(){
+		List noTalk = entityManager.createNativeQuery("select appuser.seq_app_addresslist.nextval from dual")
+				.getResultList();
+			return Integer.parseInt(noTalk.get(0).toString());
+	}
 
 	
 
