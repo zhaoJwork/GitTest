@@ -1,10 +1,8 @@
 package com.lin.service;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +13,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
-import org.hibernate.dialect.identity.GetGeneratedKeysDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,13 +35,10 @@ import com.lin.util.Result;
 import com.lin.util.XmlReqAndRes;
 import com.lin.vo.AddressCollectionVo;
 import com.lin.vo.AutoCollectionVo;
-import com.querydsl.core.types.CollectionExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sun.xml.internal.fastinfoset.algorithm.FloatEncodingAlgorithm;
 
 
 /**
@@ -587,7 +581,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
 		.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
 		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
-		.orderBy(auxiliary.shouZiMu.asc())
+		.orderBy(auxiliary.quanPin.asc())
 //		.offset(Long.parseLong(PAGENUM)*(Long.parseLong(NUMBER)-1))
 //		.limit(Long.parseLong(PAGENUM))
 		.fetch();
