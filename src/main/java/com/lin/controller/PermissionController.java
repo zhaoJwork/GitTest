@@ -444,11 +444,12 @@ public class PermissionController {
 	@ApiOperation(value="收藏列表查询",tags = {"2s"})
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "loginId", required = true, dataType = "String"),
+		@ApiImplicitParam(name = "search", required = true, dataType = "String"),
 		@ApiImplicitParam(name = "pageSize", required = true, dataType = "String"),
 		@ApiImplicitParam(name = "pageNum", required = true, dataType = "String")
 	})
 	@GetMapping("/collectionlist")
-	public Result getCollectionList(HttpServletRequest req,String loginId, String pageSize, String pageNum) {
+	public Result getCollectionList(HttpServletRequest req,String loginId,String search, String pageSize, String pageNum) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "收藏列表查询");
 		Result result = new Result();
 		if(loginId == null) {
@@ -458,7 +459,7 @@ public class PermissionController {
 			return result;
 		}
 		try {
-			this.permissionService.getCollectionList(loginId, pageSize, pageNum, result);
+			this.permissionService.getCollectionList(loginId,search, pageSize, pageNum, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
