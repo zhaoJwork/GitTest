@@ -227,7 +227,7 @@ public class GroupServiceImpl implements GroupServiceI {
 			// 更新appuser.address_group表
 			if (f.exists()) {
 				GroupBean gb = new GroupBean();
-				gb.setGroupID(saveUrl);
+				gb.setGroupID(groupID);
 				gb.setGroupName(saveUrl);
 				groupDao.updateGroupImgInfo(gb);
 			}
