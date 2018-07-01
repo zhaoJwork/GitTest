@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
+import com.querydsl.core.types.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -154,7 +155,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 */
 	public void getIsBannedSay(String loginId, Result result) {
 		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
-		BooleanExpression eq = qAddressBanned.bannedSayLoginId.eq(Integer.parseInt(loginId))
+		BooleanExpression eq = qAddressBanned.bannedSayUserId.eq(Integer.parseInt(loginId))
 				.and(qAddressBanned.bannedSayType.eq(1)
 				.and(qAddressBanned.type.eq(1)));
 		Optional<AddressBanned> findOne = addressBannedRepository.findOne(eq);
@@ -163,7 +164,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			result.setRespDesc("该用户没有被禁言");
 			result.setRespMsg("1");
 		}else {
-			result.setRespCode("2");
+			result.setRespCode("1");
 			result.setRespDesc("该用户已经被禁言");
 			result.setRespMsg("0");
 		}
@@ -541,7 +542,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 * @date 2018年6月13日
 	 */
 	@SuppressWarnings("unchecked")
-	public void getCollectionList(String loginId, String pageSize, String pageNum, Result result) {
+	public void getCollectionList(String loginId,String search, String pageSize, String pageNum, Result result) {
 		List<AutoCollectionVo> resultList = new ArrayList<AutoCollectionVo>();
 
 		String NUMBER = (pageNum == null || pageNum == "") ? "10000" : pageNum; // 条数
@@ -551,6 +552,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
 		QAddressColAuxiliary auxiliary = QAddressColAuxiliary.addressColAuxiliary;
+		Predicate predicate = auxiliary.name.like(search+"%")
+									.or(auxiliary.quanPin.like(search+"%"))
+									.or(auxiliary.mobile.like(search+"%"));
 		List<AutoCollectionVo> fetch = queryFactory.select(Projections.bean(AutoCollectionVo.class,
 				qAddressCollection.rowId,
 				qAddressCollection.source,
@@ -585,6 +589,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
 		.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
 		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
+		.where(predicate)
 		.orderBy(auxiliary.quanPin.asc())
 //		.offset(Long.parseLong(PAGENUM)*(Long.parseLong(NUMBER)-1))
 //		.limit(Long.parseLong(PAGENUM))

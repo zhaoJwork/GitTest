@@ -86,10 +86,10 @@
 		    where t.group_id =  #{0}
 	</select>
 	<!-- #{1},#{0} -->
-	<update id="updateGroupImgInfo" parameterType="java.lang.String">
+	<update id="updateGroupImgInfo" parameterType="com.lin.domain.GroupBean">
 		 update appuser.address_group p 
-		 set p.group_img=#{1}
-		 where p.group_id=#{0}
+		 set p.group_img=#{groupName}
+		 where p.group_id=#{groupID}
 	</update>
 	<select id="getGroupUserIDs" resultType="java.lang.String"
 			 parameterType="java.lang.String">

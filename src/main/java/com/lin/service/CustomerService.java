@@ -81,8 +81,8 @@ public class CustomerService  {
 		
 		String OLD_PARTY_CODE = custID;// 客户编码
 		String STATUS = custID == "" || custID == null ? "11" : "12";// 11模糊查询、12精确查询
-		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 条数
-		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //页数
+		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 页数
+		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //条数
 		String ORDERBY = "1";// 降序
 		
 		
@@ -103,7 +103,7 @@ public class CustomerService  {
 		Map<String, Object> resultMap;
 		// 组装查询in条件
 		List<String> tempList = new ArrayList<>();
-		List<Long> list2 = new ArrayList<Long>();
+		List<String> list2 = new ArrayList<String>();
 		if(!"999".equals(((Map<?, ?>)xmlMap.get("TcpCont")).get("ResultCode"))) {
 			Map<?, ?> mapp = ((Map<?, ?>)xmlMap.get("SvcCont"));
 			Object object = mapp.get("ADD_CUST_CONTACTS");
@@ -120,8 +120,8 @@ public class CustomerService  {
 				Map<?, ?> m = (Map<?, ?>)list.get(i);
 				String contactId = (String)m.get("CONTACT_ID");
 				String contactName = (String)m.get("CONTACT_NAME");
-				resultMap.put("contactID", contactName);// 联系人名称
-				resultMap.put("contactName", contactId);// 联系人编码
+				resultMap.put("contactID", contactId);// 编码
+				resultMap.put("contactName", contactName);// 联系人
 				resultMap.put("contactMobile", m.get("MOBILE_PHONE"));// 联系人手机号
 				resultMap.put("contactEmail", m.get("E_MAIL"));// 联系人Email
 				resultMap.put("contactDept", m.get("DEPT_NAME"));// 联系人所属部门
@@ -144,7 +144,7 @@ public class CustomerService  {
 				
 				resultList.add(resultMap);
 				if(oldPartyCode != null && oldPartyCode != "") {
-					list2.add(Long.parseLong(oldPartyCode));
+					list2.add(oldPartyCode);
 				}
 			}
 			
@@ -184,9 +184,9 @@ public class CustomerService  {
 			}
 			
 			
-			Number[] numbers = new  Number[list2.size()];
+			String[] str = new  String[list2.size()];
 			for (int i = 0; i < list2.size(); i++) {
-				numbers[i]=(Number)list2.get(i);
+				str[i]=list2.get(i);
 			}
 			
 			
@@ -198,22 +198,24 @@ public class CustomerService  {
 			
 			
 			List<Tuple> fetch = queryFactory.select(
-					qCust.custID, 
+					qCust.oldPartyCode,
 					qdkLogourl.twoxUrl
 					)
 			.from(qCust)
 			.leftJoin(qCustTreeRel).on(qCust.custID.eq(qCustTreeRel.custID))
 			.leftJoin(qCustTreeNode).on(qCustTreeNode.custNodeID.eq(qCustTreeRel.custNodeID))
 			.leftJoin(qdkLogourl).on(qdkLogourl.custNodeCD.eq(qCustTreeNode.custNodeCD.stringValue()))
-			.where(qCust.custID.in(numbers))
+			.where(qCust.oldPartyCode.in(str))
 			.fetch();
 			
 			
 			if(fetch.size() > 0) {
 				for (int i = 0; i < resultList.size(); i++) {
-					if(fetch.get(i).get(qCust.custID).equals(resultList.get(i).get("oldPartyCode"))) {
-						String imgUrl = fetch.get(i).get(qdkLogourl.twoxUrl);
-						resultList.get(i).put("img", custIMG+"/"+imgUrl.substring(34, imgUrl.length()));
+					for (int j = 0 ; j < fetch.size() ; j ++) {
+						if (fetch.get(j).get(qCust.oldPartyCode).equals(resultList.get(i).get("oldPartyCode"))) {
+							String imgUrl = fetch.get(j).get(qdkLogourl.twoxUrl);
+							resultList.get(i).put("img", custIMG + "/" + imgUrl.substring(34, imgUrl.length()));
+						}
 					}
 				}
 			}
@@ -237,9 +239,9 @@ public class CustomerService  {
     	Integer deptId = queryFactory.select(qUserStaff.departmentID).from(qUserStaff)
     	.where(qUserStaff.staffID.eq(Integer.parseInt(loginId))).fetchOne();
     	
-		String STATUS = "10";//2精确查询   5查询当前客户树子节点详细信息（扩展到五级)
-		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 条数
-		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //页数
+		String STATUS = "10";
+		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 页数
+		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //条数
 		String ORDERBY = "1";// 降序
 		
 		
@@ -283,7 +285,7 @@ public class CustomerService  {
 		}
 
 		result.setRespCode("1");
-		result.setRespDesc("人员列表查询成功");
+		result.setRespDesc("客户列表查询成功");
 		result.setRespMsg(resultList);
 		
 		
