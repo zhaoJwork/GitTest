@@ -62,13 +62,12 @@ public interface GroupMapper {
 	 */
 	List<User> selectGroupUserBygroupID(String groupID);
 	/**
-	 * @param groupID
-	 * @param groupImgAddress void
+	 * @param gb
 	 * @author zhangWeiJie
 	 * @date 2017年11月2日
 	 * @describe 更新群组头像地址信息
 	 */
-	void updateGroupImgInfo(String groupID, String groupImgAddress);
+	void updateGroupImgInfo(GroupBean gb);
 	
 	
 	/**
