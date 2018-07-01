@@ -155,7 +155,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 */
 	public void getIsBannedSay(String loginId, Result result) {
 		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
-		BooleanExpression eq = qAddressBanned.bannedSayLoginId.eq(Integer.parseInt(loginId))
+		BooleanExpression eq = qAddressBanned.bannedSayUserId.eq(Integer.parseInt(loginId))
 				.and(qAddressBanned.bannedSayType.eq(1)
 				.and(qAddressBanned.type.eq(1)));
 		Optional<AddressBanned> findOne = addressBannedRepository.findOne(eq);
