@@ -98,6 +98,12 @@ public class CustomerService  {
 		map.put("ORDERBY", ORDERBY);
 		
 		Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
+		if(xmlMap.isEmpty()) {
+			result.setRespCode("2");
+			result.setRespDesc("访问迪科接口失败");
+			result.setRespMsg("");
+			return;
+		}
 		// 解析xml
 		List<Map<String, Object>> resultList = new ArrayList<>();
 		Map<String, Object> resultMap;
@@ -208,7 +214,6 @@ public class CustomerService  {
 			.where(qCust.oldPartyCode.in(str))
 			.fetch();
 			
-			
 			if(fetch.size() > 0) {
 				for (int i = 0; i < resultList.size(); i++) {
 					for (int j = 0 ; j < fetch.size() ; j ++) {
@@ -229,6 +234,14 @@ public class CustomerService  {
     }
     
 
+    /**
+     * 人员列表
+     * @param loginId
+     * @param search
+     * @param pageSize
+     * @param pageNum
+     * @param result
+     */
 	@SuppressWarnings("unchecked")
 	public void getCustList(String loginId, String search, String pageSize, String pageNum, Result result) {
 		//准备调用DK参数
@@ -255,6 +268,13 @@ public class CustomerService  {
 		map.put("ORDERBY", ORDERBY);
 		
 		Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
+		
+		if(xmlMap.isEmpty()) {
+			result.setRespCode("2");
+			result.setRespDesc("访问迪科接口失败");
+			result.setRespMsg("");
+			return;
+		}
 		
 		List<Object> resultList = new ArrayList<>();
 		if(!"999".equals(((Map<?, ?>)xmlMap.get("TcpCont")).get("ResultCode"))) {
