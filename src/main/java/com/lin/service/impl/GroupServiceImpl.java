@@ -141,7 +141,9 @@ public class GroupServiceImpl implements GroupServiceI {
 								}
 							}
 						}
-						groupDao.saveGroupUser(listGU);
+						 if(0 > listGU.size()) {
+							 groupDao.saveGroupUser(listGU);
+						 }
 					}
 				} else if (type.equals("2")) {// 2 删除人员
 					if (null != userIds && !"".equals(userIds)) {

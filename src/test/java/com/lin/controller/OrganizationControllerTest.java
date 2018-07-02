@@ -33,11 +33,11 @@ public class OrganizationControllerTest {
   @Autowired
   private WebApplicationContext wac;
 
-  @Before
+ /* @Before
   public void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
   }
-
+*/
   @Test
   public void A00_get() throws Exception {
     /*mockMvc.perform(MockMvcRequestBuilders.post("/communicationdsl/organizationlist")
