@@ -22,9 +22,11 @@ public class Cust {
 	@ApiModelProperty(value = "")
 	@Id
 	@Column(name = "CUST_ID")
-//	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator="SEQ_ADDRESS_BANNED")
-//	@SequenceGenerator(name="SEQ_ADDRESS_BANNED", sequenceName="seq_app_addresslist")
 	private Integer custID;
+	@Column(name = "old_party_code")
+	private String oldPartyCode;
+
+
 
 	public Integer getCustID() {
 		return custID;
@@ -33,7 +35,12 @@ public class Cust {
 	public void setCustID(Integer custID) {
 		this.custID = custID;
 	}
-	
-	
-	
+
+	public String getOldPartyCode() {
+		return oldPartyCode;
+	}
+
+	public void setOldPartyCode(String oldPartyCode) {
+		this.oldPartyCode = oldPartyCode;
+	}
 }

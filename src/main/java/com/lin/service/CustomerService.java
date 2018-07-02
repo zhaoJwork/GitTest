@@ -81,8 +81,8 @@ public class CustomerService  {
 		
 		String OLD_PARTY_CODE = custID;// 客户编码
 		String STATUS = custID == "" || custID == null ? "11" : "12";// 11模糊查询、12精确查询
-		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 条数
-		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //页数
+		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 页数
+		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //条数
 		String ORDERBY = "1";// 降序
 		
 		
@@ -126,8 +126,8 @@ public class CustomerService  {
 				Map<?, ?> m = (Map<?, ?>)list.get(i);
 				String contactId = (String)m.get("CONTACT_ID");
 				String contactName = (String)m.get("CONTACT_NAME");
-				resultMap.put("contactID", contactId);// 联系人名称
-				resultMap.put("contactName", contactName);// 联系人编码
+				resultMap.put("contactID", contactId);// 编码
+				resultMap.put("contactName", contactName);// 联系人
 				resultMap.put("contactMobile", m.get("MOBILE_PHONE"));// 联系人手机号
 				resultMap.put("contactEmail", m.get("E_MAIL"));// 联系人Email
 				resultMap.put("contactDept", m.get("DEPT_NAME"));// 联系人所属部门
@@ -139,7 +139,7 @@ public class CustomerService  {
 				resultMap.put("img", "");
 				
 				// 该联系人是否收藏    true 已被收藏    false未被收藏
-				resultMap.put("collection", permission.getIsCollection(contactId));
+				resultMap.put("collection", permission.getIsCollection(loginId,contactId));
 				
 				   
 				// 全拼  首字母  select f_get_hzpy('123张三sss')   from dual
@@ -190,6 +190,10 @@ public class CustomerService  {
 			}
 			
 			
+			String[] str = new  String[list2.size()];
+			for (int i = 0; i < list2.size(); i++) {
+				str[i]=list2.get(i);
+			}
 			
 			
 			// 客户编码list  进行客户图片替换
@@ -200,21 +204,23 @@ public class CustomerService  {
 			
 			
 			List<Tuple> fetch = queryFactory.select(
-					qCust.custID, 
+					qCust.oldPartyCode,
 					qdkLogourl.twoxUrl
 					)
 			.from(qCust)
 			.leftJoin(qCustTreeRel).on(qCust.custID.eq(qCustTreeRel.custID))
 			.leftJoin(qCustTreeNode).on(qCustTreeNode.custNodeID.eq(qCustTreeRel.custNodeID))
 			.leftJoin(qdkLogourl).on(qdkLogourl.custNodeCD.eq(qCustTreeNode.custNodeCD.stringValue()))
-			.where(qCust.custID.stringValue().in(list2))
+			.where(qCust.oldPartyCode.in(str))
 			.fetch();
 			
 			if(fetch.size() > 0) {
 				for (int i = 0; i < resultList.size(); i++) {
-					if(fetch.get(i).get(qCust.custID).equals(resultList.get(i).get("oldPartyCode"))) {
-						String imgUrl = fetch.get(i).get(qdkLogourl.twoxUrl);
-						resultList.get(i).put("img", custIMG+"/"+imgUrl.substring(34, imgUrl.length()));
+					for (int j = 0 ; j < fetch.size() ; j ++) {
+						if (fetch.get(j).get(qCust.oldPartyCode).equals(resultList.get(i).get("oldPartyCode"))) {
+							String imgUrl = fetch.get(j).get(qdkLogourl.twoxUrl);
+							resultList.get(i).put("img", custIMG + "/" + imgUrl.substring(34, imgUrl.length()));
+						}
 					}
 				}
 			}
@@ -246,9 +252,9 @@ public class CustomerService  {
     	Integer deptId = queryFactory.select(qUserStaff.departmentID).from(qUserStaff)
     	.where(qUserStaff.staffID.eq(Integer.parseInt(loginId))).fetchOne();
     	
-		String STATUS = "10";//2精确查询   5查询当前客户树子节点详细信息（扩展到五级)
-		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 条数
-		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //页数
+		String STATUS = "10";
+		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 页数
+		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //条数
 		String ORDERBY = "1";// 降序
 		
 		
@@ -299,7 +305,7 @@ public class CustomerService  {
 		}
 
 		result.setRespCode("1");
-		result.setRespDesc("人员列表查询成功");
+		result.setRespDesc("客户列表查询成功");
 		result.setRespMsg(resultList);
 		
 		

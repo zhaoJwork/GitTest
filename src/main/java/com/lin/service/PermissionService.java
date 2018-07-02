@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
+import com.querydsl.core.types.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -85,7 +86,6 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 * 禁言权限查询
 	 * @param loginId
 	 * @param type
-	 * @param userId
 	 * @param result
 	 * @author liudongdong
 	 * @date 2018年6月12日
@@ -156,14 +156,16 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 */
 	public void getIsBannedSay(String loginId, Result result) {
 		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
-		BooleanExpression eq = qAddressBanned.bannedSayLoginId.eq(Integer.parseInt(loginId));
+		BooleanExpression eq = qAddressBanned.bannedSayUserId.eq(Integer.parseInt(loginId))
+				.and(qAddressBanned.bannedSayType.eq(1)
+				.and(qAddressBanned.type.eq(1)));
 		Optional<AddressBanned> findOne = addressBannedRepository.findOne(eq);
 		if("Optional.empty".equals(findOne.toString())) {
 			result.setRespCode("1");
 			result.setRespDesc("该用户没有被禁言");
 			result.setRespMsg("1");
 		}else {
-			result.setRespCode("2");
+			result.setRespCode("1");
 			result.setRespDesc("该用户已经被禁言");
 			result.setRespMsg("0");
 		}
@@ -391,7 +393,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				if("Optional.empty".equals(findOne.toString())) {
 					// 创建日期
 					collection.setCollectionCreateDate(date);
-					
+					collection.setRowId(getSeq());
 					AddressCollection save = addressCollectionRepository.save(collection);
 					collectionVo.setRowId(save.getRowId());
 					if(save == null) {
@@ -515,16 +517,16 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	/**
 	 * 判断是否已经被收藏
 	 * @param loginId
-	 * @param custId
+	 * @param contactId
 	 * @return 1 已被收藏  0  未被收藏
 	 */
-	public String getIsCollection(String contactId) {
-		if(contactId == null || contactId == "") {
-			return "0";
-		}
+	public String getIsCollection(String loginId,String contactId) {
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
 		AddressCollection collection = queryFactory.selectFrom(qAddressCollection)
-		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(contactId)))
+		.where(qAddressCollection.collectionUserId.eq(Integer.parseInt(contactId))
+				.and(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)))
+				.and(qAddressCollection.collectionType.eq(1))
+				.and(qAddressCollection.type.eq(1)))
 		.fetchOne();
 		if(collection != null) {
 			return "1";
@@ -542,7 +544,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 */
 	@SuppressWarnings("unchecked")
 	@Transactional
-	public void getCollectionList(String loginId, String pageSize, String pageNum, Result result) {
+	public void getCollectionList(String loginId,String search, String pageSize, String pageNum, Result result) {
 		List<AutoCollectionVo> resultList = new ArrayList<AutoCollectionVo>();
 
 		String NUMBER = (pageNum == null || pageNum == "") ? "10000" : pageNum; // 条数
@@ -552,6 +554,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
 		QAddressColAuxiliary auxiliary = QAddressColAuxiliary.addressColAuxiliary;
+		Predicate predicate = auxiliary.name.like(search+"%")
+									.or(auxiliary.quanPin.like(search+"%"))
+									.or(auxiliary.mobile.like(search+"%"));
 		List<AutoCollectionVo> fetch = queryFactory.select(Projections.bean(AutoCollectionVo.class,
 				qAddressCollection.rowId,
 				qAddressCollection.source,
@@ -586,7 +591,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
 		.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
 		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
-		.orderBy(auxiliary.shouZiMu.asc())
+		.where(predicate)
+		.orderBy(auxiliary.quanPin.asc())
 //		.offset(Long.parseLong(PAGENUM)*(Long.parseLong(NUMBER)-1))
 //		.limit(Long.parseLong(PAGENUM))
 		.fetch();
@@ -788,7 +794,11 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 
 	
 
-	
+	private Integer getSeq(){
+		List noTalk = entityManager.createNativeQuery("select appuser.seq_app_addresslist.nextval from dual")
+				.getResultList();
+			return Integer.parseInt(noTalk.get(0).toString());
+	}
 
 	
 

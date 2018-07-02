@@ -2,6 +2,8 @@ package com.lin.service.impl;
 
 import com.google.common.io.Files;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -75,111 +77,6 @@ public class GroupServiceImpl implements GroupServiceI {
 		return list;
 	}
 
-	/**
-	 * 编辑个人分组 loginID=22295& groupID=& groupName=以小组分组& groupDesc=分组详情&
-	 * userIds=123_234_456& type=1增加人员 2 删除人员 3 删除组
-	 * 
-	 * @throws Exception
-	 */
-	/*@Override
-	public void editGroup(String loginID, String groupID, String groupName, String groupDesc, String userIds,
-			String type) throws Exception {
-		// 验证是否为新建组
-		if (null == groupID || "".equals(groupID)) {
-//			String seq = utilDao.getSeqAppAddresslist();
-			QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
-//			select max(g.group_id) + 1 from appuser.address_group g
-			String fetchOne = queryFactory.select( 
-					qAddressGroup.groupId.max())
-					.from(qAddressGroup).fetchOne();
-			System.out.println(fetchOne);
-//			groupID = groupDao.getNGroupID();
-			GroupBean gb = new GroupBean();
-//			gb.setRowID(seq);
-			gb.setGroupID(groupID);
-			gb.setGroupName(groupName);
-			gb.setGroupDesc(groupDesc);
-			gb.setCreateUser(loginID);
-			groupDao.saveGroup(gb);
-			if (null != userIds && !"".equals(userIds)) {
-				String[] userID = userIds.split("_");
-				List<GroupUserBean> listGU = new ArrayList<GroupUserBean>();
-				for (int i = 0; i < userID.length; i++) {
-					GroupUserBean gu = new GroupUserBean();
-					String uid = userID[i];
-					String rowID = utilDao.getSeqAppGourpUser();
-					gu.setRowID(rowID);
-					gu.setGroupID(groupID);
-					gu.setGroupUser(uid);
-					listGU.add(gu);
-				}
-				groupDao.saveGroupUser(listGU);
-				// 创建群组 成功 生成群组头像 zhangWeiJie
-				editGroupImg(groupID);
-			}
-		} else {
-			if (null != type && !"".equals(type)) {
-				if (type.equals("1")) {// type=1增加人员
-					if (null != userIds && !"".equals(userIds)) {
-						String[] userID = userIds.split("_");
-						//不重复增加组人员
-						String groupUsers = groupDao.getGroupUserIDs(groupID);
-						List<GroupUserBean> listGU = new ArrayList<GroupUserBean>();
-						for (int i = 0; i < userID.length; i++) {
-							GroupUserBean gu = new GroupUserBean();
-							String uid = userID[i];
-							if(groupUsers.indexOf(uid) < 0){
-								String rowID = utilDao.getSeqAppGourpUser();
-								gu.setRowID(rowID);
-								gu.setGroupID(groupID);
-								gu.setGroupUser(uid);
-								listGU.add(gu);
-							}
-						}
-						groupDao.saveGroupUser(listGU);
-					}
-				} else if (type.equals("2")) {// 2 删除人员
-					if (null != userIds && !"".equals(userIds)) {
-						String[] userID = userIds.split("_");
-						GroupUserBean gu = new GroupUserBean();
-						String groupUser = "";
-						for (int i = 0; i < userID.length; i++) {
-							String uid = userID[i];
-							groupUser += "'" + uid + "',";
-						}
-						groupUser = groupUser.substring(0, groupUser.lastIndexOf(","));
-						gu.setGroupID(groupID);
-						gu.setGroupUser(groupUser);
-						
-//						queryFactory.delete(path)
-						
-						groupDao.deleteGroupUser(gu);
-					}
-				} else if (type.equals("3")) {// 3 删除组
-					groupDao.deleteGroup(groupID);
-					GroupUserBean gu = new GroupUserBean();
-					gu.setGroupID(groupID);
-					groupDao.deleteGroupUser(gu);
-				}
-				// 编辑群组人员，重新生成群组头像 zhangWeiJie
-				editGroupImg(groupID);
-			}
-			// groupName=以小组分组&
-			if (null != groupName && !"".equals(groupName)) {
-				GroupBean gb = new GroupBean();
-				gb.setGroupID(groupID);
-				gb.setGroupName(groupName);
-				groupDao.updateGroup(gb);
-			}
-			// groupDesc=分组详情
-			if (null != groupDesc && !"".equals(groupDesc)) {
-				GroupBean gb = new GroupBean();
-				gb.setGroupID(groupID);
-				gb.setGroupDesc(groupDesc);
-				groupDao.updateGroup(gb);
-			}
-		}
-	}*/
 	/**
 	 * 编辑个人分组 loginID=22295& groupID=& groupName=以小组分组& groupDesc=分组详情&
 	 * userIds=123_234_456& type=1增加人员 2 删除人员 3 删除组
@@ -302,8 +199,10 @@ public class GroupServiceImpl implements GroupServiceI {
 			}
 			String uPicTem = tem + u.getUserID() + ".png";
 			try {
-				uPic=uPic.replace(imgIp,imgRoot);//去掉IP地址
-				Files.copy(new File(uPic), new File(uPicTem));
+				uPic=uPic.replace(imgIp,imgRoot);
+				File fromFile = new File(uPic);
+				File toFile = new File(uPicTem);
+				copyFile(fromFile,toFile);
 				File f = new File(uPicTem);
 				fileList.add(f);
 				// 只要九个图片(方法只允许最多9张图片)
@@ -319,12 +218,18 @@ public class GroupServiceImpl implements GroupServiceI {
 		if (fileList.size() > 0) {
 			//文件名称不能单用groupId生成 如果前端设置本地缓存 则图片不会更新
 			String union=System.currentTimeMillis()+"";
-			String groupImgAddress = picGroupImg + union+ groupID + ".png";// 存放群组图片地址服务器文件路径
-			ImageUtil.createImage(fileList, groupImgAddress, "");// 9张图片生成1张图片
+			// 存放群组图片地址服务器文件路径
+			String groupImgAddress = picGroupImg + union+ groupID + ".png";
+			// 9张图片生成1张图片
+			ImageUtil.createImage(fileList, groupImgAddress, "");
 			File f = new File(groupImgAddress);
 			String saveUrl = picGroupDbImg + union+ groupID + ".png";
-			if (f.exists()) {// 更新appuser.address_group表
-				groupDao.updateGroupImgInfo(groupID, saveUrl);
+			// 更新appuser.address_group表
+			if (f.exists()) {
+				GroupBean gb = new GroupBean();
+				gb.setGroupID(groupID);
+				gb.setGroupName(saveUrl);
+				groupDao.updateGroupImgInfo(gb);
 			}
 		}
 	}
@@ -380,7 +285,26 @@ public class GroupServiceImpl implements GroupServiceI {
 		}
 		return gd;
 	}
+	/**
+	 * 复制文件
+	 * @param fromFile
+	 * @param toFile
+	 * <br/>
+	 * 2016年12月19日  下午3:31:50
+	 * @throws IOException
+	 */
+	public void copyFile(File fromFile,File toFile) throws IOException{
+		FileInputStream ins = new FileInputStream(fromFile);
+		FileOutputStream out = new FileOutputStream(toFile);
+		byte[] b = new byte[1024];
+		int n=0;
+		while((n=ins.read(b))!=-1){
+			out.write(b, 0, n);
+		}
 
+		ins.close();
+		out.close();
+	}
 	@Override
 	public String getGroupUserIDs(String groupID) {
 		return groupDao.getGroupUserIDs(groupID);

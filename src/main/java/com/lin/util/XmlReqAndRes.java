@@ -36,6 +36,7 @@ public class XmlReqAndRes {
 			SalesPADSoapBindingStub stub = new SalesPADSoapBindingStub(new URL(url),locator);
 			
 			String reqXml = reqXml(busiCode, map);
+			System.out.print("dk---------:"+reqXml);
 			String salesPADService = stub.salesPADService(reqXml);
 			
 			long end = System.currentTimeMillis();
