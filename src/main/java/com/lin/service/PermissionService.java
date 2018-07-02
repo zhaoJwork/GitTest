@@ -1,10 +1,8 @@
 package com.lin.service;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +13,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
-import org.hibernate.dialect.identity.GetGeneratedKeysDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.AddressBanned;
@@ -38,13 +36,10 @@ import com.lin.util.Result;
 import com.lin.util.XmlReqAndRes;
 import com.lin.vo.AddressCollectionVo;
 import com.lin.vo.AutoCollectionVo;
-import com.querydsl.core.types.CollectionExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sun.xml.internal.fastinfoset.algorithm.FloatEncodingAlgorithm;
 
 
 /**
@@ -524,6 +519,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 * @return 1 已被收藏  0  未被收藏
 	 */
 	public String getIsCollection(String contactId) {
+		if(contactId == null || contactId == "") {
+			return "0";
+		}
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
 		AddressCollection collection = queryFactory.selectFrom(qAddressCollection)
 		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(contactId)))
@@ -543,6 +541,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	 * @date 2018年6月13日
 	 */
 	@SuppressWarnings("unchecked")
+	@Transactional
 	public void getCollectionList(String loginId, String pageSize, String pageNum, Result result) {
 		List<AutoCollectionVo> resultList = new ArrayList<AutoCollectionVo>();
 
@@ -636,6 +635,12 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			// 获取远程数据
 			Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
 
+			if(xmlMap.isEmpty()) {
+				result.setRespCode("2");
+				result.setRespDesc("访问迪科接口失败");
+				result.setRespMsg("");
+//				return;
+			}
 
 			if(!"999".equals(((Map<?, ?>)xmlMap.get("TcpCont")).get("ResultCode"))) {
 
@@ -685,7 +690,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 								String contactName = (String)m.get("CONTACT_NAME");
 								String quanPin = name.get(0).toString();
 								String shouZiMu = name.get(0).toString().substring(0,1).toUpperCase();
-								long execute = queryFactory.update(auxiliary)
+								queryFactory.update(auxiliary)
 								.set(auxiliary.mobile, mobile)
 								.set(auxiliary.name, contactName)
 								.set(auxiliary.quanPin, quanPin)
@@ -741,32 +746,29 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		}
 
 	}
+	
+	
 
 	// 本地迪科数据同步
-	private void autoDele(String contactIDs, QAddressCollection qAddressCollection, QAddressColAuxiliary auxiliary) {
+	@Transactional
+	public void autoDele(String contactIDs, QAddressCollection qAddressCollection, QAddressColAuxiliary auxiliary) {
 		String[] contactId = contactIDs.substring(0, contactIDs.length()-1).split(";");
-		Number [] contactNum = new Number[contactId.length];
+		List<Integer> list = new ArrayList<Integer>();
 		for(int m = 0; m < contactId.length; m++) {
-			contactNum[m] = (Number)Long.parseLong(contactId[m]);
+			list.add(Integer.parseInt(contactId[m]));
 		}
 
 		List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
 		.from(qAddressCollection)
-		.where(qAddressCollection.collectionUserId.in(contactNum)).fetch();
+		.where(qAddressCollection.collectionUserId.in(list.toArray(new Integer[] {}))).fetch();
 
 
-		Number [] auxiNum = new Number[fetch2.size()];
-		for(int n = 0; n < fetch2.size(); n++) {
-			auxiNum[n] = (Number)fetch2.get(n);
-		}
-
-
-		long execute = queryFactory.delete(auxiliary)
-		.where(auxiliary.rowId.in(auxiNum))
+		queryFactory.delete(auxiliary)
+		.where(auxiliary.rowId.in(fetch2.toArray(new Integer[]{})))
 		.execute();
 
-		long execute2 = queryFactory.delete(qAddressCollection)
-		.where(qAddressCollection.collectionUserId.in(contactNum))
+		queryFactory.delete(qAddressCollection)
+		.where(qAddressCollection.collectionUserId.in(list.toArray(new Integer[] {})))
 		.execute();
 	}
 

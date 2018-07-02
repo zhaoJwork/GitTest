@@ -98,12 +98,18 @@ public class CustomerService  {
 		map.put("ORDERBY", ORDERBY);
 		
 		Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
+		if(xmlMap.isEmpty()) {
+			result.setRespCode("2");
+			result.setRespDesc("访问迪科接口失败");
+			result.setRespMsg("");
+			return;
+		}
 		// 解析xml
 		List<Map<String, Object>> resultList = new ArrayList<>();
 		Map<String, Object> resultMap;
 		// 组装查询in条件
 		List<String> tempList = new ArrayList<>();
-		List<Long> list2 = new ArrayList<Long>();
+		List<String> list2 = new ArrayList<String>();
 		if(!"999".equals(((Map<?, ?>)xmlMap.get("TcpCont")).get("ResultCode"))) {
 			Map<?, ?> mapp = ((Map<?, ?>)xmlMap.get("SvcCont"));
 			Object object = mapp.get("ADD_CUST_CONTACTS");
@@ -120,8 +126,8 @@ public class CustomerService  {
 				Map<?, ?> m = (Map<?, ?>)list.get(i);
 				String contactId = (String)m.get("CONTACT_ID");
 				String contactName = (String)m.get("CONTACT_NAME");
-				resultMap.put("contactID", contactName);// 联系人名称
-				resultMap.put("contactName", contactId);// 联系人编码
+				resultMap.put("contactID", contactId);// 联系人名称
+				resultMap.put("contactName", contactName);// 联系人编码
 				resultMap.put("contactMobile", m.get("MOBILE_PHONE"));// 联系人手机号
 				resultMap.put("contactEmail", m.get("E_MAIL"));// 联系人Email
 				resultMap.put("contactDept", m.get("DEPT_NAME"));// 联系人所属部门
@@ -144,7 +150,7 @@ public class CustomerService  {
 				
 				resultList.add(resultMap);
 				if(oldPartyCode != null && oldPartyCode != "") {
-					list2.add(Long.parseLong(oldPartyCode));
+					list2.add(oldPartyCode);
 				}
 			}
 			
@@ -184,10 +190,6 @@ public class CustomerService  {
 			}
 			
 			
-			Number[] numbers = new  Number[list2.size()];
-			for (int i = 0; i < list2.size(); i++) {
-				numbers[i]=(Number)list2.get(i);
-			}
 			
 			
 			// 客户编码list  进行客户图片替换
@@ -205,9 +207,8 @@ public class CustomerService  {
 			.leftJoin(qCustTreeRel).on(qCust.custID.eq(qCustTreeRel.custID))
 			.leftJoin(qCustTreeNode).on(qCustTreeNode.custNodeID.eq(qCustTreeRel.custNodeID))
 			.leftJoin(qdkLogourl).on(qdkLogourl.custNodeCD.eq(qCustTreeNode.custNodeCD.stringValue()))
-			.where(qCust.custID.in(numbers))
+			.where(qCust.custID.stringValue().in(list2))
 			.fetch();
-			
 			
 			if(fetch.size() > 0) {
 				for (int i = 0; i < resultList.size(); i++) {
@@ -227,6 +228,14 @@ public class CustomerService  {
     }
     
 
+    /**
+     * 人员列表
+     * @param loginId
+     * @param search
+     * @param pageSize
+     * @param pageNum
+     * @param result
+     */
 	@SuppressWarnings("unchecked")
 	public void getCustList(String loginId, String search, String pageSize, String pageNum, Result result) {
 		//准备调用DK参数
@@ -253,6 +262,13 @@ public class CustomerService  {
 		map.put("ORDERBY", ORDERBY);
 		
 		Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
+		
+		if(xmlMap.isEmpty()) {
+			result.setRespCode("2");
+			result.setRespDesc("访问迪科接口失败");
+			result.setRespMsg("");
+			return;
+		}
 		
 		List<Object> resultList = new ArrayList<>();
 		if(!"999".equals(((Map<?, ?>)xmlMap.get("TcpCont")).get("ResultCode"))) {
