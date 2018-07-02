@@ -15,8 +15,8 @@ import java.util.List;
  * @since   
  */
 @Service("collectionService")
-public class CollectionService extends AbstractService<AddressCollection,Integer> {
-
+public class CollectionService {
+/*
 
 	public CollectionService(PagingAndSortingRepository<AddressCollection, Integer> pagingRepository) {
 		super(pagingRepository);
@@ -30,5 +30,5 @@ public class CollectionService extends AbstractService<AddressCollection,Integer
 	@Override
 	public List<AddressCollection> findByIds(Integer... integers) {
 		return null;
-	}
+	}*/
 }

@@ -235,7 +235,7 @@ public class CustomerService  {
     
 
     /**
-     * 人员列表
+     * 客户列表
      * @param loginId
      * @param search
      * @param pageSize

@@ -51,7 +51,7 @@ public class CustomerController {
 		Result result = new Result();
 		if(loginId == null || loginId.trim().equals("")) {
 			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
+			result.setRespDesc("loginId 不能为空");
 			logServiceDsl.saveAddressInfLog(log, result);
 			return result;
 		}
@@ -84,7 +84,7 @@ public class CustomerController {
 		Result result = new Result();
 		if(loginId == null || loginId.trim().equals("")) {
 			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
+			result.setRespDesc("loginId 不能为空");
 			logServiceDsl.saveAddressInfLog(log, result);
 			return result;
 		}

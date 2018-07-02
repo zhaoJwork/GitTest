@@ -14,9 +14,9 @@ import java.util.List;
  * @since   
  */
 @Service("colAuxiliaryService")
-public class ColAuxiliaryService extends AbstractService<AddressColAuxiliary,Integer> {
+public class ColAuxiliaryService {
 
-
+/*
 	public ColAuxiliaryService(PagingAndSortingRepository<AddressColAuxiliary, Integer> pagingRepository) {
 		super(pagingRepository);
 	}
@@ -29,5 +29,5 @@ public class ColAuxiliaryService extends AbstractService<AddressColAuxiliary,Int
 	@Override
 	public List<AddressColAuxiliary> findByIds(Integer... integers) {
 		return null;
-	}
+	}*/
 }
