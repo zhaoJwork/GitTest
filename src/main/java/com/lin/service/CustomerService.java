@@ -40,6 +40,9 @@ public class CustomerService  {
 	@Value("${application.CUST_IMG}")
 	private String custIMG;
 	
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp;
+	
 	
 	
 	@Resource
@@ -158,12 +161,14 @@ public class CustomerService  {
 			// img处理   进行行业图片替换
 			for(int i = 0; i < tempList.size(); i++) {
 				String tempStr = tempList.get(i);
+				Map<String, Object> imgMap = resultList.get(i);
 				if(tempStr == null || tempStr == "") {
-					break;
+					imgMap.put("img", picHttpIp + "/1/mphotos/10000004.png");
+					resultList.set(i, imgMap);
+					continue;
 				}
 					
 				String industry = tempStr.substring(0, 2);
-				Map<String, Object> imgMap = resultList.get(i);
 				if (industry.equals("FF")) {//制造业
 					imgMap.put("img", custIMG + "zhizaonengyuan.png");
 				}
