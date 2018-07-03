@@ -141,7 +141,7 @@ public class GroupServiceImpl implements GroupServiceI {
 								}
 							}
 						}
-						 if(0 > listGU.size()) {
+						 if(0 < listGU.size()) {
 							 groupDao.saveGroupUser(listGU);
 						 }
 					}
