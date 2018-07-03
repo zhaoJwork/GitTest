@@ -18,7 +18,7 @@ import java.util.Date;
 
 @ApiModel(value = "Context", description = "工作内容表")
 @Entity
-@Table(name = "address_user_work")
+@Table(name = "address_work_content")
 public class Context implements Serializable {
 
   @ApiModelProperty(value = "主键")
