@@ -62,7 +62,7 @@ public class PermissionController {
 		Result result = new Result();
 		if(loginId == null || loginId.trim().equals("")) {
 			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
+			result.setRespDesc("loginId 不能为空");
 			logService.saveAddressInfLog(log, result);
 			return result;
 		}
@@ -105,7 +105,7 @@ public class PermissionController {
 		Result result = new Result();
 		if(loginId == null || loginId.trim().equals("")) {
 			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
+			result.setRespDesc("loginId 不能为空");
 			logService.saveAddressInfLog(log, result);
 			return result;
 		}
@@ -147,7 +147,7 @@ public class PermissionController {
 		Result result = new Result();
 		if(loginId == null || loginId.trim().equals("")) {
 			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
+			result.setRespDesc("loginId 不能为空");
 			logService.saveAddressInfLog(log, result);
 			return result;
 		}

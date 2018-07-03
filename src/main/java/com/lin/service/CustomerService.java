@@ -89,7 +89,7 @@ public class CustomerService  {
 		Map<String,Object> map = new HashMap<>();
 		map.put("OLD_PARTY_CODE", OLD_PARTY_CODE.trim());
 		map.put("STAFF_ID", loginId);
-		map.put("DEPARTMENT_ID", deptId);
+		map.put("DEPARTMENT_ID", "");
 		map.put("CONTACT_ID", "");
 		map.put("CUSTCONTACT_NAME", search.trim());
 		map.put("STATUS", STATUS);
@@ -157,7 +157,12 @@ public class CustomerService  {
 			
 			// img处理   进行行业图片替换
 			for(int i = 0; i < tempList.size(); i++) {
-				String industry = tempList.get(i).substring(0, 2);
+				String tempStr = tempList.get(i);
+				if(tempStr == null || tempStr == "") {
+					break;
+				}
+					
+				String industry = tempStr.substring(0, 2);
 				Map<String, Object> imgMap = resultList.get(i);
 				if (industry.equals("FF")) {//制造业
 					imgMap.put("img", custIMG + "zhizaonengyuan.png");
@@ -235,7 +240,7 @@ public class CustomerService  {
     
 
     /**
-     * 人员列表
+     * 客户列表
      * @param loginId
      * @param search
      * @param pageSize
