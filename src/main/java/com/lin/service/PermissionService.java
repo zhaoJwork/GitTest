@@ -645,7 +645,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				result.setRespCode("2");
 				result.setRespDesc("访问迪科接口失败");
 				result.setRespMsg("");
-//				return;
+				return;
 			}
 
 			if(!"999".equals(((Map<?, ?>)xmlMap.get("TcpCont")).get("ResultCode"))) {
