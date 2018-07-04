@@ -50,6 +50,11 @@ application:
  ADDB_DK: http://10.128.49.81:9083/CRM-PAD/services/SalesPAD?wsdl
  #测试  图片地址
  CUST_IMG: http://42.99.16.145/mpi/plist_dir/plist_dir/custLogo/150_noword/
- 
+ redis_host: 10.1.11.32
+ redis_port: 6379
+ redis_timeout: 30000
+
+
+
 swagger:
   show: true

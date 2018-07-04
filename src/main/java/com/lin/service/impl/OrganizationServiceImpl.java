@@ -1,6 +1,8 @@
 package com.lin.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.lin.domain.OrganizationBean;
 import com.lin.util.JsonUtil;
 import java.text.ParseException;
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.lin.mapper.OrganizationMapper;
@@ -21,6 +25,8 @@ import com.lin.domain.OrgTer;
 import com.lin.service.OrganizationServiceI;
 import com.lin.service.RedisServiceI;
 import com.lin.util.JedisKey;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
  * 组织机构service 实现类
@@ -32,10 +38,21 @@ import com.lin.util.JedisKey;
 public class OrganizationServiceImpl implements OrganizationServiceI {
 
 	@Autowired
+	private StringRedisTemplate redisTemplate;
+	@Autowired
 	private OrganizationMapper organizationDao;
 
 	@Autowired
 	private RedisServiceI jedisService;
+
+
+	@Value("${application.redis_host}")
+	private String redis_host;
+	@Value("${application.redis_port}")
+	private int redis_port;
+	@Value("${application.redis_timeout}")
+	private int redis_timeout;
+
 
 	/**
 	 * 1、判断时间参数 如果等于 缺省时间： 2008-08-08 12:13:14 为首次同步 获取缓存中的数据，
@@ -961,9 +978,18 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 	public Map<String, Object> fiveCityOrganization(String loginID) {
 		Map<String, Object> organizationMap = new HashMap<String, Object>();
 		// 从redis中取出全部数据
-		List<Object> redisOrganization = jedisService.values(JedisKey.FIVEORGANIZATIONKEY);
+
+		//JedisPool jedisPool = new JedisPool("","",0,"");
+
+		Jedis jedis = new Jedis(redis_host, redis_port,redis_timeout);
+		//List redisOrgList = jedis.s(JedisKey.FIVEORGANIZATIONKEY);
+		String redisOrgList = jedis.get("fiveOrgText");
+		//List<Object> redisOrganization = jedis..get(JedisKey.FIVEORGANIZATIONKEY);
+		/*JedisPool jedisPool = new JedisPool(redis_host,redis_port,"",redis_timeout);*/
+		//List<Object> redisOrganization = jedisService.values(JedisKey.FIVEORGANIZATIONKEY);
+
 		// 缓存中不存在
-		if (redisOrganization == null || redisOrganization.size() == 0) {
+		if (redisOrgList == null || redisOrgList.length() == 0) {
 			List<OrganizationBean> organizationList = organizationDao.fiveCityOrganization(loginID);
 			Map<String, String> map = new LinkedHashMap<String, String>();
 			for (OrganizationBean o : organizationList) {
@@ -974,17 +1000,23 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 				}
 			}
 			if (map.size() > 0) {
-				jedisService.save(JedisKey.FIVEORGANIZATIONKEY, map);
+				//jedisService.save(JedisKey.FIVEORGANIZATIONKEY, map);
+				//JSONArray json = JSONArray.fromObject(list);
+				jedis.set("fiveOrgText" ,JSON.toJSONString(map,true));
 				Collections.sort(organizationList);
 				organizationMap.put("organizationList", organizationList);
 			}
 		} else {// 存在 则为首次同步数据 返回全部
 			List<OrganizationBean> list = new ArrayList<OrganizationBean>();
 			OrganizationBean ooo = new OrganizationBean();
-			for (Object re : redisOrganization) {
-				OrganizationBean organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
+			Map<String,String> map1 = (Map<String,String>)JSON.parse(redisOrgList);
+			for (String key : map1.keySet()){
+				//System.out.println(map1.get(key).getOrganizationID();
+				OrganizationBean organization = JsonUtil.fromJson(map1.get(key).toString(), ooo.getClass());
 				list.add(organization);
 			}
+
+
 			Collections.sort(list);
 			organizationMap.put("organizationList", list);
 		}
