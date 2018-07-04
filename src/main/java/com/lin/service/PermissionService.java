@@ -94,10 +94,17 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		// 根据type判断 要查询的是哪种权限  1为禁言 2为能力指数
 		if(type.equals(1)) {
 			// 查询是否有权限
-			List<?> resultList = entityManager.createNativeQuery("select count(1) from appuser.address_user u where u.dep_id = '626' and u.user_id = ?")
-					.setParameter(1, loginId)
-					.getResultList();
-			if("1".equals(resultList.get(0).toString())) {
+			QUserStaff qUserStaff = QUserStaff.userStaff;
+			
+			Long resultLong = queryFactory.select(
+					qUserStaff.staffID.count()
+					)
+			.from(qUserStaff)
+			.where(qUserStaff.departmentID.eq(626)
+					.and(qUserStaff.staffID.eq(Integer.parseInt(loginId))))
+			.fetchOne();
+			
+			if(resultLong > 0) {
 				result.setRespCode("1");
 				result.setRespDesc("正常返回数据");
 				result.setRespMsg("1");
