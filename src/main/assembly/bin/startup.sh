@@ -30,8 +30,8 @@ done
 # echo Distributed
 # echo https://appAddresslistAPIthub.com/brucexx/heisenberg
 # echo brucest0078@gmail.com
-JAVA_HOME=/app/jdk1.8.0_151
-#JAVA_HOME=/app/was/jdk1.8.0_161
+#JAVA_HOME=/app/jdk1.8.0_151
+JAVA_HOME=/app/was/jdk1.8.0_161
 PATH=$JAVA_HOME/bin:$PATH
 CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 export JAVA_HOME

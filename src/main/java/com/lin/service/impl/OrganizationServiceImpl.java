@@ -1,6 +1,8 @@
 package com.lin.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.lin.domain.OrganizationBean;
 import com.lin.util.JsonUtil;
 import java.text.ParseException;
@@ -15,6 +17,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.lin.mapper.OrganizationMapper;
@@ -34,6 +37,8 @@ import redis.clients.jedis.JedisPool;
 @Service("organizationService")
 public class OrganizationServiceImpl implements OrganizationServiceI {
 
+	@Autowired
+	private StringRedisTemplate redisTemplate;
 	@Autowired
 	private OrganizationMapper organizationDao;
 
@@ -976,13 +981,15 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 
 		//JedisPool jedisPool = new JedisPool("","",0,"");
 
-		//Jedis jedis = new Jedis(redis_host, redis_port,redis_timeout);
+		Jedis jedis = new Jedis(redis_host, redis_port,redis_timeout);
+		//List redisOrgList = jedis.s(JedisKey.FIVEORGANIZATIONKEY);
+		String redisOrgList = jedis.get("fiveOrgText");
 		//List<Object> redisOrganization = jedis..get(JedisKey.FIVEORGANIZATIONKEY);
 		/*JedisPool jedisPool = new JedisPool(redis_host,redis_port,"",redis_timeout);*/
-		List<Object> redisOrganization = jedisService.values(JedisKey.FIVEORGANIZATIONKEY);
+		//List<Object> redisOrganization = jedisService.values(JedisKey.FIVEORGANIZATIONKEY);
 
 		// 缓存中不存在
-		if (redisOrganization == null || redisOrganization.size() == 0) {
+		if (redisOrgList == null || redisOrgList.length() == 0) {
 			List<OrganizationBean> organizationList = organizationDao.fiveCityOrganization(loginID);
 			Map<String, String> map = new LinkedHashMap<String, String>();
 			for (OrganizationBean o : organizationList) {
@@ -993,17 +1000,23 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 				}
 			}
 			if (map.size() > 0) {
-				jedisService.save(JedisKey.FIVEORGANIZATIONKEY, map);
+				//jedisService.save(JedisKey.FIVEORGANIZATIONKEY, map);
+				//JSONArray json = JSONArray.fromObject(list);
+				jedis.set("fiveOrgText" ,JSON.toJSONString(map,true));
 				Collections.sort(organizationList);
 				organizationMap.put("organizationList", organizationList);
 			}
 		} else {// 存在 则为首次同步数据 返回全部
 			List<OrganizationBean> list = new ArrayList<OrganizationBean>();
 			OrganizationBean ooo = new OrganizationBean();
-			for (Object re : redisOrganization) {
-				OrganizationBean organization = JsonUtil.fromJson(re.toString(), ooo.getClass());
+			Map<String,String> map1 = (Map<String,String>)JSON.parse(redisOrgList);
+			for (String key : map1.keySet()){
+				//System.out.println(map1.get(key).getOrganizationID();
+				OrganizationBean organization = JsonUtil.fromJson(map1.get(key).toString(), ooo.getClass());
 				list.add(organization);
 			}
+
+
 			Collections.sort(list);
 			organizationMap.put("organizationList", list);
 		}
