@@ -642,9 +642,15 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
 
 			if(xmlMap.isEmpty()) {
-				result.setRespCode("2");
-				result.setRespDesc("访问迪科接口失败");
-				result.setRespMsg("");
+				List<AutoCollectionVo> localList = new ArrayList<AutoCollectionVo>();
+				for(int i = 0; i < fetch.size(); i++) {
+					if(fetch.get(i).getSource().equals(1)) {
+						localList.add(fetch.get(i));
+					}
+				}
+				result.setRespCode("1");
+				result.setRespDesc("返回本地列表");
+				result.setRespMsg(localList);
 				return;
 			}
 

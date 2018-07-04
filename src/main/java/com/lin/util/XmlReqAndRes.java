@@ -43,6 +43,10 @@ public class XmlReqAndRes {
 			
 			System.out.println("调用webservice连接,共消耗"+(end-start)+"ms");
 			
+			if(salesPADService.equals("程序内部执行异常")) {
+				return new HashMap<>();
+			}
+			
 			Document resultDoc = Xml2Bean.createDoc(salesPADService);
 			
 			dom2Map = XmlUtils.Dom2Map(resultDoc);
