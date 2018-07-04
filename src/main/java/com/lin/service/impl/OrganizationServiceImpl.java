@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.lin.mapper.OrganizationMapper;
@@ -21,6 +22,8 @@ import com.lin.domain.OrgTer;
 import com.lin.service.OrganizationServiceI;
 import com.lin.service.RedisServiceI;
 import com.lin.util.JedisKey;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
  * 组织机构service 实现类
@@ -36,6 +39,15 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 
 	@Autowired
 	private RedisServiceI jedisService;
+
+
+	@Value("${application.redis_host}")
+	private String redis_host;
+	@Value("${application.redis_port}")
+	private int redis_port;
+	@Value("${application.redis_timeout}")
+	private int redis_timeout;
+
 
 	/**
 	 * 1、判断时间参数 如果等于 缺省时间： 2008-08-08 12:13:14 为首次同步 获取缓存中的数据，
@@ -961,7 +973,14 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 	public Map<String, Object> fiveCityOrganization(String loginID) {
 		Map<String, Object> organizationMap = new HashMap<String, Object>();
 		// 从redis中取出全部数据
+
+		//JedisPool jedisPool = new JedisPool("","",0,"");
+
+		//Jedis jedis = new Jedis(redis_host, redis_port,redis_timeout);
+		//List<Object> redisOrganization = jedis..get(JedisKey.FIVEORGANIZATIONKEY);
+		/*JedisPool jedisPool = new JedisPool(redis_host,redis_port,"",redis_timeout);*/
 		List<Object> redisOrganization = jedisService.values(JedisKey.FIVEORGANIZATIONKEY);
+
 		// 缓存中不存在
 		if (redisOrganization == null || redisOrganization.size() == 0) {
 			List<OrganizationBean> organizationList = organizationDao.fiveCityOrganization(loginID);
