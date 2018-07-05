@@ -2,6 +2,7 @@ package com.lin;
 import com.lin.domain.Group;
 import com.lin.domain.User;
 import com.lin.domain.UserDetails;
+import com.lin.vo.AutoCollectionVo;
 import com.lin.vo.UserDetailsVo;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,6 @@ public class AddressBookApplication {
 
   @Bean
   public String loadConfig(){
-    return UserDetails.picHttpIp = User.picHttpIp = Group.picHttpIp = UserDetailsVo.picHttpIp = picHttpIp;
+    return UserDetails.picHttpIp = User.picHttpIp = Group.picHttpIp = UserDetailsVo.picHttpIp = AutoCollectionVo.picHttpIp =picHttpIp;
   }
 }

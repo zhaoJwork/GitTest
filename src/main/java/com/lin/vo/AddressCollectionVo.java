@@ -1,5 +1,6 @@
 package com.lin.vo;
 
+import com.google.common.base.Strings;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

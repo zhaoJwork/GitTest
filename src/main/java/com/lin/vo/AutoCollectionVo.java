@@ -2,6 +2,8 @@ package com.lin.vo;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Strings;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -13,7 +15,8 @@ import lombok.Data;
 @ApiModel(value="AutoCollectionVo", description="收藏列表 ")
 @Data
 public class AutoCollectionVo {
-
+	@JsonIgnore
+	public static String picHttpIp;
 	/**
 	 * address_collection
 	 *
@@ -204,7 +207,14 @@ public class AutoCollectionVo {
 		this.organizationID = organizationID;
 	}
 	public String getUserPic() {
-		return userPic;
+		if(Strings.isNullOrEmpty(userPic)) {
+			return userPic;
+		}
+		if (userPic.indexOf(picHttpIp) > -1) {
+			return userPic;
+		} else {
+			return picHttpIp + userPic;
+		}
 	}
 	public void setUserPic(String userPic) {
 		this.userPic = userPic;
