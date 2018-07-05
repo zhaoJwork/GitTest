@@ -68,11 +68,9 @@
 				              where o1.pid in (select o.organ_id
 				                                 from appuser.address_organization o
 				                                 where  o.organ_name = '省公司')
-				                and (o1.organ_name like '%政企部%' or
-				                    o1.organ_name like '%政企客户部%'))
+				                and o1.organ_name like '政企%')
 				connect by prior aon.organ_id = aon.pid 
 				)
-				and p.pos_name = '政企领导'
 		</if>
 		
 		<if test="search !='' and search !=null">
