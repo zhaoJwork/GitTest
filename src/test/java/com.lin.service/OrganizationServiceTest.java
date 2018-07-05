@@ -30,4 +30,12 @@ public class OrganizationServiceTest {
     List<OrganizationDsl> list = organizationServiceDsl.getOrganizationByDsl(dsl);
     Assert.assertNotNull(list);
   }
+
+  /**
+   * 测试按上一级查询组织部门
+   */
+  @Test
+  public void delRedis(){
+     organizationServiceDsl.rmJedisOrg();
+  }
 }

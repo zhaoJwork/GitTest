@@ -8,7 +8,9 @@ import com.lin.repository.OrganizationRepository;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -23,6 +25,12 @@ import java.util.List;
  */
 @Service("organizationServiceDsl")
 public class OrganizationServiceImpl extends AbstractService<OrganizationDsl,String> {
+	@Value("${application.redis_host}")
+	private String redis_host;
+	@Value("${application.redis_port}")
+	private int redis_port;
+	@Value("${application.redis_timeout}")
+	private int redis_timeout;
 
 	@Autowired
 	private OrganizationRepository repository;
@@ -79,4 +87,10 @@ public class OrganizationServiceImpl extends AbstractService<OrganizationDsl,Str
 
 		return query.select(organDsl).from(organDsl).where(organDsl.organizationID.in(strings)).fetch();
 	}
+
+public void rmJedisOrg(){
+	Jedis jedis = new Jedis(redis_host, redis_port,redis_timeout);
+	jedis.set("fiveOrgText","");
+}
+
 }

@@ -81,7 +81,7 @@ public class CommunicationDslController {
      * @describe 描述 获取个人详情
      *           http://localhost:8866/app-addresslist/communicationdsl/userdetails?loginID=101948&userID=101948
      */
-    @RequestMapping("userdetails")
+    @GetMapping("userdetails")
     @ResponseBody
     public Result userdetails(HttpServletRequest req, String loginID, String userID) {
         AddressInfLog log =  logServiceDsl.getInfLog(req,"个人详情");
@@ -122,5 +122,30 @@ public class CommunicationDslController {
         logServiceDsl.saveAddressInfLog(log,result);
         return result;
     }
-
+    /**
+     *
+     * @return Result
+     * @author lwz
+     * @date 2017年9月15日
+     * @describe URL
+     *           请求实例：
+     *           http://42.99.16.145/app-addresslist/communication/userPower?loginID=22295
+     */
+    @ApiOperation(value="删除50本地网",tags = {"1s"})
+    @GetMapping("delFiveOrgRedis")
+    @ResponseBody
+    public Result delFiveOrgRedis(HttpServletRequest req) {
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"删除50本地网");
+        Result result = new Result();
+        try {
+            organizationServiceDslImpl.rmJedisOrg();
+            result.setRespCode("1");
+            result.setRespDesc("正常返回数据");
+            result.setRespMsg("");
+            logServiceDsl.saveAddressInfLog(log, result);
+        } catch (Exception e) {
+            logServiceDsl.saveError(e,log);
+        }
+        return result;
+    }
 }
