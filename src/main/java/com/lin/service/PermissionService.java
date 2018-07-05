@@ -575,7 +575,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				qUser.address,
 				qUser.organizationID,
 				new CaseBuilder()
-					.when(uass.portrait_url.isNull().and(uass.portrait_url.isEmpty()))
+					.when(uass.portrait_url.isNull().or(uass.portrait_url.isEmpty()))
 					.then(qUser.userPic)
 					.otherwise(uass.portrait_url).as("userPic"),
 				qPositionDsl.posName,

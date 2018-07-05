@@ -75,13 +75,14 @@ public class PermissionController {
 		
 		try {
 			this.permissionService.getBannedSayCheck(loginId, type,result);
-			
+			logService.saveAddressInfLog(log, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
+			logService.saveAddressInfLog(log, result);
 		}
 		return result;
 	}
@@ -112,13 +113,14 @@ public class PermissionController {
 		
 		try {
 			this.permissionService.getIsBannedSay(loginId, result);
-			
+			logService.saveAddressInfLog(log, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
+			logService.saveAddressInfLog(log, result);
 		}
 		return result;
 	}
@@ -166,13 +168,14 @@ public class PermissionController {
 		
 		try {
 			this.permissionService.getAbilitycheck(loginId, type, userId,result);
-			
+			logService.saveAddressInfLog(log, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
+			logService.saveAddressInfLog(log, result);
 		}
 		return result;
 	}
@@ -227,13 +230,14 @@ public class PermissionController {
 		try {
 			
 			this.permissionService.addBannedSay(addressBanned, result);
-			
+			logService.saveAddressInfLog(log, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
+			logService.saveAddressInfLog(log, result);
 		}
 		return result;
 	}
@@ -288,13 +292,14 @@ public class PermissionController {
 		try {
 			
 			this.permissionService.cancelBannedSay(addressBanned, result);
-			
+			logService.saveAddressInfLog(log, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
+			logService.saveAddressInfLog(log, result);
 		}
 		return result;
 	}
@@ -364,12 +369,14 @@ public class PermissionController {
 		}
 		try {
 			this.permissionService.addAddressCollection(addressCollection, result);
+			logService.saveAddressInfLog(log, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
+			logService.saveAddressInfLog(log, result);
 		}
 		return result;
 	}
@@ -422,12 +429,14 @@ public class PermissionController {
 
 		try {
 			this.permissionService.cancelAddressCollection(addressCollection, result);
+			logService.saveAddressInfLog(log, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
+			logService.saveAddressInfLog(log, result);
 		}
 		return result;
 	}
@@ -460,12 +469,14 @@ public class PermissionController {
 		}
 		try {
 			this.permissionService.getCollectionList(loginId,search, pageSize, pageNum, result);
+			logService.saveAddressInfLog(log, result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.setExpError(e.toString());
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
+			logService.saveAddressInfLog(log, result);
 		}
 		return result;
 	}
