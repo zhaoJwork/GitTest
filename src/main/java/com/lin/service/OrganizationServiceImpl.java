@@ -1,10 +1,15 @@
 package com.lin.service;
 
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ideal.wheel.common.AbstractService;
+import com.lin.domain.OrganizationBean;
 import com.lin.domain.OrganizationDsl;
 import com.lin.domain.QOrganizationBlack;
 import com.lin.domain.QOrganizationDsl;
+import com.lin.mapper.OrganizationMapper;
 import com.lin.repository.OrganizationRepository;
+import com.lin.util.JsonUtil;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +20,9 @@ import redis.clients.jedis.Jedis;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 组织机构service 实现类
@@ -31,6 +38,9 @@ public class OrganizationServiceImpl extends AbstractService<OrganizationDsl,Str
 	private int redis_port;
 	@Value("${application.redis_timeout}")
 	private int redis_timeout;
+
+	@Autowired
+	private OrganizationMapper organizationDao;
 
 	@Autowired
 	private OrganizationRepository repository;
@@ -89,8 +99,17 @@ public class OrganizationServiceImpl extends AbstractService<OrganizationDsl,Str
 	}
 
 public void rmJedisOrg(){
+	List<OrganizationBean> organizationList = organizationDao.fiveCityOrganization("123456");
+	Map<String, String> map = new LinkedHashMap<String, String>();
+	for (OrganizationBean o : organizationList) {
+		try {
+			map.put(o.getOrganizationID(), JsonUtil.toJson(o));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+	}
 	Jedis jedis = new Jedis(redis_host, redis_port,redis_timeout);
-	jedis.set("fiveOrgText","");
+	jedis.set("fiveOrgText", JSON.toJSONString(map,true));
 }
 
 }

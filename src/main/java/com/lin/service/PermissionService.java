@@ -1,6 +1,7 @@
 package com.lin.service;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -172,6 +173,20 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			result.setRespDesc("该用户没有被禁言");
 			result.setRespMsg("1");
 		}else {
+			AddressBanned ab = findOne.get();
+			//当前日期
+			Date date = new Date();
+			if(date.after(ab.getBannedSayDate())){
+				ab.setBannedSayType(2);
+				// 修改日期
+				ab.setUpdateDate(new Date());
+				// 修改人为当前登录人
+				ab.setUpdateBy(Integer.parseInt(loginId));
+				AddressBanned save = addressBannedRepository.save(ab);
+				result.setRespCode("1");
+				result.setRespDesc("该用户没有被禁言");
+				result.setRespMsg("1");
+			}
 			result.setRespCode("1");
 			result.setRespDesc("该用户已经被禁言");
 			result.setRespMsg("0");
