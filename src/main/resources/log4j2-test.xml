@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Don't forget to set system property
+-DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+     to make all loggers asynchronous.
+
+Requires disruptor-3.0.0.jar or higher on the classpath.
+Future versions of Log4j 2 will require disruptor-3.3.3.jar or higher
+-->
+<configuration>
+  <Properties>
+    <Property name="baseDir">logs</Property>
+  </Properties>
+  <Appenders>
+    <Console name="console-log" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
+    </Console>
+
+    <RollingRandomAccessFile name="t_content" fileName="${baseDir}/content.log" filePattern="${baseDir}/content%d{yyyyMMdd}-%i.log.gz">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
+      <Policies>
+        <!--
+        关键点在于 filePattern后的日期格式，以及TimeBasedTriggeringPolicy的interval，
+        日期格式精确到哪一位， interval也精确到哪一个单位
+        -->
+        <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+        <SizeBasedTriggeringPolicy size="500 MB" />
+      </Policies>
+      <DefaultRolloverStrategy max="5"/>
+    </RollingRandomAccessFile>
+
+
+    <RollingRandomAccessFile name="errFile" fileName="${baseDir}/err.log"
+      filePattern="${baseDir}/err%d{yyyyMMdd}-%i.log.gz">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %t %C %M %L %m%n"/>
+      <Filters>
+        <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+      </Filters>
+      <DefaultRolloverStrategy max="5"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+        <SizeBasedTriggeringPolicy size="500 MB"/>
+      </Policies>
+    </RollingRandomAccessFile>
+  </Appenders>
+
+  <Loggers>
+    <root level="info">
+      <appender-ref ref="console-log"/>
+      <appender-ref ref="errFile"/>
+    </root>
+    <logger name="infoLog" level="info" additivity="false">
+      <appender-ref ref="t_content"/>
+    </logger>
+  </Loggers>
+</configuration>
