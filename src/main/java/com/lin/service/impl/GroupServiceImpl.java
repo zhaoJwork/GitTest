@@ -1,31 +1,35 @@
 package com.lin.service.impl;
 
+import com.google.common.io.Files;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+
+import com.lin.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.lin.dao.GroupDaoI;
-import com.lin.dao.UtilDaoI;
-import com.lin.domain.Group;
-import com.lin.domain.GroupBean;
-import com.lin.domain.GroupDetails;
-import com.lin.domain.GroupUserBean;
-import com.lin.domain.User;
+import com.lin.mapper.GroupMapper;
+import com.lin.mapper.UtilMapper;
+import com.lin.repository.AddressGroupRepository;
 import com.lin.service.GroupServiceI;
 import com.lin.util.ImageUtil;
-import com.lin.util.PropUtil;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**
- * TODO
+ *
  * 
  * @author zhangWeiJie
  * @date 2017年8月18日
@@ -33,14 +37,43 @@ import com.lin.util.PropUtil;
 @Service("groupService")
 public class GroupServiceImpl implements GroupServiceI {
 
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp;
+
+	@Value("${application.pic_group_img}")
+	private String picGroupImg;
+	@Value("${application.pic_group_temp_img}")
+	private String picGroupTempImg;
+	@Value("${application.pic_group_db_img_root}")
+	private String picGroupDbImgRoot;
+	@Value("${application.pic_group_db_img}")
+	private String picGroupDbImg;
+
 	@Autowired
-	private GroupDaoI groupDao;
+	private GroupMapper groupDao;
 	@Autowired
-	private UtilDaoI utilDao;
+	private UtilMapper utilDao;
+	
+	// sql 修改为jpa+querydsl 
+	
+	private AddressGroupRepository addressGroupRepository;
+	@Autowired
+    private EntityManager entityManager;
+	
+	private JPAQueryFactory queryFactory;  
+    
+    @PostConstruct  
+    public void init() {  
+       queryFactory = new JPAQueryFactory(entityManager);  
+    }
+	
 
 	@Override
-	public List<Group> selectAllGroupByLoginID(String loginID) {
-		List<Group> list = groupDao.selectAllGroupByLoginID(loginID);
+	public List<Group> selectAllGroupByLoginID(String loginID,String groupname) {
+		GroupBean gb = new GroupBean();
+		gb.setCreateUser(loginID);
+		gb.setGroupName(groupname);
+		List<Group> list = groupDao.selectAllGroupByLoginID(gb);
 		return list;
 	}
 
@@ -86,20 +119,31 @@ public class GroupServiceImpl implements GroupServiceI {
 					if (null != userIds && !"".equals(userIds)) {
 						String[] userID = userIds.split("_");
 						//不重复增加组人员
-						String groupUsers = groupDao.getGroupUserIDs(groupID);
+						String groupUsers = "";
+						groupUsers = groupDao.getGroupUserIDs(groupID);
 						List<GroupUserBean> listGU = new ArrayList<GroupUserBean>();
 						for (int i = 0; i < userID.length; i++) {
 							GroupUserBean gu = new GroupUserBean();
 							String uid = userID[i];
-							if(groupUsers.indexOf(uid) < 0){
+							if(null == groupUsers || "".equals(groupUsers)){
 								String rowID = utilDao.getSeqAppGourpUser();
 								gu.setRowID(rowID);
 								gu.setGroupID(groupID);
 								gu.setGroupUser(uid);
 								listGU.add(gu);
+							}else {
+								if(groupUsers.indexOf(uid) < 0){
+									String rowID = utilDao.getSeqAppGourpUser();
+									gu.setRowID(rowID);
+									gu.setGroupID(groupID);
+									gu.setGroupUser(uid);
+									listGU.add(gu);
+								}
 							}
 						}
-						groupDao.saveGroupUser(listGU);
+						 if(0 < listGU.size()) {
+							 groupDao.saveGroupUser(listGU);
+						 }
 					}
 				} else if (type.equals("2")) {// 2 删除人员
 					if (null != userIds && !"".equals(userIds)) {
@@ -144,10 +188,10 @@ public class GroupServiceImpl implements GroupServiceI {
 	private void editGroupImg(String groupID) throws Exception {
 		// 查询所属组的人
 		List<User> userIdList = groupDao.selectGroupUserBygroupID(groupID);
-		String imgIp = PropUtil.PIC_HTTPIP;// "http://42.99.16.145:19491";//
+		String imgIp = picHttpIp;// "http://42.99.16.145:19491";//
 											// 头像缺少IP地址
-		String tem = PropUtil.PIC_GROUP_TEMP_IMG;// 临时文件路径
-		String imgRoot=PropUtil.PIC_GROUP_DB_IMG_ROOT;//文件所缺根路径
+		String tem = picGroupTempImg;// 临时文件路径
+		String imgRoot = picGroupDbImgRoot;//文件所缺根路径
 		List<File> fileList = new ArrayList<File>();
 		for (User u : userIdList) {
 			String uPic = u.getUserPic();
@@ -157,9 +201,10 @@ public class GroupServiceImpl implements GroupServiceI {
 			}
 			String uPicTem = tem + u.getUserID() + ".png";
 			try {
-				uPic=uPic.replace(imgIp,imgRoot);//去掉IP地址
-				//FileUtils.copyURLToFile(new URL(uPic), new File(uPicTem));
-				FileUtils.copyFile(new File(uPic), new File(uPicTem));
+				uPic=uPic.replace(imgIp,imgRoot);
+				File fromFile = new File(uPic);
+				File toFile = new File(uPicTem);
+				copyFile(fromFile,toFile);
 				File f = new File(uPicTem);
 				fileList.add(f);
 				// 只要九个图片(方法只允许最多9张图片)
@@ -175,12 +220,18 @@ public class GroupServiceImpl implements GroupServiceI {
 		if (fileList.size() > 0) {
 			//文件名称不能单用groupId生成 如果前端设置本地缓存 则图片不会更新
 			String union=System.currentTimeMillis()+"";
-			String groupImgAddress = PropUtil.PIC_GROUP_IMG +union+ groupID + ".png";// 存放群组图片地址服务器文件路径
-			ImageUtil.createImage(fileList, groupImgAddress, "");// 9张图片生成1张图片
+			// 存放群组图片地址服务器文件路径
+			String groupImgAddress = picGroupImg + union+ groupID + ".png";
+			// 9张图片生成1张图片
+			ImageUtil.createImage(fileList, groupImgAddress, "");
 			File f = new File(groupImgAddress);
-			String saveUrl = PropUtil.PIC_GROUP_DB_IMG +union+ groupID + ".png";
-			if (f.exists()) {// 更新appuser.address_group表
-				groupDao.updateGroupImgInfo(groupID, saveUrl);
+			String saveUrl = picGroupDbImg + union+ groupID + ".png";
+			// 更新appuser.address_group表
+			if (f.exists()) {
+				GroupBean gb = new GroupBean();
+				gb.setGroupID(groupID);
+				gb.setGroupName(saveUrl);
+				groupDao.updateGroupImgInfo(gb);
 			}
 		}
 	}
@@ -188,12 +239,40 @@ public class GroupServiceImpl implements GroupServiceI {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public GroupDetails groupDetails(String loginID, String groupID) {
-		GroupDetails gd = new GroupDetails();
-		gd = groupDao.selectGroupBygroupID(groupID);
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		GroupDetails gd = queryFactory.select(
+				Projections.bean(
+						GroupDetails.class,
+						qAddressGroup.groupId.as("groupID"),
+						qAddressGroup.groupName,
+						qAddressGroup.groupImg,
+						qAddressGroup.groupDesc
+						)
+				)
+		.from(qAddressGroup)
+		.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+		
 		if (gd != null && !gd.getGroupID().equals("")) {
-			List<User> lu = new ArrayList<User>();
 			List<Map> lm = new ArrayList<Map>();
-			lu = groupDao.selectGroupUserBygroupID(groupID);
+			QUser qUser = QUser.user;
+			QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+			QUserNewAssist qUserNewAssist = QUserNewAssist.userNewAssist;
+			
+			List<User> lu = queryFactory.select(
+					Projections.bean(
+							User.class,
+							qUser.userID,
+							qUser.userName,
+							new CaseBuilder()
+								.when(qUserNewAssist.portrait_url.isNull())
+								.then(qUser.userPic)
+								.otherwise(qUserNewAssist.portrait_url).as("userPic")
+							)
+					)
+					.from(qAddressGroupUser)
+					.leftJoin(qUser).on(qAddressGroupUser.groupUser.eq(qUser.userID))
+					.leftJoin(qUserNewAssist).on(qUserNewAssist.userid.eq(qUser.userID))
+					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
 			if (lu.size() > 0) {
 				for (int i = 0; i < lu.size(); i++) {
 					User u = (User) lu.get(i);
@@ -208,7 +287,26 @@ public class GroupServiceImpl implements GroupServiceI {
 		}
 		return gd;
 	}
+	/**
+	 * 复制文件
+	 * @param fromFile
+	 * @param toFile
+	 * <br/>
+	 * 2016年12月19日  下午3:31:50
+	 * @throws IOException
+	 */
+	public void copyFile(File fromFile,File toFile) throws IOException{
+		FileInputStream ins = new FileInputStream(fromFile);
+		FileOutputStream out = new FileOutputStream(toFile);
+		byte[] b = new byte[1024];
+		int n=0;
+		while((n=ins.read(b))!=-1){
+			out.write(b, 0, n);
+		}
 
+		ins.close();
+		out.close();
+	}
 	@Override
 	public String getGroupUserIDs(String groupID) {
 		return groupDao.getGroupUserIDs(groupID);

@@ -1,0 +1,16 @@
+# 多环境配置文件激活属性
+spring:
+  profiles:
+    active: dev
+  http:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+server:
+  port: 8866
+  servlet:
+    path: /app-addresslist
+  tomcat:
+    uri-encoding: UTF-8

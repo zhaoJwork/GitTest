@@ -1,0 +1,28 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.mapper.SourceMapper">
+	<update id="editUser" parameterType="com.lin.domain.User">
+    	update  appuser.address_user au
+	    <set>
+	      au.update_date = sysdate,
+	      <if test="context != '' and context != null">
+	      	au.status= '${context}'
+	      </if>
+	    </set>
+    	where au.user_id = '${userID}'
+	</update>
+	<insert id="addBlack" parameterType="com.lin.domain.User">
+		insert into appuser.address_blacklist (row_id,user_id,user_name,create_by,create_date)
+		values(appuser.seq_app_addresslist.nextval,'${userID}',
+		(select u.user_name from appuser.address_user u where u.user_id = '${userID}')
+		,'15',sysdate)
+	</insert>
+	<delete id="delBlack" parameterType="com.lin.domain.User">
+		delete from appuser.address_blacklist ab where ab.user_id = '${userID}'
+	</delete>
+	<select id="pro_appuser" statementType ="CALLABLE" parameterType="com.lin.domain.User">
+		<![CDATA[
+				{call appuser.pro_appuser() }
+			]]>
+	</select>	
+</mapper>

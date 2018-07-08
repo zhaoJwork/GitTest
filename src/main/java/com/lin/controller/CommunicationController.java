@@ -1,51 +1,40 @@
 package com.lin.controller;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import com.alibaba.fastjson.JSON;
-import com.lin.domain.AddressInfLogBean;
-import com.lin.domain.Department;
-import com.lin.domain.Group;
-import com.lin.domain.GroupDetails;
-import com.lin.domain.Organization;
-import com.lin.domain.Position;
-import com.lin.domain.User;
-import com.lin.domain.UserDetails;
-import com.lin.domain.UserOrder;
-import com.lin.domain.UserPower;
-import com.lin.service.AddressInfLogServiceI;
-import com.lin.service.DepartmentServiceI;
-import com.lin.service.GroupServiceI;
-import com.lin.service.OrganizationServiceI;
-import com.lin.service.PostServiceI;
-import com.lin.service.RedisServiceI;
-import com.lin.service.UserServiceI;
+import com.lin.domain.*;
+import com.lin.service.*;
 import com.lin.util.IntegralUtil;
 import com.lin.util.JedisKey;
-import com.lin.util.PropUtil;
 import com.lin.util.Result;
+import com.lin.util.ValUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
 /**
  * 通讯录入口
  * 
- * @author zhangWeiJie
- * @date 2017年8月18日
+ * @author lwz
+ * @date 2018.6.17
  */
-@Controller
+@Api(description = "通讯录API")
+@RestController
 @RequestMapping("/communication")
 public class CommunicationController {
 
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp ;
+	@Autowired
+    private IntegralUtil integralUtil;
 	@Autowired
 	private DepartmentServiceI departmentService;
 	@Autowired
@@ -61,44 +50,42 @@ public class CommunicationController {
 	@Autowired
 	private RedisServiceI jedisService;
 
+
+	@Autowired
+	private AddressInfLogServiceImpl logServiceDsl;
+
+	@Autowired
+	private ValUtil val;
+
 	/**
 	 * @param loginID
 	 *            登录人ID
 	 * @return Result
 	 * @author zhangweijie
-	 * @date 2017年8月18日
+	 * @date 2018.6.17
 	 * @describe 描述 获取登录账号所属的常用分组列表 URL
-	 *           http://127.0.0.1:8080/app-addresslist/communication/grouplist
 	 *           请求实例：
-	 *           http://127.0.0.1:8080/app-addresslist/communication/grouplist?loginID=22295
-	 *           返回实例：
-	 *           {"respCode":"1","respDesc":"正常返回数据","respMsg":[{"groupName":"各省分管领导","groupID":"111"},{"groupName":"各省政企主任","groupID":"222"},{"groupName":"重点50个本地网","groupID":"333"},{"groupName":"小组","groupID":"444"}]}
-	 * 
+	 *           localhost:8866/app-addresslist/communication/grouplist?loginID=130376&groupname=
 	 */
-	@RequestMapping("grouplist")
-	@ResponseBody
-	public Result grouplist(HttpServletRequest req, String loginID) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "获取分组");
+	@ApiOperation(value="常用分组列表",tags = {"1s"})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "groupname", value = "分组名称", required = true, dataType = "String")
+	})
+	@GetMapping("grouplist")
+	public Result grouplist(HttpServletRequest req, String loginID,String groupname) {
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"自定义分组");
 		Result result = new Result();
-		if (loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
+		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		try {
-			List<Group> list = groupService.selectAllGroupByLoginID(loginID);
+			List<Group> list = groupService.selectAllGroupByLoginID(loginID,groupname);
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(list);
+			logServiceDsl.saveAddressInfLog(log,result);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
+			logServiceDsl.saveError(e,log);
 		}
-		logService.saveAddressInfLog(log, result);
 		return result;
 	}
 
@@ -124,6 +111,7 @@ public class CommunicationController {
 	@ResponseBody
 	public Result userlist(HttpServletRequest req, String loginID, String search, String groupID, String organizationID,
 			String provinceID, String fieldID) {
+	  //User.picHttpIp = picHttpIp;
 		AddressInfLogBean log = logService.getAddressInfLog(req, "人员列表");
 		Result result = new Result();
 		if (loginID == null || loginID.trim().equals("")) {
@@ -163,7 +151,7 @@ public class CommunicationController {
 		paras.put("fields", field);
 		try {
 			List<User> list = userService.selectUserByFilter(paras);
-			result.setRespCode("1");
+ 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(list);
 		} catch (Exception e) {
@@ -231,33 +219,26 @@ public class CommunicationController {
 	 * @author
 	 * @date 2017年8月18日
 	 * @describe 描述 获取职务列表 URL
-	 *           http://127.0.0.1:8080/app-addresslist/communication/postlist?loginID=22295
+	 *           http://localhost:8866/app-addresslist/communication/postlist?loginID=22295
 	 */
-	@RequestMapping("postlist")
-	@ResponseBody
+	@ApiOperation(value="职务列表",tags = {"1s"})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
+	})
+	@GetMapping("postlist")
 	public Result postlist(HttpServletRequest req, String loginID) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "获取职务");
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"职务");
 		Result result = new Result();
-		if (loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
-
+		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		try {
 			List<Position> list = postService.selectAllPosition();
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(list);
+			logServiceDsl.saveAddressInfLog(log,result);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
+			logServiceDsl.saveError(e,log);
 		}
-		logService.saveAddressInfLog(log, result);
 		return result;
 	}
 
@@ -373,172 +354,42 @@ public class CommunicationController {
 
 	/**
 	 * 
-	 * @return Result
-	 * @author HZH
-	 * @date 2017年8月18日
-	 * @describe 描述 获取登录账号所属的常用分组列表 URL http://127.0.0.1:8080/app-addresslist/
-	 *           请求实例
-	 * 
-	 *           返回实例 {"respCode":1,"respMsg":””,"respDesc":"正常返回数据"}
-	 *           http://127.0.0.1:8080/app-addresslist/communication/adduser?loginID=22295&userID=23&organizationID=123&posted=234&phone=15900000000&email=15900000000@qq.com&context=23_45_56&field=123_234_456
-	 */
-	@RequestMapping("adduser")
-	@ResponseBody
-	public Result adduser(HttpServletRequest req, String loginID, String userID, // 人员ID
-			String organizationID, // 部门ID
-			String postID, // 职务ID
-			String phone, // 电话
-			String email, // 邮箱
-			String context, // 工作内容（_分割传递）
-			String field, // 擅长领域（_分割传递）
-			String typpe) { // 偷偷加的，用来加入人员黑名单
-		AddressInfLogBean log = logService.getAddressInfLog(req, "修改人员");
-		Result result = new Result();
-		if (loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
-		if (userID == null || userID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("userID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
-		try {
-			String flag = "2";
-			String address = null;
-			if (typpe == null || "".equals(typpe)) {
-				UserDetails uds = userService.SelectUserDetails(userID);
-				address = uds.getAddress();
-				int i = address.lastIndexOf("/");
-				address = address.substring(0, i);
-				i = address.lastIndexOf("/");
-				address = address.substring(i) + "/";
-				if (organizationID != null && !"".equals(organizationID)) {
-					Organization organ = organizationService.getOrganizationByOrganid(organizationID);
-					address = uds.getAddress().replace(address, "/" + organ.getOrganizationName() + "/");
-				} else {
-					address = "";
-				}
-				if (postID != null && "".equals(postID)) {
-					String postName = postService.getPositionNameByID(postID);
-					if (postName.equals("部门经理") || postName.equals("公司领导") || postName.equals("政企领导")) {
-						flag = "1";
-					}
-				}
-				/*
-				 * 先删除工作内容和擅长领域 再插入
-				 */
-				userService.deleteContextById(userID); // 删除人员的工作内容
-				userService.deleteFieldById(userID); // 删除人员的擅长领域
-				/*
-				 * 保存人员工作内容和擅长领域
-				 */
-				userService.insertContextAndFieldVo(userID, context, field);
-			}
-			// 查出擅长领域和工作内容，拼接字符传，保存用户信息
-			String contextNames = "";
-			String fieldNames = "";
-			List<String> contentIdsList = new ArrayList<String>();
-			Collections.addAll(contentIdsList, context.split("_"));
-			List<String> contentsList = userService.selectContextsByIds(contentIdsList);
-			contextNames = listToString(contentsList);
-
-			List<String> fieldIdsList = new ArrayList<String>();
-			Collections.addAll(fieldIdsList, field.split("_"));
-			List<String> filedsList = userService.selectFiledsByIds(fieldIdsList);
-			fieldNames = listToString(filedsList);
-
-			userService.updateAdduserById(userID, organizationID, postID, phone, email, address, typpe, loginID, flag,
-					contextNames, fieldNames);
-
-			/*
-			 * 获取当前修改人的个人信息 供下面的redis更新使用
-			 */
-			User ud = userService.SelectuserupdateById(userID);
-			/*
-			 * 通讯录->个人资料页面，选择擅长领域或者工作内容后，此人的部分数据会缺失 2017-10-27 zhangWeiJie 注
-			 * if(null != ud.getField() && !ud.getField().equals("")){
-			 * userService.updateAdduserById(userID,"","","","","","","","","",
-			 * ud.getField()); } if(null != ud.getContext() &&
-			 * !ud.getContext().equals("")){
-			 * userService.updateAdduserById(userID,"","","","","","","","",ud.
-			 * getContext(),""); }
-			 */
-
-			jedisService.save(JedisKey.USERKEY, userID, JSON.toJSONString(ud)); // 更新redis
-																				// userID的key
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			String date = sdf.format(new Date());
-			jedisService.save(JedisKey.USERKEY_DATE, date);
-
-			result.setRespCode("1");
-			result.setRespDesc("正常保存数据");
-			result.setRespMsg("");
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
-		}
-		logService.saveAddressInfLog(log, result);
-		return result;
-	}
-
-	private String listToString(List<String> contentsList) {
-		String result = "";
-		for (String s : contentsList) {
-			result += s + ",";
-		}
-		if (!result.equals("") && result.endsWith(",")) {
-			result = result.substring(0, result.length() - 1);
-		}
-		return result;
-	}
-
-	/**
-	 * 
-	 * @param group
-	 * @return Result
 	 * @author
-	 * @date 2017年8月18日
+	 * @date 2018.6.17
 	 * @describe 描述 获取登录账号所属的常用分组列表 URL
-	 *           http://127.0.0.1:8080/app-addresslist/communication/editGroup
-	 * 
 	 *           请求实例
 	 *           http://127.0.0.1:8080/app-addresslist/communication/editGroup?
 	 *           loginID=22295& groupID=& groupName=以小组分组& groupDesc=分组详情&
 	 *           userIds=123_234_456& type=1增加人员 2 删除人员 3 删除组 返回实例
 	 *           {"respCode":1,"respMsg":””,"respDesc":"正常返回数据"}
-	 * 
 	 */
-	@RequestMapping("editGroup")
-	@ResponseBody
+	@ApiOperation(value="编辑列表",tags = {"1s"})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "groupName", value = "分组名称", dataType = "String"),
+			@ApiImplicitParam(name = "groupDesc", value = "分组描述", dataType = "String"),
+			@ApiImplicitParam(name = "userIds", value = "分组人员 _ 分割", dataType = "String"),
+			@ApiImplicitParam(name = "type", value = "类型 1增加人员2 删除人员 3 删除组", dataType = "String")
+	})
+	@GetMapping("editGroup")
 	public Result editGroup(HttpServletRequest req, String loginID, String groupID, String groupName, String groupDesc,
 			String userIds, String type) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "编辑分组");
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"编辑分组");
 		Result result = new Result();
-		if (loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
+		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		if (null == groupID || "".equals(groupID)) {
 			if ("".equals(groupName) || "".equals(groupDesc) || "".equals(userIds)) {
 				result.setRespCode("2");
 				result.setRespDesc("新建组，请输入完整信息");
-				logService.saveAddressInfLog(log, result);
+				logServiceDsl.saveAddressInfLog(log,result);
 				return result;
 			}
 		} else {// 5001,5002,5003属于不可更改
 			if (groupID.equals("5001") || groupID.equals("5002") || groupID.equals("5003")) {
-				result.setRespCode("2");
 				result.setRespDesc("分组不可修改");
-				logService.saveAddressInfLog(log, result);
+				result.setRespCode("2");
+				logServiceDsl.saveAddressInfLog(log,result);
 				return result;
 			}
 		}
@@ -547,14 +398,10 @@ public class CommunicationController {
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg("");
+			logServiceDsl.saveAddressInfLog(log,result);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
+			logServiceDsl.saveError(e,log);
 		}
-		logService.saveAddressInfLog(log, result);
 		return result;
 	}
 
@@ -712,7 +559,7 @@ public class CommunicationController {
 			map.put("BusiCode", "020");
 			int num  = organizationService.getCountIntegralByDay(map);
 			if(num ==0){
-				IntegralUtil.addScore(loginID, "020", "进入通讯录模块","0");
+        integralUtil.addScore(loginID, "020", "进入通讯录模块","0");
 				System.out.println("----进入通讯录模块积分添加成功----");
 			}
 		}catch(Exception e){
@@ -728,51 +575,43 @@ public class CommunicationController {
 	 * @author lwz
 	 * @date 2017年8月20日
 	 * @describe 描述 常用分组详情 URL
-	 *           http://42.99.16.145/app-addresslist/communication/groupDetails
 	 *           请求实例
 	 *           http://42.99.16.145/app-addresslist/communication/groupDetails?loginID=22295&groupID=1001
-	 *           返回实例 {"respCode":1,"respMsg":””,"respDesc":"正常返回数据"}
-	 *           http://127.0.0.1:8080/app-addresslist/communication/groupDetails?loginID=22295&groupID=5007
 	 */
-	@RequestMapping("groupDetails")
-	@ResponseBody
+	@ApiOperation(value="分组详情",tags = {"1s"})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String")
+	})
+	@GetMapping("groupDetails")
 	public Result groupDetails(HttpServletRequest req, String loginID, String groupID) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "分组详情");
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"分组详情");
 		Result result = new Result();
-		if (loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
+		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		if (null == groupID || "".equals(groupID)) {
 			result.setRespCode("2");
 			result.setRespDesc("分组ID不能为空");
-			logService.saveAddressInfLog(log, result);
+			logServiceDsl.saveAddressInfLog(log, result);
 			return result;
 		} else {
 			if (groupID.equals("5001") || groupID.equals("5002") || groupID.equals("5003")) {
 				result.setRespCode("2");
 				result.setRespDesc("分组不可修改");
-				logService.saveAddressInfLog(log, result);
+				logServiceDsl.saveAddressInfLog(log, result);
 				return result;
 			}
 		}
 		try {// 查询群组信息
 			GroupDetails gd = groupService.groupDetails(loginID, groupID);
 			// 完整的图片下载地址
-			gd.setGroupImg(PropUtil.PIC_HTTPIP + gd.getGroupImg());
+			gd.setGroupImg(picHttpIp + gd.getGroupImg());
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(gd);
+			logServiceDsl.saveAddressInfLog(log, result);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
+			logServiceDsl.saveError(e,log);
 		}
-		logService.saveAddressInfLog(log, result);
 		return result;
 	}
 
@@ -838,31 +677,24 @@ public class CommunicationController {
 	 * @return result
 	 *         http://127.0.0.1:8080/app-addresslist/communication/organizationTerritory?loginID=22295
 	 */
-	@RequestMapping("organizationTerritory")
-	@ResponseBody
+	@ApiOperation(value="省份领域",tags = {"1s"})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
+	})
+	@GetMapping("organizationTerritory")
 	public Result organizationTerritory(HttpServletRequest req, String loginID) {
-
-		AddressInfLogBean log = logService.getAddressInfLog(req, "省份领域");
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"省份领域");
 		Result result = new Result();
-		if (loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
+		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		try {
 			Map org = organizationService.getOrgName();
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(org);
+			logServiceDsl.saveAddressInfLog(log, result);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
+			logServiceDsl.saveError(e,log);
 		}
-		logService.saveAddressInfLog(log, result);
 		return result;
 
 	}
@@ -873,37 +705,27 @@ public class CommunicationController {
 	 * @author lwz
 	 * @date 2017年9月4日
 	 * @describe 获取50地市组织接口 URL
-	 *           http://42.99.16.145/app-addresslist/communication/fiveCityOrganization?loginID=22295
 	 *           请求实例：
 	 *           http://42.99.16.145/app-addresslist/communication/fiveCityOrganization?loginID=22295
-	 *           返回实例：
-	 *           http://127.0.0.1:8080/app-addresslist/communication/fiveCityOrganization?loginID=22295
 	 */
-	@RequestMapping("fiveCityOrganization")
-	@ResponseBody
+	@ApiOperation(value="50地市",tags = {"1s"})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
+	})
+	@GetMapping("fiveCityOrganization")
 	public Result fiveCityOrganization(HttpServletRequest req, String loginID) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "50地市");
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"50地市");
 		Result result = new Result();
-		if (loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
+		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		try {
-			Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-			orgtreeMap = organizationService.fiveCityOrganization(loginID);
+			Map<String, Object> orgtreeMap = organizationService.fiveCityOrganization(loginID);
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(orgtreeMap);
+			logServiceDsl.saveAddressInfLog(log, result);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
+			logServiceDsl.saveError(e,log);
 		}
-		logService.saveAddressInfLog(log, result);
 		return result;
 	}
 
@@ -913,37 +735,27 @@ public class CommunicationController {
 	 * @author lwz
 	 * @date 2017年9月15日
 	 * @describe URL
-	 *           http://42.99.16.145/app-addresslist/communication/userPower?loginID=22295
 	 *           请求实例：
 	 *           http://42.99.16.145/app-addresslist/communication/userPower?loginID=22295
-	 *           返回实例：
-	 *           http://127.0.0.1:8080/app-addresslist/communication/userPower?loginID=22295
 	 */
+	@ApiOperation(value="用户权限",tags = {"1s"})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
+	})
 	@RequestMapping("userPower")
-	@ResponseBody
 	public Result userPower(HttpServletRequest req, String loginID) {
-		AddressInfLogBean log = logService.getAddressInfLog(req, "权限");
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"用户权限");
 		Result result = new Result();
-		if (loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
-			logService.saveAddressInfLog(log, result);
-			return result;
-		}
 		try {
 			UserPower up = new UserPower();
 			up = userService.userPower(loginID);
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(up);
+			logServiceDsl.saveAddressInfLog(log, result);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
+			logServiceDsl.saveError(e,log);
 		}
-		logService.saveAddressInfLog(log, result);
 		return result;
 	}
 	@RequestMapping("userOrderNum")
@@ -984,21 +796,5 @@ public class CommunicationController {
 			result.setRespDesc("失败");
 		}
 		return result;
-	}
-
-	public void setDepartmentService(DepartmentServiceI departmentService) {
-		this.departmentService = departmentService;
-	}
-
-	public void setGroupService(GroupServiceI groupService) {
-		this.groupService = groupService;
-	}
-
-	public void setPostService(PostServiceI postService) {
-		this.postService = postService;
-	}
-
-	public void setUserService(UserServiceI userService) {
-		this.userService = userService;
 	}
 }

@@ -1,5 +1,7 @@
 package com.lin.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.lin.util.JsonUtil;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -8,9 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.lin.dao.AddressInfLogDaoI;
-import com.lin.dao.UtilDaoI;
+import com.lin.mapper.AddressInfLogMapper;
+import com.lin.mapper.UtilMapper;
 import com.lin.domain.AddressInfLogBean;
 import com.lin.service.AddressInfLogServiceI;
 import com.lin.util.Result;
@@ -24,16 +25,22 @@ import com.lin.util.Result;
 public class AddressInfLogServiceImpl implements AddressInfLogServiceI {
 
 	@Autowired
-	private AddressInfLogDaoI addressInfLogDao;
+	private AddressInfLogMapper addressInfLogDao;
 	@Autowired
-	private UtilDaoI utilDao;
+	private UtilMapper utilDao;
 
 	@Override
 	public void saveAddressInfLog(AddressInfLogBean log, Result respJson) {
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String str = sdf.format(date);
-		String Json = JSON.toJSONString(respJson);
+		String Json = null;
+		try {
+			Json = JsonUtil.toJson(respJson);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
 		log.setRespJson(Json);
 		log.setEndDate(str);
 		log.setRowID(utilDao.getSeqAppAddressInfLog());
