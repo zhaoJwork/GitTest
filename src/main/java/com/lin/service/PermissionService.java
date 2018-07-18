@@ -1,7 +1,6 @@
 package com.lin.service;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,7 +44,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 
 /**
- * 
+ *
  * 通讯录
  * @author liudongdong
  * @date 2018年6年6月
@@ -60,7 +59,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	public PermissionService(AddressCollectionRepository addressCollectionRepository) {
 		super(addressCollectionRepository);
 	}
-	
+
 	@Value("${application.ADDB_DK}")
 	private String addressBookDKUrl;
 
@@ -74,15 +73,15 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	private AddressColAuxiliaryRepository addressColAuxiliaryRepository;
 
 	@Autowired
-    private EntityManager entityManager;
-	
-	private JPAQueryFactory queryFactory;  
-    
-    @PostConstruct  
-    public void init() {  
-       queryFactory = new JPAQueryFactory(entityManager);  
-    }
-	
+	private EntityManager entityManager;
+
+	private JPAQueryFactory queryFactory;
+
+	@PostConstruct
+	public void init() {
+		queryFactory = new JPAQueryFactory(entityManager);
+	}
+
 	/**
 	 * 禁言权限查询
 	 * @param loginId
@@ -96,15 +95,15 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		if(type.equals(1)) {
 			// 查询是否有权限
 			QUserStaff qUserStaff = QUserStaff.userStaff;
-			
+
 			Long resultLong = queryFactory.select(
 					qUserStaff.staffID.count()
-					)
-			.from(qUserStaff)
-			.where(qUserStaff.departmentID.eq(626)
-					.and(qUserStaff.staffID.eq(Integer.parseInt(loginId))))
-			.fetchOne();
-			
+			)
+					.from(qUserStaff)
+					.where(qUserStaff.departmentID.eq(626)
+							.and(qUserStaff.staffID.eq(Integer.parseInt(loginId))))
+					.fetchOne();
+
 			if(resultLong > 0) {
 				result.setRespCode("1");
 				result.setRespDesc("正常返回数据");
@@ -119,9 +118,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			result.setRespDesc("禁言权限查询失败");
 			result.setRespMsg("0");
 		}
-		
+
 	}
-	
+
 	/**
 	 * 能力指数权限查询
 	 * @param loginId
@@ -134,7 +133,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	public void getAbilitycheck(String loginId, Integer type, String userId, Result result) {
 		// 根据type判断 要查询的是哪种权限  1为禁言 2为能力指数
 		if(type.equals(2)) {
-			// 能力指数的查看  如果角色为员工则没有权限进行下钻  
+			// 能力指数的查看  如果角色为员工则没有权限进行下钻
 			List<?> resultList = entityManager.createNativeQuery("select appuser.F_O_bannedsay(?,?) from dual")
 					.setParameter(1, loginId).setParameter(2, userId)
 					.getResultList();
@@ -152,9 +151,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			result.setRespDesc("指数能力权限查询失败");
 			result.setRespMsg("0");
 		}
-		
+
 	}
-	
+
 	/**
 	 * 当前人是否已经被禁言查询
 	 * @param loginId
@@ -166,38 +165,24 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		QAddressBanned qAddressBanned = QAddressBanned.addressBanned;
 		BooleanExpression eq = qAddressBanned.bannedSayUserId.eq(Integer.parseInt(loginId))
 				.and(qAddressBanned.bannedSayType.eq(1)
-				.and(qAddressBanned.type.eq(1)));
+						.and(qAddressBanned.type.eq(1)));
 		Optional<AddressBanned> findOne = addressBannedRepository.findOne(eq);
 		if("Optional.empty".equals(findOne.toString())) {
 			result.setRespCode("1");
 			result.setRespDesc("该用户没有被禁言");
 			result.setRespMsg("1");
 		}else {
-			AddressBanned ab = findOne.get();
-			//当前日期
-			Date date = new Date();
-			if(date.after(ab.getBannedSayDate())){
-				ab.setBannedSayType(2);
-				// 修改日期
-				ab.setUpdateDate(new Date());
-				// 修改人为当前登录人
-				ab.setUpdateBy(Integer.parseInt(loginId));
-				AddressBanned save = addressBannedRepository.save(ab);
-				result.setRespCode("1");
-				result.setRespDesc("该用户没有被禁言");
-				result.setRespMsg("1");
-			}
 			result.setRespCode("1");
 			result.setRespDesc("该用户已经被禁言");
 			result.setRespMsg("0");
 		}
 	}
 
-	
+
 	/**
 	 * 添加禁言
 	 * @author liudongdong
-	 * @throws ParseException 
+	 * @throws ParseException
 	 * @date 2018年6月6号
 	 */
 	public void addBannedSay(AddressBanned addressBanned, Result result) throws ParseException {
@@ -207,7 +192,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		Calendar cal = Calendar.getInstance();
 		// 1禁言 2其它
 		if(addressBanned.getType().equals(1)) {
-			
+
 			// 1为禁言 2取消禁言 0不处理
 			if(addressBanned.getBannedSayType().equals(1)) {
 				if(addressBanned.getBannedSayDays() == null) {
@@ -234,16 +219,16 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				result.setRespDesc("禁言操作失败");
 				result.setRespMsg("0");
 			}
-			
+
 		}else {
 			// TODO 其它待做
 			result.setRespCode("2");
 			result.setRespDesc("待做");
 			result.setRespMsg("0");
 		}
-		
+
 	}
-	
+
 
 
 	/**
@@ -270,7 +255,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			result.setRespDesc("禁言添加失败");
 			result.setRespMsg("0");
 		}
-		
+
 	}
 
 	/**
@@ -287,13 +272,13 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		// 根据当前时间进行判断是否已经禁言失效   如果失效 则禁言自动解封
 		if(date.getTime() >= banned.getBannedSayDate().getTime() || banned.getBannedSayType() == 2) {
 			banned.setBannedSayDays(addressBanned.getBannedSayDays());
-			
+
 			cal.add(Calendar.DAY_OF_MONTH, addressBanned.getBannedSayDays());
 			banned.setBannedSayDate(cal.getTime());
-			
+
 			banned.setUpdateDate(date);
 			banned.setUpdateBy(addressBanned.getBannedSayLoginId());
-			
+
 			// 如果禁言 在已经解封的基础上继续禁言
 			long time = cal.getTime().getTime();
 			if(time > date.getTime()) {
@@ -316,13 +301,13 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			result.setRespDesc("该用户已经被禁言");
 			result.setRespMsg("0");
 		}
-		
+
 	}
 
 	/**
 	 * 取消禁言
 	 * @author liudongdong
-	 * @throws ParseException 
+	 * @throws ParseException
 	 * @date 2018年6月11号
 	 */
 	public void cancelBannedSay(AddressBanned addressBanned, Result result) throws ParseException {
@@ -332,7 +317,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		Calendar cal = Calendar.getInstance();
 		// 1禁言 2其它
 		if(addressBanned.getType().equals(1)) {
-			
+
 			if(addressBanned.getBannedSayType().equals(2)) {
 				if("Optional.empty".equals(findOne.toString())) {
 					result.setRespCode("2");
@@ -348,16 +333,16 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				result.setRespDesc("禁言操作失败");
 				result.setRespMsg("0");
 			}
-			
+
 		}else {
 			// TODO 其它待做
 			result.setRespCode("2");
 			result.setRespDesc("待做");
 			result.setRespMsg("0");
 		}
-		
+
 	}
-	
+
 	/**
 	 * 取消禁言
 	 * @param addressBanned
@@ -373,7 +358,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		banned.setUpdateDate(cal.getTime());
 		// 修改人为当前登录人
 		banned.setUpdateBy(addressBanned.getBannedSayLoginId());
-		
+
 		AddressBanned save = addressBannedRepository.save(banned);
 		if(save != null) {
 			result.setRespCode("1");
@@ -384,11 +369,11 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			result.setRespDesc("禁言修改失败");
 			result.setRespMsg("0");
 		}
-		
+
 	}
 
 
-	
+
 	/**
 	 * 添加收藏
 	 * @author liudongdong
@@ -406,7 +391,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		Date date = Calendar.getInstance().getTime();
 		// 1收藏 2其它 默认0
 		if(collection.getType().equals(1)) {
-			
+
 			// 1收藏  2取消收藏 0不处理
 			if(collection.getCollectionType().equals(1)) {
 				BooleanExpression eq = qAddressCollection.collectionLoginId.eq(collection.getCollectionLoginId())
@@ -451,7 +436,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 						result.setRespDesc("用户已经处于收藏状态");
 						result.setRespMsg("0");
 					}
-					
+
 				}
 
 				if("1".equals(result.getRespCode())){
@@ -469,34 +454,34 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				result.setRespDesc("收藏操作失败");
 				result.setRespMsg("0");
 			}
-			
+
 		}else {
 			// TODO 其它待做
 			result.setRespCode("2");
 			result.setRespDesc("待做");
 			result.setRespMsg("0");
 		}
-		
+
 	}
-	
+
 	/**
 	 * 取消收藏
 	 * @author liudongdong
 	 * @date 2018年6月7日
 	 */
 	public void cancelAddressCollection(AddressCollection addressCollection, Result result) {
-		
+
 		Date date = Calendar.getInstance().getTime();
 		// 1收藏 2其它 默认0
 		if(addressCollection.getType().equals(1)) {
-			
+
 			// 1收藏  2取消收藏 0不处理
 			if(addressCollection.getCollectionType().equals(2)) {
 				QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
 				BooleanExpression eq = qAddressCollection.collectionLoginId.eq(addressCollection.getCollectionLoginId())
-					.and(qAddressCollection.collectionUserId.eq(addressCollection.getCollectionUserId()));
+						.and(qAddressCollection.collectionUserId.eq(addressCollection.getCollectionUserId()));
 				Optional<AddressCollection> findOne = addressCollectionRepository.findOne(eq);
-				
+
 				if("Optional.empty".equals(findOne.toString())) {
 					result.setRespCode("2");
 					result.setRespDesc("取消收藏用户，不处在收藏列");
@@ -508,7 +493,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 					// 修改人为当前登录人
 					collection.setCollectionUpdateBy(addressCollection.getCollectionLoginId());
 					collection.setCollectionType(addressCollection.getCollectionType());
-					
+
 					AddressCollection save = addressCollectionRepository.save(collection);
 					if(save == null) {
 						result.setRespCode("2");
@@ -520,22 +505,22 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 						result.setRespMsg("1");
 					}
 				}
-				
+
 			}else {
 				result.setRespCode("2");
 				result.setRespDesc("收藏操作失败");
 				result.setRespMsg("0");
 			}
-			
+
 		}else {
 			// TODO 其它待做
 			result.setRespCode("2");
 			result.setRespDesc("待做");
 			result.setRespMsg("0");
 		}
-		
+
 	}
-	
+
 	/**
 	 * 判断是否已经被收藏
 	 * @param loginId
@@ -545,18 +530,18 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	public String getIsCollection(String loginId,String contactId) {
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
 		AddressCollection collection = queryFactory.selectFrom(qAddressCollection)
-		.where(qAddressCollection.collectionUserId.eq(Integer.parseInt(contactId))
-				.and(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)))
-				.and(qAddressCollection.collectionType.eq(1))
-				.and(qAddressCollection.type.eq(1)))
-		.fetchOne();
+				.where(qAddressCollection.collectionUserId.eq(Integer.parseInt(contactId))
+						.and(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)))
+						.and(qAddressCollection.collectionType.eq(1))
+						.and(qAddressCollection.type.eq(1)))
+				.fetchOne();
 		if(collection != null) {
 			return "1";
 		}else {
 			return "0";
 		}
 	}
-	
+
 	/**
 	 * 当前人收藏列表查询
 	 * @param loginId
@@ -577,8 +562,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
 		QAddressColAuxiliary auxiliary = QAddressColAuxiliary.addressColAuxiliary;
 		Predicate predicate = auxiliary.name.like(search+"%")
-									.or(auxiliary.quanPin.like(search+"%"))
-									.or(auxiliary.mobile.like(search+"%"));
+				.or(auxiliary.quanPin.like(search+"%"))
+				.or(auxiliary.mobile.like(search+"%"));
 		List<AutoCollectionVo> fetch = queryFactory.select(Projections.bean(AutoCollectionVo.class,
 				qAddressCollection.rowId,
 				qAddressCollection.source,
@@ -590,9 +575,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				qUser.address,
 				qUser.organizationID,
 				new CaseBuilder()
-					.when(uass.portrait_url.isNull().or(uass.portrait_url.isEmpty()))
-					.then(qUser.userPic)
-					.otherwise(uass.portrait_url).as("userPic"),
+						.when(uass.portrait_url.isNull().and(uass.portrait_url.isEmpty()))
+						.then(qUser.userPic)
+						.otherwise(uass.portrait_url).as("userPic"),
 				qPositionDsl.posName,
 				qUser.deptype,
 				qUser.quanPin,
@@ -606,18 +591,18 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				auxiliary.mobile.as("colAuxContactMobile"),
 				auxiliary.quanPin.as("colAuxQanPin"),
 				auxiliary.shouZiMu.as("colAuxShouZiMu")
-				))
-		.from(qAddressCollection)
-		.leftJoin(qUser).on(qUser.userID.eq(qAddressCollection.collectionUserId.stringValue()))
-		.leftJoin(qPositionDsl).on(qUser.post.eq(qPositionDsl.posId))
-		.leftJoin(uass).on(uass.userid.eq(qUser.userID))
-		.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
-		.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
-		.where(predicate)
-		.orderBy(auxiliary.quanPin.asc())
+		))
+				.from(qAddressCollection)
+				.leftJoin(qUser).on(qUser.userID.eq(qAddressCollection.collectionUserId.stringValue()))
+				.leftJoin(qPositionDsl).on(qUser.post.eq(qPositionDsl.posId))
+				.leftJoin(uass).on(uass.userid.eq(qUser.userID))
+				.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
+				.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
+				.where(predicate)
+				.orderBy(auxiliary.quanPin.asc())
 //		.offset(Long.parseLong(PAGENUM)*(Long.parseLong(NUMBER)-1))
 //		.limit(Long.parseLong(PAGENUM))
-		.fetch();
+				.fetch();
 
 		if(fetch == null || fetch.size() == 0) {
 			result.setRespCode("1");
@@ -629,19 +614,20 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		String contactIDs = "";
 		for (AutoCollectionVo autoCollection : fetch) {
 			if(autoCollection.getSource() != null && 2 == autoCollection.getSource()){
-				contactIDs += autoCollection.getColAuxContactID()+";";
+				contactIDs += ";"+autoCollection.getColAuxContactID();
 			}
 		}
 
 		if(!"".equals(contactIDs)) {
-	//		迪科接口
-	//		list 返回收藏
-			// 获取部门
-	    	QUserStaff qUserStaff = QUserStaff.userStaff;
-	    	Integer deptId = queryFactory.select(qUserStaff.departmentID).from(qUserStaff)
-	    	.where(qUserStaff.staffID.eq(Integer.parseInt(loginId))).fetchOne();
+			contactIDs = contactIDs.substring(1);
+			//		迪科接口
+			//		list 返回收藏
+			//  获取部门
+			QUserStaff qUserStaff = QUserStaff.userStaff;
+			Integer deptId = queryFactory.select(qUserStaff.departmentID).from(qUserStaff)
+					.where(qUserStaff.staffID.eq(Integer.parseInt(loginId))).fetchOne();
 
-	    	//准备调用DK参数
+			//准备调用DK参数
 			String busiCode = "CustOmer";
 
 			String OLD_PARTY_CODE = "";// 客户编码
@@ -653,7 +639,22 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 			map.put("OLD_PARTY_CODE", OLD_PARTY_CODE);
 			map.put("STAFF_ID", loginId);
 			map.put("DEPARTMENT_ID", deptId);
-			map.put("CUSTCONTACT_NAME", "");
+
+			// search匹配  是否至少一位
+			if(search != "" && search.matches("[0-9]+")) {
+				// 纯为数字  默认手机号
+				map.put("CUSTCONTACT_NAME", "");
+				map.put("MOBILE_PHONE", search.trim());
+			}else if(search != "") {
+				// 非纯数字 默认名称查询
+				map.put("CUSTCONTACT_NAME", search.trim());
+				map.put("MOBILE_PHONE", "");
+			}else {
+				// search 为空
+				map.put("CUSTCONTACT_NAME", "");
+				map.put("MOBILE_PHONE", "");
+			}
+
 			map.put("CONTACT_ID", contactIDs);
 			map.put("STATUS", STATUS);
 			map.put("NUMBER", NUMBER);
@@ -710,9 +711,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 						         where tto.collection_userid = ''*/
 
 								List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
-								.from(qAddressCollection)
-								.where(qAddressCollection.collectionUserId.eq(fetch.get(i).getColAuxContactID()))
-								.fetch();
+										.from(qAddressCollection)
+										.where(qAddressCollection.collectionUserId.eq(fetch.get(i).getColAuxContactID()))
+										.fetch();
 
 								Number [] auxiNum = new Number[fetch2.size()];
 								for(int n = 0; n < fetch2.size(); n++) {
@@ -725,12 +726,12 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 								String quanPin = name.get(0).toString();
 								String shouZiMu = name.get(0).toString().substring(0,1).toUpperCase();
 								queryFactory.update(auxiliary)
-								.set(auxiliary.mobile, mobile)
-								.set(auxiliary.name, contactName)
-								.set(auxiliary.quanPin, quanPin)
-								.set(auxiliary.shouZiMu, shouZiMu)
-								.where(auxiliary.rowId.in(auxiNum))
-								.execute();
+										.set(auxiliary.mobile, mobile)
+										.set(auxiliary.name, contactName)
+										.set(auxiliary.quanPin, quanPin)
+										.set(auxiliary.shouZiMu, shouZiMu)
+										.where(auxiliary.rowId.in(auxiNum))
+										.execute();
 
 								AutoCollectionVo vo = fetch.get(j);
 								vo.setColAuxContactMobile(mobile);
@@ -780,8 +781,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		}
 
 	}
-	
-	
+
+
 
 	// 本地迪科数据同步
 	@Transactional
@@ -793,17 +794,17 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		}
 
 		List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
-		.from(qAddressCollection)
-		.where(qAddressCollection.collectionUserId.in(list.toArray(new Integer[] {}))).fetch();
+				.from(qAddressCollection)
+				.where(qAddressCollection.collectionUserId.in(list.toArray(new Integer[] {}))).fetch();
 
 
 		queryFactory.delete(auxiliary)
-		.where(auxiliary.rowId.in(fetch2.toArray(new Integer[]{})))
-		.execute();
+				.where(auxiliary.rowId.in(fetch2.toArray(new Integer[]{})))
+				.execute();
 
 		queryFactory.delete(qAddressCollection)
-		.where(qAddressCollection.collectionUserId.in(list.toArray(new Integer[] {})))
-		.execute();
+				.where(qAddressCollection.collectionUserId.in(list.toArray(new Integer[] {})))
+				.execute();
 	}
 
 
@@ -820,18 +821,18 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		return null;
 	}
 
-	
+
 
 	private Integer getSeq(){
 		List noTalk = entityManager.createNativeQuery("select appuser.seq_app_addresslist.nextval from dual")
 				.getResultList();
-			return Integer.parseInt(noTalk.get(0).toString());
+		return Integer.parseInt(noTalk.get(0).toString());
 	}
 
-	
 
 
-	
-	
-	
+
+
+
+
 }
