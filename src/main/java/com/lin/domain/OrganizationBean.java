@@ -115,29 +115,6 @@ public class OrganizationBean implements Comparable<OrganizationBean> {
 			return 0; // 0为等于
 		}
 	}
-
-	/*@Override
-	public int compareTo(OrganizationBean o) {
-		String thisZ = this.zimuname;
-		if (thisZ == null) {
-			thisZ = "";
-		} else {
-			thisZ = this.zimuname.toLowerCase();
-		}
-		String paraZ = o.getZimuname();
-		if (paraZ == null) {
-			paraZ = "";
-		} else {
-			paraZ = o.getZimuname().toLowerCase();
-		}
-		if ((thisZ.compareTo(paraZ)) > 0) {
-			return 1; // 正整数是大于
-		} else if ((thisZ.compareTo(paraZ)) < 0) {
-			return -1;// 负整数是小于
-		} else {
-			return 0; // 0为等于
-		}
-	}*/
 	
 	public Integer getOrderValue() {
 		return orderValue;

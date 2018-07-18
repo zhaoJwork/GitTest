@@ -710,15 +710,16 @@ public class CommunicationController {
 	 */
 	@ApiOperation(value="50地市",tags = {"1s"})
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "pID", value = "上一级", required = true, dataType = "String")
 	})
 	@GetMapping("fiveCityOrganization")
-	public Result fiveCityOrganization(HttpServletRequest req, String loginID) {
+	public Result fiveCityOrganization(HttpServletRequest req, String loginID, String pID) {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"50地市");
 		Result result = new Result();
 		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		try {
-			Map<String, Object> orgtreeMap = organizationService.fiveCityOrganization(loginID);
+			Map<String, Object> orgtreeMap = organizationService.fiveCityOrganization(pID);
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(orgtreeMap);
