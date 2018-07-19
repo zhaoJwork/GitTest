@@ -50,7 +50,7 @@ application:
  #体验
  sales_integral_add_score: http://10.128.49.65:20060/sales-integral/common/addScore
  #体验
- ADDB_DK: http://10.128.49.81:9083/CRM-PAD/services/SalesPAD?wsdl
+ ADDB_DK: http://10.128.90.164:9080/CRM-PAD/services/SalesPAD?wsdl
  #生产
  #ADDB_DK: http://10.128.87.58:8101/CRM-PAD/services/SalesPAD?wsdl
  #测试  图片地址
