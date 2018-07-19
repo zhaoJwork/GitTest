@@ -81,13 +81,13 @@ public class CustomerService  {
 
 		//准备调用DK参数
 		String busiCode = "CustOmer";
-
+		custID = (custID == null || custID == "") ? "":custID;
 		String OLD_PARTY_CODE = custID;// 客户编码+shoujih
 		String STATUS = custID == "" || custID == null ? "11" : "12";// 11模糊查询、12精确查询
 		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 页数
 		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //条数
 		String ORDERBY = "1";// 降序
-
+		search = (search == null || search == "") ? "":search;
 
 		Map<String,Object> map = new HashMap<>();
 		map.put("OLD_PARTY_CODE", OLD_PARTY_CODE.trim());
@@ -144,22 +144,27 @@ public class CustomerService  {
 				Map<?, ?> m = (Map<?, ?>)list.get(i);
 				String contactId = (String)m.get("CONTACT_ID");
 				String contactName = (String)m.get("CONTACT_NAME");
-				resultMap.put("contactID", contactId);// 编码
-				resultMap.put("contactName", contactName);// 联系人
-				resultMap.put("contactMobile", m.get("MOBILE_PHONE"));// 联系人手机号
-				resultMap.put("contactEmail", m.get("E_MAIL"));// 联系人Email
-				resultMap.put("contactDept", m.get("DEPT_NAME"));// 联系人所属部门
-				resultMap.put("contactPOST", m.get("POST_NAME"));// 联系人职位名称
+				//// 编码
+				resultMap.put("contactID", contactId);
+				//// 联系人
+				resultMap.put("contactName", contactName);
+				//// 联系人手机号
+				resultMap.put("contactMobile", m.get("MOBILE_PHONE"));
+				//// 联系人Email
+				resultMap.put("contactEmail", m.get("E_MAIL"));
+				//// 联系人所属部门
+				resultMap.put("contactDept", m.get("DEPT_NAME"));
+				//// 联系人职位名称
+				resultMap.put("contactPOST", m.get("POST_NAME"));
 
 				String oldPartyCode = (String)m.get("OLD_PARTY_CODE");
-				tempList.add((String)m.get("INDUSTRY"));// 行业编码
+				// 行业编码
+				tempList.add((String)m.get("INDUSTRY"));
 				// 图片地址  先置空  后处理
 				resultMap.put("img", "");
 
 				// 该联系人是否收藏    true 已被收藏    false未被收藏
 				resultMap.put("collection", permission.getIsCollection(loginId,contactId));
-
-
 				// 全拼  首字母  select f_get_hzpy('123张三sss')   from dual
 				List<?> name = entityManager.createNativeQuery("select f_get_hzpy(?)   from dual")
 						.setParameter(1, contactName).getResultList();
@@ -278,9 +283,9 @@ public class CustomerService  {
 				.where(qUserStaff.staffID.eq(Integer.parseInt(loginId))).fetchOne();
 
 		String STATUS = "10";
-		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum; // 页数
-		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //条数
-		String ORDERBY = "1";// 降序
+		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum;
+		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize;
+		String ORDERBY = "1";
 
 
 		Map<String,Object> map = new HashMap<>();

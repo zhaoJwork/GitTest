@@ -26,7 +26,7 @@ public class Swagger2 {
         .enable(swaggerShow)
         .apiInfo(apiInfo())
         .select()
-        .apis(RequestHandlerSelectors.basePackage("cn.com.jamboree.search.controller"))
+        .apis(RequestHandlerSelectors.basePackage("com.lin.controller"))
         .paths(PathSelectors.any())
         .build();
   }

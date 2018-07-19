@@ -75,7 +75,8 @@ public class UserService extends AbstractService<User,String> {
 				user.field.as("fields"),
 				uass.install.as("install"),
 				user.quanPin,
-				user.shouZiMu
+				user.shouZiMu,
+				user.crmAccount
 		)).from(user)
 				.leftJoin(uass)
 				.on(user.userID.eq(uass.userid))

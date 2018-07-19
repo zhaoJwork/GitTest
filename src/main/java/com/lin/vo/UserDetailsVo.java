@@ -106,7 +106,11 @@ public class UserDetailsVo {
 	 * 首字母
 	 */
 	private String shouZiMu;
-
+	/**
+	 * crmAccount
+	 * CRM账号
+	 */
+	private String crmAccount;
 
 	@JsonIgnore
 	public static String picHttpIp;
