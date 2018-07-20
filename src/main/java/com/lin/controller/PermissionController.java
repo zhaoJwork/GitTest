@@ -450,7 +450,7 @@ public class PermissionController {
 	@ApiOperation(value="收藏列表查询")
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "loginId", required = true, dataType = "String"),
-		@ApiImplicitParam(name = "search", required = true, dataType = "String"),
+		@ApiImplicitParam(name = "search",  dataType = "String"),
 		@ApiImplicitParam(name = "pageSize", required = true, dataType = "String"),
 		@ApiImplicitParam(name = "pageNum", required = true, dataType = "String")
 	})

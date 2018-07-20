@@ -286,7 +286,7 @@ public class CustomerService  {
 		String NUMBER = (pageNum == null || pageNum == "") ? "20" : pageNum;
 		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize;
 		String ORDERBY = "1";
-
+		search = (search == null || search == "") ? "":search;
 
 		Map<String,Object> map = new HashMap<>();
 		map.put("CUST_NAME", search.trim());

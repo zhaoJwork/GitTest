@@ -13,6 +13,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
+import com.lin.domain.*;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,16 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.AddressBanned;
-import com.lin.domain.AddressColAuxiliary;
-import com.lin.domain.AddressCollection;
-import com.lin.domain.QAddressBanned;
-import com.lin.domain.QAddressColAuxiliary;
-import com.lin.domain.QAddressCollection;
-import com.lin.domain.QPositionDsl;
-import com.lin.domain.QUser;
-import com.lin.domain.QUserNewAssist;
-import com.lin.domain.QUserStaff;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressColAuxiliaryRepository;
 import com.lin.repository.AddressCollectionRepository;
@@ -62,6 +54,10 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 
 	@Value("${application.ADDB_DK}")
 	private String addressBookDKUrl;
+	@Value("${application.CUST_IMG}")
+	private String custIMG;
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp;
 
 	@Resource
 	private AddressBannedRepository addressBannedRepository;
@@ -553,15 +549,17 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 	@Transactional
 	public void getCollectionList(String loginId,String search, String pageSize, String pageNum, Result result) {
 		List<AutoCollectionVo> resultList = new ArrayList<AutoCollectionVo>();
-
-		String NUMBER = (pageNum == null || pageNum == "") ? "10000" : pageNum; // 条数
-		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize; //页数
+	// 条数
+		String NUMBER = (pageNum == null || pageNum == "") ? "10000" : pageNum;
+		//页数
+		String PAGENUM = (pageSize == null || pageSize == "") ? "1" : pageSize;
+		search = (search == null || search == "") ? "":search;
 		QUser qUser = QUser.user;
 		QAddressCollection qAddressCollection = QAddressCollection.addressCollection;
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
 		QAddressColAuxiliary auxiliary = QAddressColAuxiliary.addressColAuxiliary;
-		Predicate predicate = auxiliary.name.like(search+"%")
+		Predicate predicate =  auxiliary.name.like(search+"%")
 				.or(auxiliary.quanPin.like(search+"%"))
 				.or(auxiliary.mobile.like(search+"%"));
 		List<AutoCollectionVo> fetch = queryFactory.select(Projections.bean(AutoCollectionVo.class,
@@ -574,10 +572,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				qUser.email,
 				qUser.address,
 				qUser.organizationID,
-				new CaseBuilder()
-						.when(uass.portrait_url.isNull().and(uass.portrait_url.isEmpty()))
-						.then(qUser.userPic)
-						.otherwise(uass.portrait_url).as("userPic"),
+				new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("userPic"),
 				qPositionDsl.posName,
 				qUser.deptype,
 				qUser.quanPin,
@@ -597,7 +592,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				.leftJoin(qPositionDsl).on(qUser.post.eq(qPositionDsl.posId))
 				.leftJoin(uass).on(uass.userid.eq(qUser.userID))
 				.leftJoin(auxiliary).on(auxiliary.rowId.eq(qAddressCollection.rowId))
-				.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId)).and(qAddressCollection.collectionType.eq(1)))
+				.where(qAddressCollection.collectionLoginId.eq(Integer.parseInt(loginId))
+						.and(qAddressCollection.collectionType.eq(1)))
 				.where(predicate)
 				.orderBy(auxiliary.quanPin.asc())
 //		.offset(Long.parseLong(PAGENUM)*(Long.parseLong(NUMBER)-1))
@@ -614,7 +610,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 		String contactIDs = "";
 		for (AutoCollectionVo autoCollection : fetch) {
 			if(autoCollection.getSource() != null && 2 == autoCollection.getSource()){
-				contactIDs += ";"+autoCollection.getColAuxContactID();
+				contactIDs += ","+autoCollection.getColAuxContactID();
 			}
 		}
 
@@ -690,65 +686,127 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 				}
 				// 根据迪克数据封装返回值 以迪科为准
 				for(int i = 0; i < fetch.size(); i++) {
+					if (1 == fetch.get(i).getSource()) {
+						resultList.add(fetch.get(i));
+					} else {
+						// 0 为正常不处理  1为修改  2为删除
+						int flag = 0;
+						for (int j = 0; j < list.size(); j++) {
+							Map<?, ?> m = (Map<?, ?>) list.get(j);
+							String CONTACTID = (String) m.get("CONTACT_ID");
+							String oldPartyCode = (String)m.get("OLD_PARTY_CODE");
+							String custImg = picHttpIp + "/1/mphotos/10000004.png";
+							String  industry = (String)m.get("INDUSTRY");
+							industry = industry.substring(0, 2);
+							if (industry.equals("FF")) {//制造业
+								custImg = custIMG + "zhizaonengyuan.png";
+							}
+							if (industry.equals("EE")) {//医疗卫生
+								custImg = custIMG + "yiliaoweisheng.png";
+							}
+							if (industry.equals("DD")) {//金融业
+								custImg = custIMG + "jinrongye.png";
+							}
+							if (industry.equals("CC")) {//交通物流
+								custImg = custIMG + "jiaotongwuliu.png";
+							}
+							if (industry.equals("II")) {//现代农业
+								custImg = custIMG + "xiandainongye.png";
+							}
+							if (industry.equals("HH")) {//商业客户
+								custImg = custIMG + "shangyekehu.png";
+							}
+							if (industry.equals("BB")) {//服务业
+								custImg = custIMG + "fuwuhangye.png";
+							}
+							if (industry.equals("GG")) {//教育行业
+								custImg = custIMG + "jiaoyuhangye.png";
+							}
+							if (industry.equals("AA")) {//政务行业
+								custImg = custIMG + "zhengwuhangye.png";
+							}
+							// 客户编码list  进行客户图片替换
+							QCust qCust = QCust.cust;
+							QCustTreeRel qCustTreeRel = QCustTreeRel.custTreeRel;
+							QCustTreeNode qCustTreeNode = QCustTreeNode.custTreeNode;
+							QDKLogourl qdkLogourl = QDKLogourl.dKLogourl;
 
-					// 0 为正常不处理  1为修改  2为删除
-					int flag = 0;
-					for(int j = 0; j < list.size(); j++) {
-						Map<?, ?> m = (Map<?, ?>)list.get(j);
-						String oldPartyCode = (String)m.get("OLD_PARTY_CODE");
-						if(oldPartyCode.equals(fetch.get(i).getColAuxContactID().toString())) {
-							if(!((String)m.get("CONTACT_NAME")).equals(fetch.get(i).getUserName()) ||
-									!((String)m.get("MOBILE_PHONE")).equals(fetch.get(i).getPhone())) {
 
-								// 本地数据和迪科数据不一致  进行修改本地数据
-								flag = 1;
+							List<Tuple> fetchvo = queryFactory.select(
+									qCust.oldPartyCode,
+									qdkLogourl.twoxUrl
+							)
+									.from(qdkLogourl)
+									.leftJoin(qCustTreeNode).on(qdkLogourl.custNodeCD.eq(qCustTreeNode.custNodeCD.stringValue()))
+									.leftJoin(qCustTreeRel).on(qCustTreeNode.custNodeID.eq(qCustTreeRel.custNodeID))
+									.leftJoin(qCust).on(qCust.custID.eq(qCustTreeRel.custID))
+									.where(qCust.oldPartyCode.in(oldPartyCode))
+									.fetch();
 
-								// 全拼  首字母  select f_get_hzpy('123张三sss')   from dual
-								List<?> name = entityManager.createNativeQuery("select f_get_hzpy(?)   from dual")
-										.setParameter(1, (String)m.get("CONTACT_NAME")).getResultList();
-								/*select tto.row_id
-						          from appuser.address_collection tto
-						         where tto.collection_userid = ''*/
+							if(fetch.size() > 0) {
 
-								List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
-										.from(qAddressCollection)
-										.where(qAddressCollection.collectionUserId.eq(fetch.get(i).getColAuxContactID()))
-										.fetch();
-
-								Number [] auxiNum = new Number[fetch2.size()];
-								for(int n = 0; n < fetch2.size(); n++) {
-									auxiNum[n] = (Number)fetch2.get(n);
+								for (int jj = 0; jj < fetchvo.size(); jj++) {
+									if (fetchvo.get(jj).get(qCust.oldPartyCode).equals(oldPartyCode)) {
+										String imgUrl = fetchvo.get(jj).get(qdkLogourl.twoxUrl);
+										custImg = custIMG + "/" + imgUrl.substring(34, imgUrl.length());
+									}
 								}
 
-								// 修改   手机号变更更新appuser.ADDRESS_COLAUXILIARY ;
-								String mobile = (String)m.get("MOBILE_PHONE");
-								String contactName = (String)m.get("CONTACT_NAME");
-								String quanPin = name.get(0).toString();
-								String shouZiMu = name.get(0).toString().substring(0,1).toUpperCase();
-								queryFactory.update(auxiliary)
-										.set(auxiliary.mobile, mobile)
-										.set(auxiliary.name, contactName)
-										.set(auxiliary.quanPin, quanPin)
-										.set(auxiliary.shouZiMu, shouZiMu)
-										.where(auxiliary.rowId.in(auxiNum))
-										.execute();
-
-								AutoCollectionVo vo = fetch.get(j);
-								vo.setColAuxContactMobile(mobile);
-								vo.setColAuxContactName(contactName);
-								vo.setColAuxQanPin(quanPin);
-								vo.setColAuxShouZiMu(shouZiMu);
-								resultList.add(vo);
 							}
-						}else {
-							flag = 2;
+							if (CONTACTID.equals(fetch.get(i).getColAuxContactID().toString())) {
+								flag = 0;
+								if (!((String) m.get("CONTACT_NAME")).equals(fetch.get(i).getUserName()) ||
+										!((String) m.get("MOBILE_PHONE")).equals(fetch.get(i).getPhone())) {
+
+									// 本地数据和迪科数据不一致  进行修改本地数据
+									flag = 1;
+
+									// 全拼  首字母  select f_get_hzpy('123张三sss')   from dual
+									List<?> name = entityManager.createNativeQuery("select f_get_hzpy(?)   from dual")
+											.setParameter(1, (String) m.get("CONTACT_NAME")).getResultList();
+									List<Integer> fetch2 = queryFactory.select(qAddressCollection.rowId)
+											.from(qAddressCollection)
+											.where(qAddressCollection.collectionUserId.eq(fetch.get(i).getColAuxContactID()))
+											.fetch();
+
+									Number[] auxiNum = new Number[fetch2.size()];
+									for (int n = 0; n < fetch2.size(); n++) {
+										auxiNum[n] = (Number) fetch2.get(n);
+									}
+
+									// 修改   手机号变更更新appuser.ADDRESS_COLAUXILIARY ;
+									String mobile = (String) m.get("MOBILE_PHONE");
+									String contactName = (String) m.get("CONTACT_NAME");
+									String quanPin = name.get(0).toString();
+									String shouZiMu = name.get(0).toString().substring(0, 1).toUpperCase();
+									queryFactory.update(auxiliary)
+											.set(auxiliary.mobile, mobile)
+											.set(auxiliary.name, contactName)
+											.set(auxiliary.quanPin, quanPin)
+											.set(auxiliary.shouZiMu, shouZiMu)
+											.where(auxiliary.rowId.in(auxiNum))
+											.execute();
+
+									AutoCollectionVo vo = fetch.get(i);
+									vo.setColAuxContactMobile(mobile);
+									vo.setColAuxContactName(contactName);
+									vo.setColAuxQanPin(quanPin);
+									vo.setColAuxShouZiMu(shouZiMu);
+									vo.setColAuxImg(custImg);
+									resultList.add(vo);
+								}
+								AutoCollectionVo vo = fetch.get(i);
+								vo.setColAuxImg(custImg);
+								resultList.add(vo);
+								break;
+							} else {
+								flag = 2;
+							}
 						}
-					}
-					if(flag == 2) {
-						// 删除   迪科  本地都有数据数据的情况下   数据进行和迪科数据同步
-						autoDele(contactIDs, qAddressCollection, auxiliary);
-					}else if(flag == 0){
-						resultList.add(fetch.get(i));
+						if (flag == 2) {
+							// 删除   迪科  本地都有数据数据的情况下   数据进行和迪科数据同步
+							autoDele(contactIDs, qAddressCollection, auxiliary);
+						}
 					}
 				}
 				result.setRespCode("1");
