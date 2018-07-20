@@ -743,7 +743,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 									.where(qCust.oldPartyCode.in(oldPartyCode))
 									.fetch();
 
-							if(fetch.size() > 0) {
+							if(fetchvo.size() > 0) {
 
 								for (int jj = 0; jj < fetchvo.size(); jj++) {
 									if (fetchvo.get(jj).get(qCust.oldPartyCode).equals(oldPartyCode)) {
