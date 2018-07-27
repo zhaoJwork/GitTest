@@ -6,6 +6,7 @@ import com.lin.util.IntegralUtil;
 import com.lin.util.JedisKey;
 import com.lin.util.Result;
 import com.lin.util.ValUtil;
+import com.lin.vo.InputGroup;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -365,19 +366,17 @@ public class CommunicationController {
 	 *           {"respCode":1,"respMsg":””,"respDesc":"正常返回数据"}
 	 */
 	@ApiOperation(value="编辑列表")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "groupName", value = "分组名称", dataType = "String"),
-			@ApiImplicitParam(name = "groupDesc", value = "分组描述", dataType = "String"),
-			@ApiImplicitParam(name = "userIds", value = "分组人员 _ 分割", dataType = "String"),
-			@ApiImplicitParam(name = "type", value = "类型 1增加人员2 删除人员 3 删除组", dataType = "String")
-	})
+	@ApiImplicitParam(dataType = "InputGroup")
 	@PostMapping("editGroup")
-	public Result editGroup(HttpServletRequest req, String loginID, String groupID, String groupName, String groupDesc,
-			String userIds, String type) {
+	public Result editGroup(HttpServletRequest req, @RequestBody InputGroup inputGroup) {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"编辑分组");
 		Result result = new Result();
+		String loginID = inputGroup.getLoginID() == null ? "" : inputGroup.getLoginID();
+		String groupID = inputGroup.getGroupID() == null ? "" : inputGroup.getGroupID();
+		String groupName = inputGroup.getGroupName() == null ? "" : inputGroup.getGroupName();
+		String groupDesc = inputGroup.getGroupDesc() == null ? "" : inputGroup.getGroupDesc();
+		String userIds = inputGroup.getUserIds() == null ? "" : inputGroup.getUserIds();
+		String type = inputGroup.getType() == null ? "" : inputGroup.getType();
 		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		if (null == groupID || "".equals(groupID)) {
 			if ("".equals(groupName) || "".equals(groupDesc) || "".equals(userIds)) {

@@ -190,7 +190,7 @@ public class PermissionController {
 	@ApiOperation(value="添加禁言")
 	@ApiImplicitParam(dataType = "AddressBanned")
 	@PostMapping("/addbannedsay")
-	public Result addBannedSay(HttpServletRequest req,AddressBanned addressBanned) {
+	public Result addBannedSay(HttpServletRequest req,@RequestBody AddressBanned addressBanned) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加禁言");
 		Result result = new Result();
 		if(addressBanned == null) {
@@ -252,7 +252,7 @@ public class PermissionController {
 	@ApiOperation(value="取消禁言")
 	@ApiImplicitParam(dataType = "AddressBanned")
 	@PostMapping("/cancelbannedsay")
-	public Result cacelBannedSay(HttpServletRequest req, AddressBanned addressBanned, BindingResult bindingResult) {
+	public Result cacelBannedSay(HttpServletRequest req,@RequestBody AddressBanned addressBanned) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "取消禁言");
 		Result result = new Result();
 		if(addressBanned == null) {
@@ -313,7 +313,7 @@ public class PermissionController {
 	@ApiOperation(value="添加收藏")
 	@ApiImplicitParam(dataType = "AddressCollection")
 	@PostMapping("/addcollection")
-	public Result addCollection(HttpServletRequest req, AddressCollectionVo addressCollection) {
+	public Result addCollection(HttpServletRequest req,@RequestBody AddressCollectionVo addressCollection) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加收藏");
 		Result result = new Result();
 		if(addressCollection == null) {
@@ -390,7 +390,7 @@ public class PermissionController {
 	@ApiOperation(value="取消收藏")
 	@ApiImplicitParam(dataType = "AddressCollection")
 	@PostMapping("/cancelcollection")
-	public Result cancelCollection(HttpServletRequest req, AddressCollection addressCollection) {
+	public Result cancelCollection(HttpServletRequest req,@RequestBody AddressCollection addressCollection) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "取消收藏");
 		Result result = new Result();
 		if(addressCollection == null) {
@@ -451,8 +451,8 @@ public class PermissionController {
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "loginId", required = true, dataType = "String"),
 		@ApiImplicitParam(name = "search",  dataType = "String"),
-		@ApiImplicitParam(name = "pageSize", required = true, dataType = "String"),
-		@ApiImplicitParam(name = "pageNum", required = true, dataType = "String")
+		@ApiImplicitParam(name = "pageSize",  dataType = "String"),
+		@ApiImplicitParam(name = "pageNum", dataType = "String")
 	})
 	@GetMapping("/collectionlist")
 	public Result getCollectionList(HttpServletRequest req,String loginId,String search, String pageSize, String pageNum) {

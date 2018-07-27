@@ -653,8 +653,8 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 
 			map.put("CONTACT_ID", contactIDs);
 			map.put("STATUS", STATUS);
-			map.put("NUMBER", NUMBER);
-			map.put("PAGENUM", PAGENUM);
+			map.put("NUMBER", 1);
+			map.put("PAGENUM", 100000);
 			map.put("ORDERBY", ORDERBY);
 
 			// 获取远程数据
@@ -695,6 +695,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 							Map<?, ?> m = (Map<?, ?>) list.get(j);
 							String CONTACTID = (String) m.get("CONTACT_ID");
 							String oldPartyCode = (String)m.get("OLD_PARTY_CODE");
+							String eMail = (String)m.get("E_MAIL");
+							String postName = (String)m.get("POST_NAME");
+							String deptName = (String)m.get("DEPT_NAME");
 							String custImg = picHttpIp + "/1/mphotos/10000004.png";
 							String  industry = (String)m.get("INDUSTRY");
 							industry = industry.substring(0, 2);
@@ -793,10 +796,16 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 									vo.setColAuxQanPin(quanPin);
 									vo.setColAuxShouZiMu(shouZiMu);
 									vo.setColAuxImg(custImg);
+									vo.setColAuxContactDept(deptName);
+									vo.setColAuxContactEmail(eMail);
+									vo.setColAuxContactPOST(postName);
 									resultList.add(vo);
 								}else {
 									AutoCollectionVo vo = fetch.get(i);
 									vo.setColAuxImg(custImg);
+									vo.setColAuxContactDept(deptName);
+									vo.setColAuxContactEmail(eMail);
+									vo.setColAuxContactPOST(postName);
 									resultList.add(vo);
 								}
 								break;
@@ -806,7 +815,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 						}
 						if (flag == 2) {
 							// 删除   迪科  本地都有数据数据的情况下   数据进行和迪科数据同步
-							autoDele(contactIDs, qAddressCollection, auxiliary);
+							autoDele(fetch.get(i).getColAuxContactID().toString(), qAddressCollection, auxiliary);
 						}
 					}
 				}
@@ -823,9 +832,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 						resultList.add(autoCollection);
 					}
 				}
-				if(str != "") {
+				/*if(str != "") {
 					autoDele(str, qAddressCollection, auxiliary);
-				}
+				}*/
 
 				result.setRespCode("1");
 				result.setRespDesc("列表查询成功");
