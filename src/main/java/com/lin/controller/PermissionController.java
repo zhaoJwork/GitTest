@@ -312,7 +312,7 @@ public class PermissionController {
 	 */
 	@ApiOperation(value="添加收藏")
 	@ApiImplicitParam(dataType = "AddressCollection")
-	@GetMapping("/addcollection")
+	@PostMapping("/addcollection")
 	public Result addCollection(HttpServletRequest req, AddressCollectionVo addressCollection) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "添加收藏");
 		Result result = new Result();

@@ -794,10 +794,11 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 									vo.setColAuxShouZiMu(shouZiMu);
 									vo.setColAuxImg(custImg);
 									resultList.add(vo);
+								}else {
+									AutoCollectionVo vo = fetch.get(i);
+									vo.setColAuxImg(custImg);
+									resultList.add(vo);
 								}
-								AutoCollectionVo vo = fetch.get(i);
-								vo.setColAuxImg(custImg);
-								resultList.add(vo);
 								break;
 							} else {
 								flag = 2;
