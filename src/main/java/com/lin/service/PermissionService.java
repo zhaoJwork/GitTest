@@ -700,7 +700,9 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 							String deptName = (String)m.get("DEPT_NAME");
 							String custImg = picHttpIp + "/1/mphotos/10000004.png";
 							String  industry = (String)m.get("INDUSTRY");
-							industry = industry.substring(0, 2);
+							if(null != industry && !"".equals(industry) ){
+								industry = industry.substring(0, 2);
+							}
 							if (industry.equals("FF")) {//制造业
 								custImg = custIMG + "zhizaonengyuan.png";
 							}
