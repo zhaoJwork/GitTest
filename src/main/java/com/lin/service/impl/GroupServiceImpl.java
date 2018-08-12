@@ -110,10 +110,10 @@ public class GroupServiceImpl implements GroupServiceI {
 					listGU.add(gu);
 				}
 				groupDao.saveGroupUser(listGU);
-				// 创建群组 成功 生成群组头像 zhangWeiJie
-				editGroupImg(groupID);
 				gb.setGroupName("/1/mphotos/10000001.png");
 				groupDao.updateGroupImgInfo(gb);
+				// 创建群组 成功 生成群组头像 zhangWeiJie
+				editGroupImg(groupID);
 			}
 		} else {
 			if (null != type && !"".equals(type)) {
