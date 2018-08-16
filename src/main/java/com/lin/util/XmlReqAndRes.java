@@ -52,6 +52,7 @@ public class XmlReqAndRes {
 			dom2Map = XmlUtils.Dom2Map(resultDoc);
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println(e);
 		}
 		return dom2Map;
 	}

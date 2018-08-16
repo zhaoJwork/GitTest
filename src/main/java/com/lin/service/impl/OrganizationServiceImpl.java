@@ -977,20 +977,12 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 	 */
 	public Map<String, Object> fiveCityOrganization(String loginID) {
 		Map<String, Object> organizationMap = new HashMap<String, Object>();
-		// 从redis中取出全部数据
-
-		//JedisPool jedisPool = new JedisPool("","",0,"");
-
-		Jedis jedis = new Jedis(redis_host, redis_port,redis_timeout);
-		//List redisOrgList = jedis.s(JedisKey.FIVEORGANIZATIONKEY);
-		String redisOrgList = jedis.get("fiveOrgText");
-		//List<Object> redisOrganization = jedis..get(JedisKey.FIVEORGANIZATIONKEY);
-		/*JedisPool jedisPool = new JedisPool(redis_host,redis_port,"",redis_timeout);*/
-		//List<Object> redisOrganization = jedisService.values(JedisKey.FIVEORGANIZATIONKEY);
-
-		// 缓存中不存在
-		if (redisOrgList == null || redisOrgList.length() == 0) {
-			List<OrganizationBean> organizationList = organizationDao.fiveCityOrganization(loginID);
+		List<OrganizationBean> organizationList = new ArrayList<OrganizationBean>();
+			if("".equals(loginID)) {
+				organizationList = organizationDao.fiveCityOrganization(loginID);
+			}else{
+				organizationList = organizationDao.organizationByPID(loginID);
+			}
 			Map<String, String> map = new LinkedHashMap<String, String>();
 			for (OrganizationBean o : organizationList) {
 				try {
@@ -1000,26 +992,10 @@ public class OrganizationServiceImpl implements OrganizationServiceI {
 				}
 			}
 			if (map.size() > 0) {
-				//jedisService.save(JedisKey.FIVEORGANIZATIONKEY, map);
-				//JSONArray json = JSONArray.fromObject(list);
-				jedis.set("fiveOrgText" ,JSON.toJSONString(map,true));
 				Collections.sort(organizationList);
 				organizationMap.put("organizationList", organizationList);
 			}
-		} else {// 存在 则为首次同步数据 返回全部
-			List<OrganizationBean> list = new ArrayList<OrganizationBean>();
-			OrganizationBean ooo = new OrganizationBean();
-			Map<String,String> map1 = (Map<String,String>)JSON.parse(redisOrgList);
-			for (String key : map1.keySet()){
-				//System.out.println(map1.get(key).getOrganizationID();
-				OrganizationBean organization = JsonUtil.fromJson(map1.get(key).toString(), ooo.getClass());
-				list.add(organization);
-			}
 
-
-			Collections.sort(list);
-			organizationMap.put("organizationList", list);
-		}
 		return organizationMap;
 	}
 	/**

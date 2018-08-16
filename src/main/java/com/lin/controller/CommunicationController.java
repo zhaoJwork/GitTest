@@ -6,16 +6,14 @@ import com.lin.util.IntegralUtil;
 import com.lin.util.JedisKey;
 import com.lin.util.Result;
 import com.lin.util.ValUtil;
+import com.lin.vo.InputGroup;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -67,7 +65,7 @@ public class CommunicationController {
 	 *           请求实例：
 	 *           localhost:8866/app-addresslist/communication/grouplist?loginID=130376&groupname=
 	 */
-	@ApiOperation(value="常用分组列表",tags = {"1s"})
+	@ApiOperation(value="常用分组列表")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
 			@ApiImplicitParam(name = "groupname", value = "分组名称", required = true, dataType = "String")
@@ -107,7 +105,8 @@ public class CommunicationController {
 	 *           {"respCode":"1","respDesc":"正常返回数据","respMsg":[{"field":"互联网、物联网","userID":"123","provinceID":"12345","phone":"15900000000","post":"大客户经理","userPic":"/pic.pic","address":"北京","email":"15900000000@qq.com","context":"联系大客户、大客户维护","organizationID":"12345","userName":"小明","type":"行政主任"},{"field":"互联网、物联网","userID":"123","provinceID":"12345","phone":"15900000000","post":"大客户经理","userPic":"/pic.pic","address":"北京","email":"15900000000@qq.com","context":"联系大客户、大客户维护","organizationID":"12345","userName":"小明","type":"行政主任"}]}
 	 * 
 	 */
-	@RequestMapping("userlist")
+	@ApiOperation(value="废弃")
+	@GetMapping("userlist")
 	@ResponseBody
 	public Result userlist(HttpServletRequest req, String loginID, String search, String groupID, String organizationID,
 			String provinceID, String fieldID) {
@@ -179,7 +178,8 @@ public class CommunicationController {
 	 *           {"respCode":"1","respDesc":"正常返回数据","respMsg":[{"departmentName":"运营部","departmentID":"111"},{"departmentName":"政企部","departmentID":"222"}]}
 	 * 
 	 */
-	@RequestMapping("departmentlist")
+	@GetMapping("departmentlist")
+	@ApiOperation(value="废弃")
 	@ResponseBody
 	public Result departmentlist(HttpServletRequest req, String loginID, String organizationID) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "获取部门");
@@ -221,7 +221,7 @@ public class CommunicationController {
 	 * @describe 描述 获取职务列表 URL
 	 *           http://localhost:8866/app-addresslist/communication/postlist?loginID=22295
 	 */
-	@ApiOperation(value="职务列表",tags = {"1s"})
+	@ApiOperation(value="职务列表")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
 	})
@@ -250,7 +250,8 @@ public class CommunicationController {
 	 * @describe 描述 获取登录账号所属的常用分组列表
 	 *           http://127.0.0.1:8080/app-addresslist/communication/userdetails?loginID=101948&userID=101948
 	 */
-	@RequestMapping("userdetails")
+	@GetMapping("userdetails")
+	@ApiOperation(value="废弃")
 	@ResponseBody
 	public Result userdetails(HttpServletRequest req, String loginID, String userID) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "获取人员");
@@ -300,7 +301,8 @@ public class CommunicationController {
 	 * @describe 描述 获取登录账号所属的常用分组列表
 	 *           http://127.0.0.1:8080/app-addresslist/communication/userListDetails?loginID=101948&userID=101948
 	 */
-	@RequestMapping("userListDetails")
+	@GetMapping("userListDetails")
+	@ApiOperation(value="废弃")
 	@ResponseBody
 	public Result userListDetails(String loginID, String userIDs) {
 		Result result = new Result();
@@ -363,20 +365,18 @@ public class CommunicationController {
 	 *           userIds=123_234_456& type=1增加人员 2 删除人员 3 删除组 返回实例
 	 *           {"respCode":1,"respMsg":””,"respDesc":"正常返回数据"}
 	 */
-	@ApiOperation(value="编辑列表",tags = {"1s"})
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "groupName", value = "分组名称", dataType = "String"),
-			@ApiImplicitParam(name = "groupDesc", value = "分组描述", dataType = "String"),
-			@ApiImplicitParam(name = "userIds", value = "分组人员 _ 分割", dataType = "String"),
-			@ApiImplicitParam(name = "type", value = "类型 1增加人员2 删除人员 3 删除组", dataType = "String")
-	})
-	@GetMapping("editGroup")
-	public Result editGroup(HttpServletRequest req, String loginID, String groupID, String groupName, String groupDesc,
-			String userIds, String type) {
+	@ApiOperation(value="编辑列表")
+	@ApiImplicitParam(dataType = "InputGroup")
+	@PostMapping("editGroup")
+	public Result editGroup(HttpServletRequest req, @RequestBody InputGroup inputGroup) {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"编辑分组");
 		Result result = new Result();
+		String loginID = inputGroup.getLoginID() == null ? "" : inputGroup.getLoginID();
+		String groupID = inputGroup.getGroupID() == null ? "" : inputGroup.getGroupID();
+		String groupName = inputGroup.getGroupName() == null ? "" : inputGroup.getGroupName();
+		String groupDesc = inputGroup.getGroupDesc() == null ? "" : inputGroup.getGroupDesc();
+		String userIds = inputGroup.getUserIds() == null ? "" : inputGroup.getUserIds();
+		String type = inputGroup.getType() == null ? "" : inputGroup.getType();
 		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		if (null == groupID || "".equals(groupID)) {
 			if ("".equals(groupName) || "".equals(groupDesc) || "".equals(userIds)) {
@@ -469,7 +469,8 @@ public class CommunicationController {
 	 *           testUrl:localhost:8080/app-addresslist/communication/syncUser?loginID=22295&userDate=
 	 * 
 	 */
-	@RequestMapping("syncUser")
+	@GetMapping("syncUser")
+	@ApiOperation(value="废弃")
 	@ResponseBody
 	public Result syncUser(HttpServletRequest req, String loginID, String userDate) {
 		AddressInfLogBean log = logService.getAddressInfLog(req, "同步人员");
@@ -512,7 +513,8 @@ public class CommunicationController {
 	 * @describe 同步组织机构接口
 	 *           testUrl:localhost:8080/app-addresslist/communication/syncallOrganization?loginID=22295&organizationDate=
 	 */
-	@RequestMapping("syncallOrganization")
+	@GetMapping("syncallOrganization")
+	@ApiOperation(value="废弃")
 	@ResponseBody
 	public Result syncallOrganization(HttpServletRequest req, String loginID, String organizationDate,
 			String organizationID) {
@@ -578,7 +580,7 @@ public class CommunicationController {
 	 *           请求实例
 	 *           http://42.99.16.145/app-addresslist/communication/groupDetails?loginID=22295&groupID=1001
 	 */
-	@ApiOperation(value="分组详情",tags = {"1s"})
+	@ApiOperation(value="分组详情")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
 			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String")
@@ -625,7 +627,8 @@ public class CommunicationController {
 	 *           如果时间与缓存中时间相同则说明不需要更新 否则需要更新
 	 *           localhost:8080/app-addresslist/communication/replace?loginID=00&organizationDate=99&userDate=88
 	 */
-	@RequestMapping("replace")
+	@GetMapping("replace")
+	@ApiOperation(value="废弃")
 	@ResponseBody
 	public Result replace(String loginID, String organizationDate, String userDate) {
 		Result result = new Result();
@@ -677,7 +680,7 @@ public class CommunicationController {
 	 * @return result
 	 *         http://127.0.0.1:8080/app-addresslist/communication/organizationTerritory?loginID=22295
 	 */
-	@ApiOperation(value="省份领域",tags = {"1s"})
+	@ApiOperation(value="省份领域")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
 	})
@@ -708,17 +711,19 @@ public class CommunicationController {
 	 *           请求实例：
 	 *           http://42.99.16.145/app-addresslist/communication/fiveCityOrganization?loginID=22295
 	 */
-	@ApiOperation(value="50地市",tags = {"1s"})
+	@ApiOperation(value="50地市")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
+			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "pID", value = "上一级",  dataType = "String")
 	})
 	@GetMapping("fiveCityOrganization")
-	public Result fiveCityOrganization(HttpServletRequest req, String loginID) {
+	public Result fiveCityOrganization(HttpServletRequest req, String loginID, String pID) {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"50地市");
 		Result result = new Result();
 		if(val.valByT(result,log,"loginID",loginID)){return result;}
 		try {
-			Map<String, Object> orgtreeMap = organizationService.fiveCityOrganization(loginID);
+			pID = (pID == null || pID == "") ? "":pID;
+			Map<String, Object> orgtreeMap = organizationService.fiveCityOrganization(pID);
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 			result.setRespMsg(orgtreeMap);
@@ -738,11 +743,11 @@ public class CommunicationController {
 	 *           请求实例：
 	 *           http://42.99.16.145/app-addresslist/communication/userPower?loginID=22295
 	 */
-	@ApiOperation(value="用户权限",tags = {"1s"})
+	@ApiOperation(value="用户权限")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String")
 	})
-	@RequestMapping("userPower")
+	@GetMapping("userPower")
 	public Result userPower(HttpServletRequest req, String loginID) {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"用户权限");
 		Result result = new Result();
@@ -758,7 +763,8 @@ public class CommunicationController {
 		}
 		return result;
 	}
-	@RequestMapping("userOrderNum")
+	@PostMapping("userOrderNum")
+	@ApiOperation(value="废弃")
 	@ResponseBody
 	public Result userOrderNum(String staffid,Integer num){
 		Result result = new Result();

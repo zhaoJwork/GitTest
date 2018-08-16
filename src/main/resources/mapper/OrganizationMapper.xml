@@ -116,44 +116,6 @@
                          '1945234','1944574','1945238','1944665','1945339'，
                          '1944952','1945122','1945310','1945242','1945246'，
                          '1945329','1944950','1945340','1945353','1944565')
-              union all 
-              SELECT o.organ_id organizationID,
-                   o.organ_name organizationName,
-                   to_char(o.update_date,'yyyy-mm-dd hh24:mi:ss') updateDate,
-                   o.organ_user_count userCount,
-                   o.organ_online_count onlineCount,
-                   nvl(o.pid ,'0') pID,
-                   o.status type,
-                   o.flag flag,
-                   o.org_order zimuname
-                FROM appuser.address_organization o
-               WHERE pID !='0'
-                and o.organ_id not in (
-                         '1944700','1944680','1944690','1944699','1944681'，
-                         '1944683','1944642','1944707','1944729','1944706'，
-                         '1944714','1944717','1944708','1944719','1944724'，
-                         '1944704','1944725','1944723','1944722','1944735'，
-                         '1944730','1944738','1944664','1944606','1945062'，
-                         '1944739','1945073','1945087','1945098','1944507'，
-                         '1944556','1944649','1944520','1945293','1945294'，
-                         '1945234','1944574','1945238','1944665','1945339'，
-                         '1944952','1945122','1945310','1945242','1945246'，
-                         '1945329','1944950','1945340','1945353','1944565'
-               )
-               START WITH o.organ_id  in (select o.organ_id from appuser.address_organization o where 
-              o.organ_id in (
-                         '1944700','1944680','1944690','1944699','1944681'，
-                         '1944683','1944642','1944707','1944729','1944706'，
-                         '1944714','1944717','1944708','1944719','1944724'，
-                         '1944704','1944725','1944723','1944722','1944735'，
-                         '1944730','1944738','1944664','1944606','1945062'，
-                         '1944739','1945073','1945087','1945098','1944507'，
-                         '1944556','1944649','1944520','1945293','1945294'，
-                         '1945234','1944574','1945238','1944665','1945339'，
-                         '1944952','1945122','1945310','1945242','1945246'，
-                         '1945329','1944950','1945340','1945353','1944565'
-              ))
-              CONNECT BY PRIOR   o.organ_id = o.pid 
             ) tc 
             where not exists (
 		      select 1 from appuser.address_blackorglist b
@@ -179,7 +141,7 @@
 		      select 1 from appuser.address_blackorglist b
 		      where b.org_id = t.organ_id
 		) 
-			order by t.org_order   
+			order by t.org_order  asc
 	</select>
 	<select id="downOrganization" parameterType="java.lang.String"
 		resultType="com.lin.domain.OrganizationBean">

@@ -36,11 +36,11 @@ public class CustomerController {
 	@Autowired
 	private CustomerService customerService;
 
-	@ApiOperation(value="通讯录人员列表",tags = {"1s"})
+	@ApiOperation(value="通讯录人员列表")
 	@ApiImplicitParams({
 	      @ApiImplicitParam(name = "loginId", value = "当前登入Id", required = true, dataType = "String"),
-	      @ApiImplicitParam(name = "search", value = "模糊搜索关键字", required = true, dataType = "String"),
-	      @ApiImplicitParam(name = "custID", value = "客户id多个值以;号隔开", required = true, dataType = "String"),
+	      @ApiImplicitParam(name = "search", value = "模糊搜索关键字",  dataType = "String"),
+	      @ApiImplicitParam(name = "custID", value = "客户id多个值以;号隔开",  dataType = "String"),
 	      @ApiImplicitParam(name = "pageSize", value = "条数", required = true, dataType = "String"),
 	      @ApiImplicitParam(name = "pageNum", value = "页数", required = true, dataType = "String")
 	  })
@@ -70,10 +70,10 @@ public class CustomerController {
 	}
 	
 	
-	@ApiOperation(value="通讯录人员列表",tags = {"2s"})
+	@ApiOperation(value="通讯录人员列表")
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "loginId", value = "当前登入Id", required = true, dataType = "String"),
-		@ApiImplicitParam(name = "search", value = "模糊搜索关键字", required = true, dataType = "String"),
+		@ApiImplicitParam(name = "search", value = "模糊搜索关键字",  dataType = "String"),
 		@ApiImplicitParam(name = "pageSize", value = "条数", required = true, dataType = "String"),
 		@ApiImplicitParam(name = "pageNum", value = "页数", required = true, dataType = "String")
 	})

@@ -7,10 +7,13 @@ import com.lin.service.UserService;
 import com.lin.util.Result;
 import com.lin.vo.UserDetailsVo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -42,8 +45,12 @@ public class CommunicationDslController {
      * @param organ  当前登录人
      * @return
      */
-    @ApiOperation(value="查询组织部门",tags = {"1s"})
     @GetMapping("organizationlist")
+    @ApiOperation(value="查询组织部门")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "loginID", value = "当前登入ID", required = true, dataType = "String"),
+            @ApiImplicitParam(dataType = "OrganizationDsl")
+    })
     @ResponseBody
     public Result organizationlist(HttpServletRequest req, OrganizationDsl organ,String loginID) {
         AddressInfLog log =  logServiceDsl.getInfLog(req,"组织部门");
@@ -82,6 +89,11 @@ public class CommunicationDslController {
      *           http://localhost:8866/app-addresslist/communicationdsl/userdetails?loginID=101948&userID=101948
      */
     @GetMapping("userdetails")
+    @ApiOperation(value="获取个人详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "loginID", value = "当前登入ID", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "userID", value = "用户ID", required = true, dataType = "String")
+    })
     @ResponseBody
     public Result userdetails(HttpServletRequest req, String loginID, String userID) {
         AddressInfLog log =  logServiceDsl.getInfLog(req,"个人详情");
@@ -106,7 +118,6 @@ public class CommunicationDslController {
                 logServiceDsl.saveAddressInfLog(log,result);
                 return result;
             }else{
-                  ////  UserDetails ud = userService.SelectUserDetailsById(userID);
                     result.setRespCode("1");
                     result.setRespDesc("正常返回数据");
                     result.setRespMsg(uu);
@@ -131,8 +142,8 @@ public class CommunicationDslController {
      *           请求实例：
      *           http://42.99.16.145/app-addresslist/communication/userPower?loginID=22295
      */
-    @ApiOperation(value="删除50本地网",tags = {"1s"})
-    @GetMapping("delFiveOrgRedis")
+    @ApiOperation(value="删除50本地网")
+    @PostMapping("delFiveOrgRedis")
     @ResponseBody
     public Result delFiveOrgRedis(HttpServletRequest req) {
         AddressInfLog log =  logServiceDsl.getInfLog(req,"删除50本地网");
