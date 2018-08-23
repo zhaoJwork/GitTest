@@ -153,7 +153,7 @@ public class CustomerService  {
 				//// 联系人Email
 				resultMap.put("contactEmail", m.get("E_MAIL"));
 				//// 联系人所属部门
-				resultMap.put("contactDept", m.get("DEPT_NAME"));
+				resultMap.put("contactDept", (String)m.get("CUST_NAME")+ (String)m.get("DEPT_NAME"));
 				//// 联系人职位名称
 				resultMap.put("contactPOST", m.get("POST_NAME"));
 
