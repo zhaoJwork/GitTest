@@ -697,7 +697,7 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 							String oldPartyCode = (String)m.get("OLD_PARTY_CODE");
 							String eMail = (String)m.get("E_MAIL");
 							String postName = (String)m.get("POST_NAME");
-							String deptName = (String)m.get("DEPT_NAME");
+							String deptName = (String)m.get("CUST_NAME")+(String)m.get("DEPT_NAME");
 							String custImg = picHttpIp + "/1/mphotos/10000004.png";
 							String  industry = (String)m.get("INDUSTRY");
 							if(null != industry && !"".equals(industry) ){
