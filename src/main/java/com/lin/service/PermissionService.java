@@ -1,5 +1,7 @@
 package com.lin.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -434,7 +436,6 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 					}
 
 				}
-
 				if("1".equals(result.getRespCode())){
 					AddressColAuxiliary auxVo = new AddressColAuxiliary();
 					auxVo.setRowId(collectionVo.getRowId());
@@ -442,6 +443,13 @@ public class PermissionService extends AbstractService<AddressCollection,String>
 					auxVo.setQuanPin(collectionVo.getQuanPin());
 					auxVo.setShouZiMu(collectionVo.getShouZiMu());
 					auxVo.setName(collectionVo.getName());
+					if(collectionVo.getName().indexOf("%") > -1){
+						try {
+							auxVo.setName(URLDecoder.decode(collectionVo.getName(), "UTF-8"));
+						} catch (UnsupportedEncodingException e) {
+							e.printStackTrace();
+						}
+					}
 					auxVo.setMobile(collectionVo.getMobile());
 					addressColAuxiliaryRepository.save(auxVo);
 				}
