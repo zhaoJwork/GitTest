@@ -89,7 +89,7 @@ fi
 #JAVA_OPTS="$JAVA_OPTS -Drmi.agent.port=8233"
 
 appAddresslistAPI_HOME=`pwd`
-JAVA_OPTS="-server -Xmx1000M -Xms1000M -Xmn400M"
+JAVA_OPTS="-server -Xmx1000M -Xms1000M -Xmn1000M"
 #JAVA_OPTS="$JAVA_OPTS -XX:PermSize=500M -XX:MaxPermSize=500M -Xss256K"
 JAVA_OPTS="$JAVA_OPTS -XX:+DisableExplicitGC -XX:SurvivorRatio=1 -XX:+UseConcMarkSweepGC"
 JAVA_OPTS="$JAVA_OPTS -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled"
