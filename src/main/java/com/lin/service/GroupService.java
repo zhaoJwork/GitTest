@@ -5,28 +5,17 @@ import com.lin.domain.*;
 import com.lin.repository.AddressBannedRepository;
 import com.lin.repository.AddressColAuxiliaryRepository;
 import com.lin.repository.AddressCollectionRepository;
+import com.lin.repository.GroupRepository;
+import com.lin.util.JsonObjectMapper;
 import com.lin.util.Result;
-import com.lin.util.XmlReqAndRes;
-import com.lin.vo.AddressCollectionVo;
-import com.lin.vo.AutoCollectionVo;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.text.ParseException;
 import java.util.*;
 
 
@@ -38,21 +27,30 @@ import java.util.*;
  *
  */
 @Service
-public class GroupService extends AbstractService<AddressCollection,String>{
+public class GroupService extends AbstractService<GroupBo,String>{
 
 	private static final String String = null;
 
 	@Autowired
-	public GroupService(AddressCollectionRepository addressCollectionRepository) {
-		super(addressCollectionRepository);
+	public GroupService(GroupRepository groupRepository) {
+		super(groupRepository);
 	}
 
-	@Value("${application.ADDB_DK}")
-	private String addressBookDKUrl;
-	@Value("${application.CUST_IMG}")
-	private String custIMG;
-	@Value("${application.pic_HttpIP}")
-	private String picHttpIp;
+	@Value("${application.enterprise.createGroup}")
+	private String enterpriseCreateGroup;
+	@Value("${application.enterprise.inviteFriend}")
+	private String enterpriseInviteFriend;
+	@Value("${application.enterprise.removeMembers}")
+	private String enterpriseRemoveMembers;
+	@Value("${application.enterprise.exitGroup}")
+	private String enterpriseExitGroup;
+	@Value("${application.enterprise.dissolution}")
+	private String enterpriseDissolution;
+	@Value("${application.enterprise.modify}")
+	private String enterpriseModify;
+	@Value("${application.enterprise.queryGroup}")
+	private String enterpriseQueryGroup;
+
 
 	@Resource
 	private AddressBannedRepository addressBannedRepository;
@@ -81,6 +79,12 @@ public class GroupService extends AbstractService<AddressCollection,String>{
 	 * @param queryType
 	 */
 	public void selectRoleDept(Result result, String loginID, String queryType){
+		QPositionDsl qPositionDsl = QPositionDsl.positionDsl;
+		String db = "select * from (select to_char(wm_concat(p.pos_id)) pos_id,p.pos_name,min(p.role_num) role_num from appuser.address_position p group by p.pos_name) t order by t.role_num";
+		List positionList = entityManager.createNativeQuery(db).getResultList();
+		for (int i = 0 ;i < positionList.size() ; i++){
+			System.out.println("key:" + positionList.get(i));
+		}
 
 	}
 
@@ -132,7 +136,7 @@ public class GroupService extends AbstractService<AddressCollection,String>{
 	}
 
 	@Override
-	public List<AddressCollection> findByIds(String... ids) {
+	public List<GroupBo> findByIds(String... ids) {
 		// TODO Auto-generated method stub
 		return null;
 	}
