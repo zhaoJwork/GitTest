@@ -36,7 +36,7 @@ public class GroupController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
-	private GroupService groupService;
+	private GroupService newGroupService;
 
 
 	@ApiOperation(value="角色信息查询")
@@ -60,7 +60,7 @@ public class GroupController {
 		}
 		
 		try {
-			this.groupService.selectRoleDept(result,loginID,queryType);
+			this.newGroupService.selectRoleDept(result,loginID,queryType);
 			logger.info("角色信息查询接口::--" + JsonUtil.toJson(result));
 		} catch (Exception e) {
 			result.setRespCode("2");
@@ -99,7 +99,7 @@ public class GroupController {
 		}
 
 		try {
-			this.groupService.selectGroupCount(result,loginID,queryType,roleList,deptList,userList,groupID);
+			this.newGroupService.selectGroupCount(result,loginID,queryType,roleList,deptList,userList,groupID);
 			logger.info("统计当前人数查询接口::--" + JsonUtil.toJson(result));
 		} catch (Exception e) {
 			result.setRespCode("2");
@@ -140,7 +140,7 @@ public class GroupController {
 		}
 
 		try {
-			this.groupService.saveGroupCount(result,loginID,queryType,roleList,deptList,userList,groupID,groupName,groupDesc);
+			this.newGroupService.saveGroupCount(result,loginID,queryType,roleList,deptList,userList,groupID,groupName,groupDesc);
 			logger.info("新分组保存功能接口::--" + JsonUtil.toJson(result));
 		} catch (Exception e) {
 			result.setRespCode("2");
