@@ -75,9 +75,9 @@ public class GroupController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登入Id", required = true, dataType = "String"),
 			@ApiImplicitParam(name = "queryType", value = "查询类型 1角色2部门3自定义4已有分组", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "roleList", value = "角色列表Josn<list> {\"roleList\":\"[{\"roleID\",\"1\"},{\"roleID\",\"2\"}]\"}", dataType = "String" ),
-			@ApiImplicitParam(name = "deptList", value = "部门列表Josn<list> {\"deptList\":\"[{\"deptID\",\"1\"},{\"deptID\",\"2\"}]\"}", dataType = "String"),
-			@ApiImplicitParam(name = "userList", value = "人员列表Josn<list> {\"userList\":\"[{\"userID\",\"1\"},{\"userID\",\"2\"}]\"}", dataType = "String"),
+			@ApiImplicitParam(name = "roleList", value = "角色列表Josn<list> {\"roleList\":[{\"roleID\":\"1758\"},{\"roleID\":\"2\"}]}", dataType = "String" ),
+			@ApiImplicitParam(name = "deptList", value = "部门列表Josn<list> {\"deptList\":[{\"deptID\":\"1844641\"},{\"deptID\":\"2\"}]}", dataType = "String"),
+			@ApiImplicitParam(name = "userList", value = "人员列表Josn<list> {\"userList\":[{\"userID\":\"1\"},{\"userID\":\"2\"}]}", dataType = "String"),
 			@ApiImplicitParam(name = "groupID", value = "分组ID 分组增加时判断人数", dataType = "String")
 	})
 	@GetMapping("/selectGroupCount")
@@ -88,13 +88,11 @@ public class GroupController {
 		if(loginID == null || loginID.trim().equals("")) {
 			result.setRespCode("2");
 			result.setRespDesc("loginID 不能为空");
-			logger.info("loginID 不能为空");
 			return result;
 		}
 		if(queryType == null || queryType.trim().equals("")) {
 			result.setRespCode("2");
 			result.setRespDesc("queryType 不能为空");
-			logger.info("queryType 不能为空");
 			return result;
 		}
 
@@ -102,6 +100,7 @@ public class GroupController {
 			this.newGroupService.selectGroupCount(result,loginID,queryType,roleList,deptList,userList,groupID);
 			logger.info("统计当前人数查询接口::--" + JsonUtil.toJson(result));
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");
@@ -114,9 +113,9 @@ public class GroupController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登入Id", required = true, dataType = "String"),
 			@ApiImplicitParam(name = "queryType", value = "查询类型 1角色2部门3自定义4已有分组", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "roleList", value = "角色列表Josn<list> {\"roleList\":\"[{\"roleID\",\"1\"},{\"roleID\",\"2\"}]\"}", dataType = "String" ),
-			@ApiImplicitParam(name = "deptList", value = "部门列表Josn<list> {\"deptList\":\"[{\"deptID\",\"1\"},{\"deptID\",\"2\"}]\"}", dataType = "String"),
-			@ApiImplicitParam(name = "userList", value = "人员列表Josn<list> {\"userList\":\"[{\"userID\",\"1\"},{\"userID\",\"2\"}]\"}", dataType = "String"),
+			@ApiImplicitParam(name = "roleList", value = "角色列表Josn<list> {\"roleList\":[{\"roleID\":\"1758\"},{\"roleID\":\"2\"}]}", dataType = "String" ),
+			@ApiImplicitParam(name = "deptList", value = "部门列表Josn<list> {\"deptList\":[{\"deptID\":\"1844641\"},{\"deptID\":\"2\"}]}", dataType = "String"),
+			@ApiImplicitParam(name = "userList", value = "人员列表Josn<list> {\"userList\":[{\"userID\":\"1\"},{\"userID\":\"2\"}]}", dataType = "String"),
 			@ApiImplicitParam(name = "groupID", value = "分组ID", dataType = "String"),
 			@ApiImplicitParam(name = "groupName", value = "分组名称", dataType = "String"),
 			@ApiImplicitParam(name = "groupDesc", value = "分组详情", dataType = "String")
