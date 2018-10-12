@@ -28,8 +28,6 @@ public class AddressGroup implements Serializable{
 	@ApiModelProperty(value = "主键")
 	@Id
 	@Column(name = "ROW_ID")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator="SEQ_ADDRESS_GROUP")
-	@SequenceGenerator(name="SEQ_ADDRESS_GROUP", sequenceName="seq_app_addresslist")
 	private String rowId;
 	
 	@ApiModelProperty(value = "组id")

@@ -142,6 +142,7 @@ public class GroupController {
 			this.newGroupService.saveGroupCount(result,loginID,queryType,roleList,deptList,userList,groupID,groupName,groupDesc);
 			logger.info("新分组保存功能接口::--" + JsonUtil.toJson(result));
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.setRespCode("2");
 			result.setRespDesc("失败");
 			result.setRespMsg("");

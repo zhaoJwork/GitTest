@@ -80,6 +80,28 @@ public class OrganizationDsl{
 	@Column(name = "ORG_ORDER")
 	private Integer orderValue;
 
+	/**
+	 * 索引
+	 */
+	private String orgIDIndex;
+
+	private String orgNameIndex;
+
+	public String getOrgIDIndex(){
+		return orgIDIndex;
+	}
+
+	public  String getOrgNameIndex(){
+		return orgNameIndex;
+	}
+
+	public void setOrgIDIndex(String orgIDIndex){
+		this.orgIDIndex = orgIDIndex;
+	}
+
+	public void setOrgNameIndex(String orgNameIndex){
+		this.orgNameIndex = orgNameIndex;
+	}
 
 	public String getRowID() {
 		return rowID;

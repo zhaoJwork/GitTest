@@ -3,14 +3,12 @@ package com.lin.service;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.OrganizationBean;
-import com.lin.domain.OrganizationDsl;
-import com.lin.domain.QOrganizationBlack;
-import com.lin.domain.QOrganizationDsl;
+import com.lin.domain.*;
 import com.lin.mapper.OrganizationMapper;
 import com.lin.repository.OrganizationRepository;
 import com.lin.util.JsonUtil;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,19 +62,70 @@ public class OrganizationServiceImpl extends AbstractService<OrganizationDsl,Str
 	public List<OrganizationDsl> getOrganizationByDsl(OrganizationDsl organ) {
         QOrganizationDsl organDsl = QOrganizationDsl.organizationDsl;
         QOrganizationBlack blackDsl = QOrganizationBlack.organizationBlack;
+		QOrganizationIndex qOrganizationIndex = QOrganizationIndex.organizationIndex;
 		Predicate predicate = null;
 		if(null != organ.getpID()&& !organ.getpID().equals("")){
 			predicate = QOrganizationDsl.organizationDsl.pID.eq(organ.getpID());
-			return queryFactory.select(organDsl).from(organDsl).where(predicate)
+			return queryFactory.select(Projections.bean(OrganizationDsl.class,
+					organDsl.rowID,
+					organDsl.organizationID,
+					organDsl.organizationName,
+					organDsl.pID,
+					organDsl.type,
+					organDsl.updateDate,
+					organDsl.orderValue,
+					organDsl.flag,
+					organDsl.onlineCount,
+					organDsl.userCount,
+					organDsl.zimuname,
+					qOrganizationIndex.orgIDIneex.as("orgIDIndex"),
+					qOrganizationIndex.orgNameIneex.as("orgNameIndex")
+					)).from(organDsl)
+					.leftJoin(qOrganizationIndex)
+					.on(qOrganizationIndex.orgID.eq(organDsl.organizationID))
+					.where(predicate)
 					.where(QOrganizationDsl.organizationDsl.organizationID.notIn(queryFactory.select(blackDsl.organizationID).from(blackDsl)))
 					.orderBy(QOrganizationDsl.organizationDsl.orderValue.asc()).fetch();
 		}
 		if(null != organ.getOrganizationID() && !organ.getOrganizationID().equals("")){
 			predicate = QOrganizationDsl.organizationDsl.organizationID.eq(organ.getOrganizationID());
-			return queryFactory.select(organDsl).from(organDsl).where(predicate)
+			return queryFactory.select(Projections.bean(OrganizationDsl.class,
+					organDsl.rowID,
+					organDsl.organizationID,
+					organDsl.organizationName,
+					organDsl.pID,
+					organDsl.type,
+					organDsl.updateDate,
+					organDsl.orderValue,
+					organDsl.flag,
+					organDsl.onlineCount,
+					organDsl.userCount,
+					organDsl.zimuname,
+					qOrganizationIndex.orgIDIneex.as("orgIDIndex"),
+					qOrganizationIndex.orgNameIneex.as("orgNameIndex")
+			)).from(organDsl)
+					.leftJoin(qOrganizationIndex)
+					.on(qOrganizationIndex.orgID.eq(organDsl.organizationID))
+					.where(predicate)
 					.fetch();
 		}
-		return queryFactory.selectFrom(organDsl).from(organDsl).where(predicate).fetch();
+		return queryFactory.select(Projections.bean(OrganizationDsl.class,
+				organDsl.rowID,
+				organDsl.organizationID,
+				organDsl.organizationName,
+				organDsl.pID,
+				organDsl.type,
+				organDsl.updateDate,
+				organDsl.orderValue,
+				organDsl.flag,
+				organDsl.onlineCount,
+				organDsl.userCount,
+				organDsl.zimuname,
+				qOrganizationIndex.orgIDIneex.as("orgIDIndex"),
+				qOrganizationIndex.orgNameIneex.as("orgNameIndex")
+		)).from(organDsl)
+				.leftJoin(qOrganizationIndex)
+				.on(qOrganizationIndex.orgID.eq(organDsl.organizationID)).where(predicate).fetch();
 	}
 
 	@Autowired

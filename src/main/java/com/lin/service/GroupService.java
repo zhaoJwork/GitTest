@@ -2,10 +2,11 @@ package com.lin.service;
 
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
-import com.lin.repository.AddressBannedRepository;
-import com.lin.repository.AddressColAuxiliaryRepository;
-import com.lin.repository.AddressCollectionRepository;
-import com.lin.repository.AddressGroupRepository;
+import com.lin.repository.*;
+import com.lin.util.ImageUtil;
+import com.lin.vo.UserDetailsVo;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import io.swagger.models.auth.In;
 import net.sf.json.JSONArray;
 import com.lin.util.Result;
@@ -18,6 +19,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.*;
 
 
@@ -52,16 +58,22 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	private String enterpriseModify;
 	@Value("${application.enterprise.queryGroup}")
 	private String enterpriseQueryGroup;
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp;
 
+	@Value("${application.pic_group_img}")
+	private String picGroupImg;
+	@Value("${application.pic_group_temp_img}")
+	private String picGroupTempImg;
+	@Value("${application.pic_group_db_img_root}")
+	private String picGroupDbImgRoot;
+	@Value("${application.pic_group_db_img}")
+	private String picGroupDbImg;
 
 	@Resource
-	private AddressBannedRepository addressBannedRepository;
-
+	private AddressGroupRepository addressGroupRepository;
 	@Resource
-	private AddressCollectionRepository addressCollectionRepository;
-
-	@Resource
-	private AddressColAuxiliaryRepository addressColAuxiliaryRepository;
+	private AddressGroupUserRepository addressGroupUserRepository;
 
 	@Autowired
 	private EntityManager entityManager;
@@ -224,22 +236,143 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		////查询类型 1角色 2部门
 		if("1".equals(queryType) || "2".equals(queryType)) {
 			if (!"".equals(deptList) && null != deptList) {
+				////保存主表数据
+				AddressGroup addressGroup = new AddressGroup();
+				addressGroup.setGroupName(groupName);
+				addressGroup.setGroupDesc(groupDesc);
+				groupID = getSeq()+"";
+				addressGroup.setRowId(groupID);
+				addressGroup.setGroupId(groupID);
+				addressGroup.setCreateUser(loginID);
+				addressGroup.setCreateDate(new Date());
+				addressGroup.setUpdateDate(new Date());
+				addressGroup.setGroupImg("/1/mphotos/10000001.png");
+				addressGroupRepository.save(addressGroup);
+				////保存子表数据
 				JSONObject obj = JSONObject.fromObject(deptList);
 				JSONArray objlist = obj.getJSONArray("deptList");
 				for (int i = 0; i < objlist.size(); i++) {
 					JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
 					String deptID = jsonObj.getString("deptID");
-
-
+					List list = getUserByDeptID(deptID,inroles);
+					List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
+					for(int m = 0 ; m < list.size() ; m ++){
+						AddressGroupUser addressGroupUser = new AddressGroupUser();
+						addressGroupUser.setRowId(getSeq()+"");
+						addressGroupUser.setGroupId(groupID);
+						addressGroupUser.setGroupUser(list.get(m).toString());
+						addressGroupUser.setCreateDate(new Date());
+						listgu.add(addressGroupUser);
+					}
+					addressGroupUserRepository.saveAll(listgu);
 				}
+				////更新头像
+				try {
+					editGroupImg(groupID);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				////推送极光推送
+
 			}
 		}
 	}
 
+	/**
+	 * 编辑图片
+	 * @param groupID
+	 */
+	private void editGroupImg(String groupID) throws Exception{
+		// 查询所属组的人
 
+		QUser qUser = QUser.user;
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		List<User> userIdList = queryFactory.select(Projections.bean(User.class,
+					qAddressGroupUser.groupUser.as("userID"),
+					new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("userPic")
+				)
+			).from(qAddressGroupUser)
+			.leftJoin(qUser)
+			.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+			.leftJoin(uass)
+			.on(qUser.userID.eq(uass.userid))
+			.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+
+		////List<User> userIdList = groupDao.selectGroupUserBygroupID(groupID);
+		String imgIp = picHttpIp;
+		//// 临时文件路径
+		String tem = picGroupTempImg;
+		////文件所缺根路径
+		String imgRoot = picGroupDbImgRoot;
+		List<File> fileList = new ArrayList<File>();
+		for (User u : userIdList) {
+			String uPic = u.getUserPic();
+			if (uPic == null || uPic.equals(imgIp + "/1/mphotos/10000001.png")) {
+				// 10000001.png数据库中因为不能有空数据，所以写死的假数据
+				continue;
+			}
+			String uPicTem = tem + u.getUserID() + ".png";
+			try {
+				uPic=uPic.replace(imgIp,imgRoot);
+				File fromFile = new File(uPic);
+				File toFile = new File(uPicTem);
+				copyFile(fromFile,toFile);
+				File f = new File(uPicTem);
+				fileList.add(f);
+				// 只要九个图片(方法只允许最多9张图片)
+				if (fileList.size() == 9) {
+					break;
+				}
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (fileList.size() > 0) {
+			//文件名称不能单用groupId生成 如果前端设置本地缓存 则图片不会更新
+			String union=System.currentTimeMillis()+"";
+			// 存放群组图片地址服务器文件路径
+			String groupImgAddress = picGroupImg + union+ groupID + ".png";
+			// 9张图片生成1张图片
+			ImageUtil.createImage(fileList, groupImgAddress, "");
+			File f = new File(groupImgAddress);
+			String saveUrl = picGroupDbImg + union+ groupID + ".png";
+			// 更新appuser.address_group表
+			if (f.exists()) {
+				AddressGroup addressGroup = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+				addressGroup.setUpdateDate(new Date());
+				addressGroup.setGroupImg(saveUrl);
+				super.update(addressGroup);
+			}
+		}
+	}
+
+	/**
+	 * 复制文件
+	 * @param fromFile
+	 * @param toFile
+	 * @throws IOException
+	 */
+	public void copyFile(File fromFile,File toFile) throws IOException{
+		FileInputStream ins = new FileInputStream(fromFile);
+		FileOutputStream out = new FileOutputStream(toFile);
+		byte[] b = new byte[1024];
+		int n=0;
+		while((n=ins.read(b))!=-1){
+			out.write(b, 0, n);
+		}
+
+		ins.close();
+		out.close();
+	}
     /**
      * 根据部门ID获取最下级部门当前没有黑名单的人数
      * @param deptID
+	 * @param roles
      * @return
      */
     private int getUserCountByDeptID(String deptID ,String roles){
@@ -267,7 +400,41 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	    return Integer.parseInt(list.get(0).toString());
     }
 
+	/**
+	 * 根据部门ID获取最下级部门当前没有黑名单的人员ID
+	 * @param deptID
+	 * @param roles
+	 * @return
+	 */
+	private List getUserByDeptID(String deptID ,String roles){
+		int i = 0 ;
+		StringBuffer sql = new StringBuffer();
+		sql.append("select u.user_id " +
+				"  from appuser.address_user u" +
+				" where not exists" +
+				" (select 1" +
+				"          from appuser.address_blacklist tt" +
+				"         where tt.user_id = u.user_id)" +
+				"   and u.dep_id in" +
+				"       (select t.organ_id" +
+				"          from appuser.address_organization t" +
+				"         where t.flag = '1'" +
+				"           and not exists (select 1" +
+				"                  from appuser.address_blackorglist tt" +
+				"                 where t.organ_id = tt.org_id)" +
+				"         start with t.organ_id = '"+ deptID +"'" +
+				"        connect by prior t.organ_id = t.pid)");
+		if (!"".equals(roles) && null != roles){
+			sql.append(" and u.pos_id in ( " + roles + " )");
+		}
+		return entityManager.createNativeQuery(sql.toString()).getResultList();
+	}
 
+	private Integer getSeq(){
+		List noTalk = entityManager.createNativeQuery("select appuser.seq_app_addresslist.nextval from dual")
+				.getResultList();
+		return Integer.parseInt(noTalk.get(0).toString());
+	}
 	@Override
 	public long deleteByIds(String... ids) {
 		// TODO Auto-generated method stub
