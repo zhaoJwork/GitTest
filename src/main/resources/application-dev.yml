@@ -54,12 +54,12 @@ application:
   redis_port: 6379
   redis_timeout: 30000
   enterprise:
-    createGroup:
-    inviteFriend:
-    removeMembers:
-    exitGroup:
-    dissolution:
-    modify:
-    queryGroup:
+    createGroup: http://10.128.49.65:20060/enterprise_go/group/createGroup
+    inviteFriend: http://10.128.49.65:20060/enterprise_go/customer/inviteFriend
+    removeMembers: http://10.128.49.65:20060/enterprise_go/group/removeMembers
+    exitGroup: http://10.128.49.65:20060/enterprise_go/group/exitGroup
+    dissolution: http://10.128.49.65:20060/enterprise_go/group/dissolution
+    modify: http://10.128.49.65:20060/enterprise_go/group/modify
+    queryGroup: http://10.128.49.65:20060/enterprise_go/group/queryGroup
 swagger:
   show: true

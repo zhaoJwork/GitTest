@@ -4,6 +4,7 @@ import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.*;
 import com.lin.util.ImageUtil;
+import com.lin.util.NetUtil;
 import com.lin.vo.UserDetailsVo;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -274,10 +275,13 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				}
 
 				////推送极光推送
-
+				////createGroup("");
 			}
 		}
 	}
+
+
+
 
 	/**
 	 * 编辑图片
