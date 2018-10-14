@@ -62,7 +62,6 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	private AddressGroupRepository addressGroupRepository;
 	@Resource
 	private AddressGroupUserRepository addressGroupUserRepository;
-
 	@Autowired
 	private SendGroupService sendGroupService;
 	@Autowired
@@ -280,7 +279,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						 .leftJoin(uass)
 						 .on(qUser.userID.eq(uass.userid))
 						 .where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-				sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),group.getGroupImg(),listJoinUsers);
+				sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp + group.getGroupImg(),listJoinUsers);
 			}
 		}
 	}

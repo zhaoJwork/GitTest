@@ -18,7 +18,8 @@ import java.util.Map;
  */
 @Service
 public class SendGroupService {
-
+    @Value("${application.pic_HttpIP}")
+    private String picHttpIp;
     @Value("${application.enterprise.createGroup}")
     private String enterpriseCreateGroup;
     @Value("${application.enterprise.inviteFriend}")
@@ -76,11 +77,11 @@ public class SendGroupService {
         obj.put("crator",crator);
         obj.put("groupName",groupName);
         obj.put("id",id);
-        obj.put("avatar",avatar);
+        obj.put("avatar",picHttpIp + avatar);
         List<Map> listMap = new ArrayList<Map>();
         for(JoinUsers joinuser :joinUsers){
             Map map = new HashMap();
-            map.put("avatar",joinuser.getAvatar());
+            map.put("avatar",picHttpIp + joinuser.getAvatar());
             map.put("nickName",joinuser.getNickName());
             map.put("customerId",joinuser.getCustomerId());
             listMap.add(map);
@@ -121,17 +122,21 @@ public class SendGroupService {
      *      nickName 用户昵称
      *      avatar 用户头像
      * @param sender 操作人staffId
+     * @param groupId 群ID
+     * @param avatar 群组头像
      * @param members 邀请成员列表
      *
      */
-    public Boolean inviteFriend(String sender, List<JoinUsers> members){
+    public Boolean inviteFriend(String sender, String groupId ,String avatar ,List<JoinUsers> members){
         Boolean bool = false;
         JSONObject obj = new JSONObject();
         obj.put("sender",sender);
+        obj.put("groupId",groupId);
+        obj.put("avatar",picHttpIp + avatar);
         List<Map> listMap = new ArrayList<Map>();
         for(JoinUsers joinuser :members){
             Map map = new HashMap();
-            map.put("avatar",joinuser.getAvatar());
+            map.put("avatar",picHttpIp + joinuser.getAvatar());
             map.put("nickName",joinuser.getNickName());
             map.put("customerId",joinuser.getCustomerId());
             map.put("groupId",joinuser.getGroupId());
@@ -164,14 +169,16 @@ public class SendGroupService {
      * }
      * @param masterId 操作人staffId
      * @param groupId 群ID
+     * @param avatar 群组头像
      * @param customerIds 删除成员staffID
      *
      */
-    public Boolean removeMembers(String masterId,String groupId, List<JoinUsers> customerIds){
+    public Boolean removeMembers(String masterId,String groupId,String avatar, List<JoinUsers> customerIds){
         Boolean bool = false;
         JSONObject obj = new JSONObject();
         obj.put("masterId",masterId);
         obj.put("groupId",groupId);
+        obj.put("avatar",picHttpIp + avatar);
         List<Map> listMap = new ArrayList<Map>();
         String ids = "";
         for(JoinUsers joinuser :customerIds){

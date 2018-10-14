@@ -15,6 +15,8 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 
 import com.lin.domain.*;
+import com.lin.service.SendGroupService;
+import com.lin.vo.JoinUsers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,8 @@ public class GroupServiceImpl implements GroupServiceI {
 	private GroupMapper groupDao;
 	@Autowired
 	private UtilMapper utilDao;
+	@Autowired
+	private SendGroupService sendGroupService;
 	
 	// sql 修改为jpa+querydsl 
 	
@@ -115,9 +119,31 @@ public class GroupServiceImpl implements GroupServiceI {
 				// 创建群组 成功 生成群组头像 zhangWeiJie
 				editGroupImg(groupID);
 			}
+
+			//一键建群
+			QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+			QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+			QUser qUser = QUser.user;
+			QUserNewAssist uass = QUserNewAssist.userNewAssist;
+			AddressGroup group = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+			List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
+					qAddressGroupUser.groupUser.as("customerId"),
+					qUser.userName.as("nickName"),
+					new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+			))
+					.from(qAddressGroupUser)
+					.leftJoin(qUser)
+					.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+					.leftJoin(uass)
+					.on(qUser.userID.eq(uass.userid))
+					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+			sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),group.getGroupImg(),listJoinUsers);
+
+
 		} else {
 			if (null != type && !"".equals(type)) {
 				if (type.equals("1")) {// type=1增加人员
+					List<String> list = new ArrayList<String>();
 					if (null != userIds && !"".equals(userIds)) {
 						String[] userID = userIds.split("_");
 						//不重复增加组人员
@@ -133,6 +159,7 @@ public class GroupServiceImpl implements GroupServiceI {
 								gu.setGroupID(groupID);
 								gu.setGroupUser(uid);
 								listGU.add(gu);
+								list.add(uid);
 							}else {
 								if(groupUsers.indexOf(uid) < 0){
 									String rowID = utilDao.getSeqAppGourpUser();
@@ -140,6 +167,7 @@ public class GroupServiceImpl implements GroupServiceI {
 									gu.setGroupID(groupID);
 									gu.setGroupUser(uid);
 									listGU.add(gu);
+									list.add(uid);
 								}
 							}
 						}
@@ -147,7 +175,27 @@ public class GroupServiceImpl implements GroupServiceI {
 							 groupDao.saveGroupUser(listGU);
 						 }
 					}
+					// 编辑群组人员，重新生成群组头像 zhangWeiJie
+					String saveImp = editGroupImg(groupID);
+					QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+					QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+					QUser qUser = QUser.user;
+					QUserNewAssist uass = QUserNewAssist.userNewAssist;
+					List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
+							qAddressGroupUser.groupUser.as("customerId"),
+							qUser.userName.as("nickName"),
+							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+					))
+							.from(qAddressGroupUser)
+							.leftJoin(qUser)
+							.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+							.leftJoin(uass)
+							.on(qUser.userID.eq(uass.userid))
+							.where(qAddressGroupUser.groupId.eq(groupID).and(qAddressGroupUser.groupUser.in(list))).fetch();
+					sendGroupService.inviteFriend(loginID,groupID,saveImp,listJoinUsers);
+
 				} else if (type.equals("2")) {// 2 删除人员
+					List<JoinUsers> list = new ArrayList<JoinUsers>();
 					if (null != userIds && !"".equals(userIds)) {
 						String[] userID = userIds.split("_");
 						GroupUserBean gu = new GroupUserBean();
@@ -159,16 +207,26 @@ public class GroupServiceImpl implements GroupServiceI {
 						groupUser = groupUser.substring(0, groupUser.lastIndexOf(","));
 						gu.setGroupID(groupID);
 						gu.setGroupUser(groupUser);
+						JoinUsers joinUsers = new JoinUsers();
+						joinUsers.setCustomerId(groupUser);
+						list.add(joinUsers);
 						groupDao.deleteGroupUser(gu);
 					}
+					// 编辑群组人员，重新生成群组头像 zhangWeiJie
+					String saveImp = editGroupImg(groupID);
+					sendGroupService.removeMembers(loginID,groupID,saveImp,list);
+
+
+
 				} else if (type.equals("3")) {// 3 删除组
 					groupDao.deleteGroup(groupID);
 					GroupUserBean gu = new GroupUserBean();
 					gu.setGroupID(groupID);
 					groupDao.deleteGroupUser(gu);
+					////解散群组
+					sendGroupService.dissolution(groupID,loginID);
+
 				}
-				// 编辑群组人员，重新生成群组头像 zhangWeiJie
-				editGroupImg(groupID);
 			}
 			// groupName=以小组分组&
 			if (null != groupName && !"".equals(groupName)) {
@@ -176,6 +234,8 @@ public class GroupServiceImpl implements GroupServiceI {
 				gb.setGroupID(groupID);
 				gb.setGroupName(groupName);
 				groupDao.updateGroup(gb);
+				////修改群名称
+				sendGroupService.modify(groupID,groupName,loginID);
 			}
 			// groupDesc=分组详情
 			if (null != groupDesc && !"".equals(groupDesc)) {
@@ -187,13 +247,14 @@ public class GroupServiceImpl implements GroupServiceI {
 		}
 	}
 
-	private void editGroupImg(String groupID) throws Exception {
+	private String editGroupImg(String groupID) throws Exception {
 		// 查询所属组的人
 		List<User> userIdList = groupDao.selectGroupUserBygroupID(groupID);
 		String imgIp = picHttpIp;// "http://42.99.16.145:19491";//
 											// 头像缺少IP地址
 		String tem = picGroupTempImg;// 临时文件路径
 		String imgRoot = picGroupDbImgRoot;//文件所缺根路径
+		String saveUrl = "";
 		List<File> fileList = new ArrayList<File>();
 		for (User u : userIdList) {
 			String uPic = u.getUserPic();
@@ -227,7 +288,7 @@ public class GroupServiceImpl implements GroupServiceI {
 			// 9张图片生成1张图片
 			ImageUtil.createImage(fileList, groupImgAddress, "");
 			File f = new File(groupImgAddress);
-			String saveUrl = picGroupDbImg + union+ groupID + ".png";
+			saveUrl = picGroupDbImg + union+ groupID + ".png";
 			// 更新appuser.address_group表
 			if (f.exists()) {
 				GroupBean gb = new GroupBean();
@@ -236,6 +297,7 @@ public class GroupServiceImpl implements GroupServiceI {
 				groupDao.updateGroupImgInfo(gb);
 			}
 		}
+		return saveUrl;
 	}
 
 	@SuppressWarnings("rawtypes")
