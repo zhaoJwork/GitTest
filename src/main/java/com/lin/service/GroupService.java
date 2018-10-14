@@ -5,6 +5,7 @@ import com.lin.domain.*;
 import com.lin.repository.*;
 import com.lin.util.ImageUtil;
 import com.lin.util.NetUtil;
+import com.lin.vo.JoinUsers;
 import com.lin.vo.UserDetailsVo;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -45,23 +46,9 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		super(addressGroupRepository);
 	}
 
-	@Value("${application.enterprise.createGroup}")
-	private String enterpriseCreateGroup;
-	@Value("${application.enterprise.inviteFriend}")
-	private String enterpriseInviteFriend;
-	@Value("${application.enterprise.removeMembers}")
-	private String enterpriseRemoveMembers;
-	@Value("${application.enterprise.exitGroup}")
-	private String enterpriseExitGroup;
-	@Value("${application.enterprise.dissolution}")
-	private String enterpriseDissolution;
-	@Value("${application.enterprise.modify}")
-	private String enterpriseModify;
-	@Value("${application.enterprise.queryGroup}")
-	private String enterpriseQueryGroup;
+
 	@Value("${application.pic_HttpIP}")
 	private String picHttpIp;
-
 	@Value("${application.pic_group_img}")
 	private String picGroupImg;
 	@Value("${application.pic_group_temp_img}")
@@ -76,6 +63,8 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	@Resource
 	private AddressGroupUserRepository addressGroupUserRepository;
 
+	@Autowired
+	private SendGroupService sendGroupService;
 	@Autowired
 	private EntityManager entityManager;
 
@@ -275,7 +264,23 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				}
 
 				////推送极光推送
-				////createGroup("");
+				QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+				QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+				QUser qUser = QUser.user;
+				QUserNewAssist uass = QUserNewAssist.userNewAssist;
+				AddressGroup group = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+				List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
+						 							qAddressGroupUser.groupUser.as("customerId"),
+						 							qUser.userName.as("nickName"),
+						 							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+						 ))
+						 .from(qAddressGroupUser)
+						 .leftJoin(qUser)
+						 .on(qAddressGroupUser.groupUser.eq(qUser.userID))
+						 .leftJoin(uass)
+						 .on(qUser.userID.eq(uass.userid))
+						 .where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+				sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),group.getGroupImg(),listJoinUsers);
 			}
 		}
 	}

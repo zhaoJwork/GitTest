@@ -24,4 +24,9 @@ public class JoinUsers {
      * 群组ID
      */
     private String groupId;
+    /**
+     * 群组名称
+     */
+    private String groupName;
+
 }
