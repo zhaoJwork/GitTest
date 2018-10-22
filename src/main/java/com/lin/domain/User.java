@@ -133,6 +133,10 @@ public class User implements Serializable ,Comparable<User>{
 	 */
 	private Integer install;
 	
+	@ApiModelProperty(value = "性别")
+	@Column(name = "SEX")
+	private String sex;
+	
 	public Integer getInstall() {
 		return install;
 	}

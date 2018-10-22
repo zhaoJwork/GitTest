@@ -23,29 +23,69 @@ import java.util.Date;
 @Data
 @Table(name = "ADDRESS_BLACKLIST")
 public class BlackUserList {
+	
+	
 	@ApiModelProperty(value = "主键")
 	@Id
 	@Column(name = "ROW_ID")
 	private String rowID;
-	/**
-	 * 部门ID
-	 */
-	@Column(name = "ORG_ID")
-	private String orgID;
-	/**
-	 * 部门名称
-	 */
-	@Column(name = "ORG_NAME")
-	private String orgName;
-	/**
-	 * 创建人
-	 */
+	
+	@ApiModelProperty(value = "用户id")
+	@Column(name = "USER_ID")
+	private String userID;
+	
+	@ApiModelProperty(value = "用户name")
+	@Column(name = "USER_NAME")
+	private String userName;
+	
+	@ApiModelProperty(value = "创建人")
 	@Column(name = "CREATE_BY")
 	private String createBy;
-	/**
-	 * 创建时间
-	 */
+	
+	@ApiModelProperty(value = "创建时间")
 	@Column(name = "CREATE_DATE")
 	private Date createDate;
+
+
+	public String getRowID() {
+		return rowID;
+	}
+
+	public void setRowID(String rowID) {
+		this.rowID = rowID;
+	}
+
+	public String getUserID() {
+		return userID;
+	}
+
+	public void setUserID(String userID) {
+		this.userID = userID;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getCreateBy() {
+		return createBy;
+	}
+
+	public void setCreateBy(String createBy) {
+		this.createBy = createBy;
+	}
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
 
 }
