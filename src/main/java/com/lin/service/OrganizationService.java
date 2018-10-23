@@ -75,6 +75,7 @@ public class OrganizationService extends AbstractService<OrganizationDsl,String>
 							)
 			).from(organDsl).where(predicate)
 					.where(QOrganizationDsl.organizationDsl.organizationID.notIn(queryFactory.select(blackDsl.organizationID).from(blackDsl)))
+					.orderBy(QOrganizationDsl.organizationDsl.markID.asc())
 					.orderBy(QOrganizationDsl.organizationDsl.orderValue.asc()).fetch();
 		}
 		if(null != organ.getOrganizationID() && !organ.getOrganizationID().equals("")){
@@ -97,6 +98,7 @@ public class OrganizationService extends AbstractService<OrganizationDsl,String>
 							.when(organDsl.markID.eq("3")).then("综合")
 							.otherwise("").as("markName")
 			)).from(organDsl).where(predicate)
+					.orderBy(QOrganizationDsl.organizationDsl.markID.asc())
 					.fetch();
 		}
 		return queryFactory.select(Projections.bean(OrganizationDsl.class,
@@ -116,7 +118,7 @@ public class OrganizationService extends AbstractService<OrganizationDsl,String>
 						.when(organDsl.markID.eq("2")).then("支撑")
 						.when(organDsl.markID.eq("3")).then("综合")
 						.otherwise("").as("markName")
-		)).from(organDsl).where(predicate).fetch();
+		)).from(organDsl).where(predicate).orderBy(QOrganizationDsl.organizationDsl.markID.asc()).fetch();
 	}
 	@Override
 	public long deleteByIds(String... strings) {
