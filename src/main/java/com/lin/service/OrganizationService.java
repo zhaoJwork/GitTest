@@ -10,6 +10,8 @@ import com.lin.domain.QOrganizationDsl;
 import com.lin.repository.OrganizationRepository;
 import com.lin.util.JsonUtil;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,16 +54,69 @@ public class OrganizationService extends AbstractService<OrganizationDsl,String>
 		JPAQueryFactory queryFactory = jpaQueryFactory();
 		if(null != organ.getpID()&& !organ.getpID().equals("")){
 			predicate = QOrganizationDsl.organizationDsl.pID.eq(organ.getpID());
-			return queryFactory.select(organDsl).from(organDsl).where(predicate)
+			return queryFactory.select(
+					Projections.bean(OrganizationDsl.class,
+							organDsl.rowID,
+							organDsl.organizationID,
+							organDsl.organizationName,
+							organDsl.pID,
+							organDsl.type,
+							organDsl.updateDate,
+							organDsl.orderValue,
+							organDsl.flag,
+							organDsl.onlineCount,
+							organDsl.userCount,
+							organDsl.zimuname,
+							organDsl.markID.as("markID"),
+							new CaseBuilder().when(organDsl.markID.eq("1")).then("营销")
+									.when(organDsl.markID.eq("2")).then("支撑")
+									.when(organDsl.markID.eq("3")).then("综合")
+									.otherwise("").as("markName")
+							)
+			).from(organDsl).where(predicate)
 					.where(QOrganizationDsl.organizationDsl.organizationID.notIn(queryFactory.select(blackDsl.organizationID).from(blackDsl)))
 					.orderBy(QOrganizationDsl.organizationDsl.orderValue.asc()).fetch();
 		}
 		if(null != organ.getOrganizationID() && !organ.getOrganizationID().equals("")){
 			predicate = QOrganizationDsl.organizationDsl.organizationID.eq(organ.getOrganizationID());
-			return queryFactory.select(organDsl).from(organDsl).where(predicate)
+			return queryFactory.select(Projections.bean(OrganizationDsl.class,
+					organDsl.rowID,
+					organDsl.organizationID,
+					organDsl.organizationName,
+					organDsl.pID,
+					organDsl.type,
+					organDsl.updateDate,
+					organDsl.orderValue,
+					organDsl.flag,
+					organDsl.onlineCount,
+					organDsl.userCount,
+					organDsl.zimuname,
+					organDsl.markID.as("markID"),
+					new CaseBuilder().when(organDsl.markID.eq("1")).then("营销")
+							.when(organDsl.markID.eq("2")).then("支撑")
+							.when(organDsl.markID.eq("3")).then("综合")
+							.otherwise("").as("markName")
+			)).from(organDsl).where(predicate)
 					.fetch();
 		}
-		return queryFactory.selectFrom(organDsl).from(organDsl).where(predicate).fetch();
+		return queryFactory.select(Projections.bean(OrganizationDsl.class,
+				organDsl.rowID,
+				organDsl.organizationID,
+				organDsl.organizationName,
+				organDsl.pID,
+				organDsl.type,
+				organDsl.updateDate,
+				organDsl.orderValue,
+				organDsl.flag,
+				organDsl.onlineCount,
+				organDsl.userCount,
+				organDsl.zimuname,
+				organDsl.markID.as("markID"),
+				new CaseBuilder().when(organDsl.markID.eq("1")).then("营销")
+						.when(organDsl.markID.eq("2")).then("支撑")
+						.when(organDsl.markID.eq("3")).then("综合")
+						.otherwise("").as("markName")
+		)).from(organDsl).where(predicate).fetch();
 	}
 	@Override
 	public long deleteByIds(String... strings) {

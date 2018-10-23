@@ -86,6 +86,16 @@ public class OrganizationDsl{
 	@Column(name = "MARK")
 	private String markID;
 
+	private String markName;
+
+
+	public String getMarkName() {
+		return markName;
+	}
+
+	public void setMarkName(String markName) {
+		this.markName = markName;
+	}
 
 	public String getMarkID() {
 		return markID;
