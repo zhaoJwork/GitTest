@@ -2,7 +2,7 @@ package com.lin.controller;
 
 import com.lin.domain.*;
 import com.lin.service.AddressInfLogServiceImpl;
-import com.lin.service.OrganizationServiceImpl;
+import com.lin.service.OrganizationService;
 import com.lin.service.UserService;
 import com.lin.util.Result;
 import com.lin.vo.UserDetailsVo;
@@ -33,7 +33,7 @@ import java.util.Map;
 public class CommunicationDslController {
 
     @Autowired
-    private OrganizationServiceImpl organizationServiceDslImpl;
+    private OrganizationService organizationServiceDslImpl;
     @Autowired
     private AddressInfLogServiceImpl logServiceDsl;
     @Autowired
@@ -149,7 +149,7 @@ public class CommunicationDslController {
         AddressInfLog log =  logServiceDsl.getInfLog(req,"删除50本地网");
         Result result = new Result();
         try {
-            organizationServiceDslImpl.rmJedisOrg();
+            //organizationServiceDslImpl.rmJedisOrg();
             result.setRespCode("1");
             result.setRespDesc("正常返回数据");
             result.setRespMsg("");

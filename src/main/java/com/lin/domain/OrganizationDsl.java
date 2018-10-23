@@ -80,6 +80,20 @@ public class OrganizationDsl{
 	@Column(name = "ORG_ORDER")
 	private Integer orderValue;
 
+	/**
+	 *  标签
+	 */
+	@Column(name = "MARK")
+	private String markID;
+
+
+	public String getMarkID() {
+		return markID;
+	}
+
+	public void setMarkID(String markID) {
+		this.markID = markID;
+	}
 
 	public String getRowID() {
 		return rowID;
