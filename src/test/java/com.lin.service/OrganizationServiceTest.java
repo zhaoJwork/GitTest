@@ -26,7 +26,7 @@ public class OrganizationServiceTest {
   @Test
   public void testLoad(){
     OrganizationDsl dsl = new OrganizationDsl();
-    dsl.setpID("0");
+    dsl.setpID("1947350");
     List<OrganizationDsl> list = organizationServiceDsl.getOrganizationByDsl(dsl);
     Assert.assertNotNull(list);
   }

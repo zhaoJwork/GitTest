@@ -87,6 +87,29 @@ public class OrganizationDsl{
 	private String markID;
 
 	private String markName;
+	/**
+	 * 标签在线数
+	 */
+	private Integer markOnline;
+	/**
+	 * 用户数
+	 */
+	private Integer markUser;
+
+	public Integer getMarkOnline() {
+		return markOnline;
+	}
+
+	public void setMarkOnline(Integer markOnline) {
+		this.markOnline = markOnline;
+	}
+
+	public Integer getMarkUser() {
+		return markUser;
+	}
+	public void setMarkUser(Integer markUser) {
+		this.markUser = markUser;
+	}
 
 
 	public String getMarkName() {

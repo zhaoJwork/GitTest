@@ -19,6 +19,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +50,15 @@ public class OrganizationService extends AbstractService<OrganizationDsl,String>
 	 */
 	public List<OrganizationDsl> getOrganizationByDsl(OrganizationDsl organ) {
         QOrganizationDsl organDsl = QOrganizationDsl.organizationDsl;
+		QOrganizationDsl organs = QOrganizationDsl.organizationDsl;
         QOrganizationBlack blackDsl = QOrganizationBlack.organizationBlack;
 		Predicate predicate = null;
 		JPAQueryFactory queryFactory = jpaQueryFactory();
 		if(null != organ.getpID()&& !organ.getpID().equals("")){
 			predicate = QOrganizationDsl.organizationDsl.pID.eq(organ.getpID());
-			return queryFactory.select(
+			List<OrganizationDsl> list = new ArrayList<OrganizationDsl>();
+			List<OrganizationDsl> retList = new ArrayList<OrganizationDsl>();
+			list = queryFactory.select(
 					Projections.bean(OrganizationDsl.class,
 							organDsl.rowID,
 							organDsl.organizationID,
@@ -71,12 +75,40 @@ public class OrganizationService extends AbstractService<OrganizationDsl,String>
 							new CaseBuilder().when(organDsl.markID.eq("1")).then("营销")
 									.when(organDsl.markID.eq("2")).then("支撑")
 									.when(organDsl.markID.eq("3")).then("综合")
-									.otherwise("").as("markName")
+									.otherwise("").as("markName"),
+							new CaseBuilder().when(organDsl.markID.eq("")).then(0).otherwise(0).as("markOnline"),
+							new CaseBuilder().when(organDsl.markID.eq("")).then(0).otherwise(0).as("markUser")
 							)
-			).from(organDsl).where(predicate)
+			).from(organDsl)
+					.where(predicate)
 					.where(QOrganizationDsl.organizationDsl.organizationID.notIn(queryFactory.select(blackDsl.organizationID).from(blackDsl)))
 					.orderBy(QOrganizationDsl.organizationDsl.markID.asc())
 					.orderBy(QOrganizationDsl.organizationDsl.orderValue.asc()).fetch();
+
+			if(0 < list.size()){
+				List noTalk = entityManager.createNativeQuery("select ot.mark ,sum(ot.organ_user_count), sum(ot.organ_online_count)" +
+						"  from appuser.address_organization ot" +
+						" where ot.pid = ?" +
+						" group by ot.mark")
+						.setParameter(1,organ.getpID())
+						.getResultList();
+
+				if(0 < noTalk.size()){
+					for(OrganizationDsl ret :list)
+					{
+						for(int i = 0 ; i < noTalk.size() ; i ++){
+							Object[] obj = (Object[])noTalk.get(i);
+							if(obj[0].equals(ret.getMarkID())){
+								ret.setMarkOnline(Integer.parseInt(obj[2].toString()));
+								ret.setMarkUser(Integer.parseInt(obj[1].toString()));
+							}
+						}
+						retList.add(ret);
+					}
+					return retList;
+				}
+				return list;
+			}
 		}
 		if(null != organ.getOrganizationID() && !organ.getOrganizationID().equals("")){
 			predicate = QOrganizationDsl.organizationDsl.organizationID.eq(organ.getOrganizationID());
