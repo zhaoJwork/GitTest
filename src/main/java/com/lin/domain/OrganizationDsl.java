@@ -2,7 +2,6 @@ package com.lin.domain;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -81,12 +80,57 @@ public class OrganizationDsl{
 	private Integer orderValue;
 
 	/**
+
 	 * 索引
 	 */
 	private String orgIDIndex;
 
 	private String orgNameIndex;
 
+	@Column(name = "MARK")
+	private String markID;
+
+	private String markName;
+	/**
+	 * 标签在线数
+	 */
+	private Integer markOnline;
+	/**
+	 * 用户数
+	 */
+	private Integer markUser;
+
+	public Integer getMarkOnline() {
+		return markOnline;
+	}
+
+	public void setMarkOnline(Integer markOnline) {
+		this.markOnline = markOnline;
+	}
+
+	public Integer getMarkUser() {
+		return markUser;
+	}
+	public void setMarkUser(Integer markUser) {
+		this.markUser = markUser;
+	}
+
+
+	public String getMarkName() {
+		return markName;
+	}
+
+	public void setMarkName(String markName) {
+		this.markName = markName;
+	}
+
+	public String getMarkID() {
+		return markID;
+	}
+
+	public void setMarkID(String markID) {
+		this.markID = markID;
+	}
 	public String getOrgIDIndex(){
 		return orgIDIndex;
 	}
@@ -101,6 +145,7 @@ public class OrganizationDsl{
 
 	public void setOrgNameIndex(String orgNameIndex){
 		this.orgNameIndex = orgNameIndex;
+
 	}
 
 	public String getRowID() {

@@ -29,7 +29,7 @@ public class OrganizationIndex implements Serializable {
 
 	@ApiModelProperty(value = "索引")
 	@Column(name = "ORG_ID_INDEX")
-	private String orgIDIneex;
+	private String orgIDIndex;
 
 	@ApiModelProperty(value = "名称")
 	@Column(name = "ORG_NAME")
@@ -37,6 +37,6 @@ public class OrganizationIndex implements Serializable {
 
 	@ApiModelProperty(value = "索引名称")
 	@Column(name = "ORG_NAME_INDEX")
-	private String orgNameIneex;
+	private String orgNameIndex;
 
 }
