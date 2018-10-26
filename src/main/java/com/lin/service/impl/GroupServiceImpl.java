@@ -17,6 +17,7 @@ import javax.persistence.EntityManager;
 import com.lin.domain.*;
 import com.lin.service.SendGroupService;
 import com.lin.vo.JoinUsers;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -90,6 +91,10 @@ public class GroupServiceImpl implements GroupServiceI {
 	@Override
 	public void editGroup(String loginID, String groupID, String groupName, String groupDesc, String userIds,
 			String type) throws Exception {
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+		QUser qUser = QUser.user;
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		// 验证是否为新建组
 		if (null == groupID || "".equals(groupID)) {
 			String seq = utilDao.getSeqAppAddresslist();
@@ -121,10 +126,7 @@ public class GroupServiceImpl implements GroupServiceI {
 			}
 
 			//一键建群
-			QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
-			QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
-			QUser qUser = QUser.user;
-			QUserNewAssist uass = QUserNewAssist.userNewAssist;
+
 			AddressGroup group = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 			List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
 					qAddressGroupUser.groupUser.as("customerId"),
@@ -137,10 +139,16 @@ public class GroupServiceImpl implements GroupServiceI {
 					.leftJoin(uass)
 					.on(qUser.userID.eq(uass.userid))
 					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-			sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),group.getGroupImg(),listJoinUsers);
-
-
+			String result = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),group.getGroupImg(),listJoinUsers);
+			if("" != result && !result.equals("error")){
+				JSONObject obj = JSONObject.fromObject(result);
+				String data = obj.getString("data");
+				JSONObject objID = JSONObject.fromObject(data);
+				String groupChatID = objID.getString("id");
+				queryFactory.update(qAddressGroup).set(qAddressGroup.groupChatID,groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+			}
 		} else {
+			AddressGroup addressGroup = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 			if (null != type && !"".equals(type)) {
 				if (type.equals("1")) {// type=1增加人员
 					List<String> list = new ArrayList<String>();
@@ -177,23 +185,21 @@ public class GroupServiceImpl implements GroupServiceI {
 					}
 					// 编辑群组人员，重新生成群组头像 zhangWeiJie
 					String saveImp = editGroupImg(groupID);
-					QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
-					QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
-					QUser qUser = QUser.user;
-					QUserNewAssist uass = QUserNewAssist.userNewAssist;
-					List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
-							qAddressGroupUser.groupUser.as("customerId"),
-							qUser.userName.as("nickName"),
-							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
-					))
-							.from(qAddressGroupUser)
-							.leftJoin(qUser)
-							.on(qAddressGroupUser.groupUser.eq(qUser.userID))
-							.leftJoin(uass)
-							.on(qUser.userID.eq(uass.userid))
-							.where(qAddressGroupUser.groupId.eq(groupID).and(qAddressGroupUser.groupUser.in(list))).fetch();
-					sendGroupService.inviteFriend(loginID,groupID,saveImp,listJoinUsers);
-
+					if(null != addressGroup && !"".equals(addressGroup.getGroupChatID())) {
+						List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
+								qAddressGroupUser.groupUser.as("customerId"),
+								qUser.userName.as("nickName"),
+								new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+						))
+								.from(qAddressGroupUser)
+								.leftJoin(qUser)
+								.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+								.leftJoin(uass)
+								.on(qUser.userID.eq(uass.userid))
+								.where(qAddressGroupUser.groupId.eq(groupID).and(qAddressGroupUser.groupUser.in(list))).fetch();
+						sendGroupService.inviteFriend(loginID, listJoinUsers);
+						sendGroupService.updateGroupInfo(addressGroup.getGroupChatID(),saveImp);
+					}
 				} else if (type.equals("2")) {// 2 删除人员
 					List<JoinUsers> list = new ArrayList<JoinUsers>();
 					if (null != userIds && !"".equals(userIds)) {
@@ -214,9 +220,8 @@ public class GroupServiceImpl implements GroupServiceI {
 					}
 					// 编辑群组人员，重新生成群组头像 zhangWeiJie
 					String saveImp = editGroupImg(groupID);
-					sendGroupService.removeMembers(loginID,groupID,saveImp,list);
-
-
+					sendGroupService.removeMembers(loginID,addressGroup.getGroupChatID(),list);
+					sendGroupService.updateGroupInfo(addressGroup.getGroupChatID(),saveImp);
 
 				} else if (type.equals("3")) {// 3 删除组
 					groupDao.deleteGroup(groupID);
@@ -224,8 +229,7 @@ public class GroupServiceImpl implements GroupServiceI {
 					gu.setGroupID(groupID);
 					groupDao.deleteGroupUser(gu);
 					////解散群组
-					sendGroupService.dissolution(groupID,loginID);
-
+					sendGroupService.dissolution(addressGroup.getGroupChatID(),loginID);
 				}
 			}
 			// groupName=以小组分组&
@@ -235,7 +239,7 @@ public class GroupServiceImpl implements GroupServiceI {
 				gb.setGroupName(groupName);
 				groupDao.updateGroup(gb);
 				////修改群名称
-				sendGroupService.modify(groupID,groupName,loginID);
+				sendGroupService.modify(addressGroup.getGroupChatID(),groupName,loginID);
 			}
 			// groupDesc=分组详情
 			if (null != groupDesc && !"".equals(groupDesc)) {
@@ -250,21 +254,21 @@ public class GroupServiceImpl implements GroupServiceI {
 	private String editGroupImg(String groupID) throws Exception {
 		// 查询所属组的人
 		List<User> userIdList = groupDao.selectGroupUserBygroupID(groupID);
-		String imgIp = picHttpIp;// "http://42.99.16.145:19491";//
+		//String imgIp = picHttpIp;// "http://42.99.16.145:19491";//
 											// 头像缺少IP地址
-		String tem = picGroupTempImg;// 临时文件路径
-		String imgRoot = picGroupDbImgRoot;//文件所缺根路径
+		String tem = picGroupTempImg;// 临时文件路径/cfiles/sales/appkms/2/public/addresslist/group/temp/
+		String imgRoot = picGroupDbImgRoot;//文件所缺根路径/cfiles/sales/appkms
 		String saveUrl = "";
 		List<File> fileList = new ArrayList<File>();
 		for (User u : userIdList) {
 			String uPic = u.getUserPic();
-			if (uPic == null || uPic.equals(imgIp + "/1/mphotos/10000001.png")) {
+			if (uPic == null || uPic.equals("/1/mphotos/10000001.png")) {
 				// 10000001.png数据库中因为不能有空数据，所以写死的假数据
 				continue;
 			}
 			String uPicTem = tem + u.getUserID() + ".png";
 			try {
-				uPic=uPic.replace(imgIp,imgRoot);
+				uPic =  imgRoot + uPic;
 				File fromFile = new File(uPic);
 				File toFile = new File(uPicTem);
 				copyFile(fromFile,toFile);
@@ -297,7 +301,7 @@ public class GroupServiceImpl implements GroupServiceI {
 				groupDao.updateGroupImgInfo(gb);
 			}
 		}
-		return saveUrl;
+		return picHttpIp + saveUrl;
 	}
 
 	@SuppressWarnings("rawtypes")

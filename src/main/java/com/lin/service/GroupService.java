@@ -386,7 +386,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
     private int getUserCountByDeptID(String deptID ,String roles){
         int i = 0 ;
         StringBuffer sql = new StringBuffer();
-        sql.append("select count(1) cou" +
+        sql.append("select count(distinct u.user_id) cou" +
 				"  from appuser.address_user u" +
 				" where not exists" +
 				" (select 1" +
@@ -417,7 +417,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	private List getUserByDeptID(String deptID ,String roles){
 		int i = 0 ;
 		StringBuffer sql = new StringBuffer();
-		sql.append("select u.user_id " +
+		sql.append("select distinct u.user_id " +
 				"  from appuser.address_user u" +
 				" where not exists" +
 				" (select 1" +

@@ -34,6 +34,8 @@ public class SendGroupService {
     private String enterpriseModify;
     @Value("${application.enterprise.queryGroup}")
     private String enterpriseQueryGroup;
+    @Value("${application.enterprise.updateGroupInfo}")
+    private String enterpriseUpdateGroupInfo;
 
 
     /**
@@ -71,8 +73,7 @@ public class SendGroupService {
      * @param joinUsers 群成员列表
      *
      */
-    public Boolean createGroup(String crator, String groupName, String id, String avatar, List<JoinUsers> joinUsers){
-        Boolean bool = false;
+    public String createGroup(String crator, String groupName, String id, String avatar, List<JoinUsers> joinUsers){
         JSONObject obj = new JSONObject();
         obj.put("crator",crator);
         obj.put("groupName",groupName);
@@ -92,16 +93,11 @@ public class SendGroupService {
                     "POST",
                     obj.toString(),
                     "application/json;charset=utf-8");
-            JSONObject objR = JSONObject.fromObject(result);
-            String respCode = objR.getString("respCode");
-            if ("0".equals(respCode)){
-                bool = true;
-            }
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
-            return bool;
+            return "error";
         }
-        return bool;
     }
 
     /**
@@ -122,17 +118,13 @@ public class SendGroupService {
      *      nickName 用户昵称
      *      avatar 用户头像
      * @param sender 操作人staffId
-     * @param groupId 群ID
-     * @param avatar 群组头像
      * @param members 邀请成员列表
      *
      */
-    public Boolean inviteFriend(String sender, String groupId ,String avatar ,List<JoinUsers> members){
+    public Boolean inviteFriend(String sender ,List<JoinUsers> members){
         Boolean bool = false;
         JSONObject obj = new JSONObject();
         obj.put("sender",sender);
-        obj.put("groupId",groupId);
-        obj.put("avatar",picHttpIp + avatar);
         List<Map> listMap = new ArrayList<Map>();
         for(JoinUsers joinuser :members){
             Map map = new HashMap();
@@ -169,16 +161,14 @@ public class SendGroupService {
      * }
      * @param masterId 操作人staffId
      * @param groupId 群ID
-     * @param avatar 群组头像
      * @param customerIds 删除成员staffID
      *
      */
-    public Boolean removeMembers(String masterId,String groupId,String avatar, List<JoinUsers> customerIds){
+    public Boolean removeMembers(String masterId,String groupId, List<JoinUsers> customerIds){
         Boolean bool = false;
         JSONObject obj = new JSONObject();
         obj.put("masterId",masterId);
         obj.put("groupId",groupId);
-        obj.put("avatar",picHttpIp + avatar);
         List<Map> listMap = new ArrayList<Map>();
         String ids = "";
         for(JoinUsers joinuser :customerIds){
@@ -345,5 +335,37 @@ public class SendGroupService {
             return map;
         }
         return map;
+    }
+
+    /**
+     *    群头像更新
+     *      *  {
+     *      *     "groupId": "628",
+     *      *     "avatar": "http://42.99.16.145:19491/1/mphotos/11/136684.png"
+     *      * }
+     * @param groupId
+     * @param avatar
+     * @return
+     */
+    public Boolean updateGroupInfo(String groupId,String avatar){
+        Boolean bool = false;
+        JSONObject obj = new JSONObject();
+        obj.put("groupId",groupId);
+        obj.put("avatar",avatar);
+        try {
+            String result = NetUtil.send(enterpriseUpdateGroupInfo,
+                    "POST",
+                    obj.toString(),
+                    "application/json;charset=utf-8");
+            JSONObject objR = JSONObject.fromObject(result);
+            String respCode = objR.getString("respCode");
+            if ("0".equals(respCode)){
+                bool = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return bool;
+        }
+        return bool;
     }
 }

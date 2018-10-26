@@ -61,5 +61,6 @@ application:
     dissolution: http://10.128.49.65:20060/enterprise_go/group/dissolution
     modify: http://10.128.49.65:20060/enterprise_go/group/modify
     queryGroup: http://10.128.49.65:20060/enterprise_go/group/queryGroup
+    updateGroupInfo: http://10.128.49.65:20060/enterprise_go/group/updateGroupInfo
 swagger:
   show: true

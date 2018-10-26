@@ -19,6 +19,14 @@ public class Group {
 	//群组头像图片
 	private String groupImg;
 
+	private String groupChatID;
+
+	public String getGroupChatID () { return groupChatID; }
+
+	public void setGroupChatID(String groupChatID) {
+		this.groupChatID = groupChatID;
+	}
+
 	public String getGroupID() {
 		return groupID;
 	}
@@ -35,9 +43,15 @@ public class Group {
 		this.groupName = groupName;
 	}
 	public String getGroupImg() {
-		if(Strings.isNullOrEmpty(groupImg))
+		if(Strings.isNullOrEmpty(groupImg)){
 			return groupImg;
-		return picHttpIp + groupImg;
+		}else{
+			if(Strings.isNullOrEmpty(groupChatID)){
+				return picHttpIp + groupImg;
+			}else{
+				return groupImg;
+			}
+		}
 	}
 	public void setGroupImg(String groupImg) {
 		this.groupImg = groupImg;
