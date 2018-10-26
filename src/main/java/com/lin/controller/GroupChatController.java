@@ -37,7 +37,8 @@ public class GroupChatController {
     @PostMapping("createGroup")
     @ApiOperation(value="创建讨论组")
     public Result createGroup(HttpServletRequest req,@RequestBody InCreateGroup inCreateGroup) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光创建讨论组");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光创建讨论组",
+                  inCreateGroup.toString() +"&loginID="+inCreateGroup.getCrator());
         Result result = new Result();
         result.setRespMsg("");
         if (null == inCreateGroup.getId() || "".equals(inCreateGroup.getId())) {
@@ -77,7 +78,8 @@ public class GroupChatController {
     @PostMapping("inviteFriend")
     @ApiOperation(value="添加成员")
     public Result inviteFriend(HttpServletRequest req,@RequestBody InInviteFriend inInviteFriend) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光添加成员");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光添加成员",
+                inInviteFriend.toString() +"&loginID="+inInviteFriend.getSender());
         Result result = new Result();
         result.setRespMsg("");
         if (null == inInviteFriend.getSender() || "".equals(inInviteFriend.getSender())) {
@@ -107,7 +109,8 @@ public class GroupChatController {
     @PostMapping("removeMembers")
     @ApiOperation(value="删除成员")
     public Result removeMembers(HttpServletRequest req,@RequestBody InRemoveMembers inRemoveMembers) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光删除成员");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光删除成员",
+                inRemoveMembers.toString() +"&loginID="+inRemoveMembers.getMasterId());
         Result result = new Result();
         result.setRespMsg("");
         if (null == inRemoveMembers.getMasterId() || "".equals(inRemoveMembers.getMasterId())) {
@@ -143,7 +146,8 @@ public class GroupChatController {
     @PostMapping("updateGroupInfo")
     @ApiOperation(value="群头像更新")
     public Result updateGroupInfo(HttpServletRequest req,@RequestBody InUpdateGroupInfo inUpdateGroupInfo) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光群头像更新");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光群头像更新",
+                inUpdateGroupInfo.toString() +"&loginID="+inUpdateGroupInfo.getMasterId());
         Result result = new Result();
         result.setRespMsg("");
         if (null == inUpdateGroupInfo.getMasterId() || "".equals(inUpdateGroupInfo.getMasterId())) {
@@ -185,7 +189,8 @@ public class GroupChatController {
     @PostMapping("exitGroup")
     @ApiOperation(value="退出群组")
     public Result exitGroup(HttpServletRequest req,@RequestBody InExitGroup inExitGroup) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"退出群组");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光退出群组",
+                inExitGroup.toString() +"&loginID="+inExitGroup.getCustomerId());
         Result result = new Result();
         result.setRespMsg("");
         if (null == inExitGroup.getCustomerId() || "".equals(inExitGroup.getCustomerId())) {
@@ -221,7 +226,8 @@ public class GroupChatController {
     @PostMapping("dissolution")
     @ApiOperation(value="解散群组")
     public Result dissolution(HttpServletRequest req,@RequestBody InDissolution inDissolution) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"解散群组");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光解散群组",
+                inDissolution.toString() +"&loginID="+inDissolution.getMasterId());
         Result result = new Result();
         result.setRespMsg("");
         if (null == inDissolution.getMasterId() || "".equals(inDissolution.getMasterId())) {
@@ -257,7 +263,8 @@ public class GroupChatController {
     @PostMapping("modify")
     @ApiOperation(value="修改群名")
     public Result modify(HttpServletRequest req,@RequestBody InModify inModify) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"修改群名");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光修改群名",
+                inModify.toString() +"&loginID="+inModify.getCustomerId());
         Result result = new Result();
         result.setRespMsg("");
         if (null == inModify.getCustomerId() || "".equals(inModify.getCustomerId())) {
