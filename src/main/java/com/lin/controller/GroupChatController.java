@@ -2,8 +2,7 @@ package com.lin.controller;
 
 import com.lin.domain.AddressInfLog;
 import com.lin.service.AddressInfLogServiceImpl;
-import com.lin.service.OrganizationService;
-import com.lin.service.UserService;
+import com.lin.service.GroupChatService;
 import com.lin.util.Result;
 import com.lin.vo.*;
 import io.swagger.annotations.Api;
@@ -22,16 +21,15 @@ import java.util.Map;
  */
 
 @Api(description = "即时通讯调用通讯录群聊分组")
-@Controller
+@RestController
 @RequestMapping("/groupChat")
 public class GroupChatController {
 
     @Autowired
-    private OrganizationService organizationServiceDslImpl;
+    private GroupChatService groupChatService;
     @Autowired
     private AddressInfLogServiceImpl logServiceDsl;
-    @Autowired
-    private UserService userService;
+
     /**
      * 创建讨论组
      * @return
@@ -39,24 +37,31 @@ public class GroupChatController {
     @PostMapping("createGroup")
     @ApiOperation(value="创建讨论组")
     public Result createGroup(HttpServletRequest req,@RequestBody InCreateGroup inCreateGroup) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"创建讨论组");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光创建讨论组");
         Result result = new Result();
-       /* if (null == loginID || "".equals(loginID)) {
+        result.setRespMsg("");
+        if (null == inCreateGroup.getId() || "".equals(inCreateGroup.getId())) {
             result.setRespCode("2");
-            result.setRespDesc("loginID 不能为空");
+            result.setRespDesc("群组id 不能为空");
             logServiceDsl.saveAddressInfLog(log,result);
             return result;
-        }*/
+        }
+        if (null == inCreateGroup.getGroupName() || "".equals(inCreateGroup.getGroupName())) {
+            result.setRespCode("2");
+            result.setRespDesc("群组名称 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
+        if (null == inCreateGroup.getCrator() || "".equals(inCreateGroup.getCrator())) {
+            result.setRespCode("2");
+            result.setRespDesc("创建人 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
         try {
-           // List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
-            Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-         //   orgtreeMap.put("organizationList", list);
-            result.setRespCode("1");
-            result.setRespDesc("正常返回数据");
-            result.setRespMsg(orgtreeMap);
+            groupChatService.createGroup(result,inCreateGroup);
             logServiceDsl.saveAddressInfLog(log,result);
         } catch (Exception e) {
-            ////e.printStackTrace();
             log.setExpError(e.toString());
             result.setRespCode("2");
             result.setRespDesc("失败");
@@ -72,21 +77,17 @@ public class GroupChatController {
     @PostMapping("inviteFriend")
     @ApiOperation(value="添加成员")
     public Result inviteFriend(HttpServletRequest req,@RequestBody InInviteFriend inInviteFriend) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"添加成员");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光添加成员");
         Result result = new Result();
-       /* if (null == loginID || "".equals(loginID)) {
+        result.setRespMsg("");
+        if (null == inInviteFriend.getSender() || "".equals(inInviteFriend.getSender())) {
             result.setRespCode("2");
-            result.setRespDesc("loginID 不能为空");
+            result.setRespDesc("操作人 不能为空");
             logServiceDsl.saveAddressInfLog(log,result);
             return result;
-        }*/
+        }
         try {
-            // List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
-            Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-            //   orgtreeMap.put("organizationList", list);
-            result.setRespCode("1");
-            result.setRespDesc("正常返回数据");
-            result.setRespMsg(orgtreeMap);
+            groupChatService.inviteFriend(result,inInviteFriend);
             logServiceDsl.saveAddressInfLog(log,result);
         } catch (Exception e) {
             ////e.printStackTrace();
@@ -106,21 +107,23 @@ public class GroupChatController {
     @PostMapping("removeMembers")
     @ApiOperation(value="删除成员")
     public Result removeMembers(HttpServletRequest req,@RequestBody InRemoveMembers inRemoveMembers) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"删除成员");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光删除成员");
         Result result = new Result();
-       /* if (null == loginID || "".equals(loginID)) {
+        result.setRespMsg("");
+        if (null == inRemoveMembers.getMasterId() || "".equals(inRemoveMembers.getMasterId())) {
             result.setRespCode("2");
-            result.setRespDesc("loginID 不能为空");
+            result.setRespDesc("操作人 不能为空");
             logServiceDsl.saveAddressInfLog(log,result);
             return result;
-        }*/
+        }
+        if (null == inRemoveMembers.getGroupId() || "".equals(inRemoveMembers.getGroupId())) {
+            result.setRespCode("2");
+            result.setRespDesc("群ID 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
         try {
-            // List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
-            Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-            //   orgtreeMap.put("organizationList", list);
-            result.setRespCode("1");
-            result.setRespDesc("正常返回数据");
-            result.setRespMsg(orgtreeMap);
+            groupChatService.removeMembers(result,inRemoveMembers);
             logServiceDsl.saveAddressInfLog(log,result);
         } catch (Exception e) {
             ////e.printStackTrace();
@@ -140,21 +143,29 @@ public class GroupChatController {
     @PostMapping("updateGroupInfo")
     @ApiOperation(value="群头像更新")
     public Result updateGroupInfo(HttpServletRequest req,@RequestBody InUpdateGroupInfo inUpdateGroupInfo) {
-        AddressInfLog log =  logServiceDsl.getInfLog(req,"群头像更新");
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光群头像更新");
         Result result = new Result();
-       /* if (null == loginID || "".equals(loginID)) {
+        result.setRespMsg("");
+        if (null == inUpdateGroupInfo.getMasterId() || "".equals(inUpdateGroupInfo.getMasterId())) {
             result.setRespCode("2");
-            result.setRespDesc("loginID 不能为空");
+            result.setRespDesc("操作人 不能为空");
             logServiceDsl.saveAddressInfLog(log,result);
             return result;
-        }*/
+        }
+        if (null == inUpdateGroupInfo.getAvatar() || "".equals(inUpdateGroupInfo.getAvatar())) {
+            result.setRespCode("2");
+            result.setRespDesc("群头像 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
+        if (null == inUpdateGroupInfo.getGroupId() || "".equals(inUpdateGroupInfo.getGroupId())) {
+            result.setRespCode("2");
+            result.setRespDesc("群ID 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
         try {
-            // List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
-            Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-            //   orgtreeMap.put("organizationList", list);
-            result.setRespCode("1");
-            result.setRespDesc("正常返回数据");
-            result.setRespMsg(orgtreeMap);
+           groupChatService.updateGroupInfo(result,inUpdateGroupInfo);
             logServiceDsl.saveAddressInfLog(log,result);
         } catch (Exception e) {
             ////e.printStackTrace();
@@ -176,19 +187,21 @@ public class GroupChatController {
     public Result exitGroup(HttpServletRequest req,@RequestBody InExitGroup inExitGroup) {
         AddressInfLog log =  logServiceDsl.getInfLog(req,"退出群组");
         Result result = new Result();
-       /* if (null == loginID || "".equals(loginID)) {
+        result.setRespMsg("");
+        if (null == inExitGroup.getCustomerId() || "".equals(inExitGroup.getCustomerId())) {
             result.setRespCode("2");
-            result.setRespDesc("loginID 不能为空");
+            result.setRespDesc("退出用户 不能为空");
             logServiceDsl.saveAddressInfLog(log,result);
             return result;
-        }*/
+        }
+        if (null == inExitGroup.getGroupId() || "".equals(inExitGroup.getGroupId())) {
+            result.setRespCode("2");
+            result.setRespDesc("群ID 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
         try {
-            // List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
-            Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-            //   orgtreeMap.put("organizationList", list);
-            result.setRespCode("1");
-            result.setRespDesc("正常返回数据");
-            result.setRespMsg(orgtreeMap);
+           groupChatService.exitGroup(result,inExitGroup);
             logServiceDsl.saveAddressInfLog(log,result);
         } catch (Exception e) {
             ////e.printStackTrace();
@@ -210,19 +223,21 @@ public class GroupChatController {
     public Result dissolution(HttpServletRequest req,@RequestBody InDissolution inDissolution) {
         AddressInfLog log =  logServiceDsl.getInfLog(req,"解散群组");
         Result result = new Result();
-       /* if (null == loginID || "".equals(loginID)) {
+        result.setRespMsg("");
+        if (null == inDissolution.getMasterId() || "".equals(inDissolution.getMasterId())) {
             result.setRespCode("2");
-            result.setRespDesc("loginID 不能为空");
+            result.setRespDesc("操作人 不能为空");
             logServiceDsl.saveAddressInfLog(log,result);
             return result;
-        }*/
+        }
+        if (null == inDissolution.getGroupId() || "".equals(inDissolution.getGroupId())) {
+            result.setRespCode("2");
+            result.setRespDesc("群ID 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
         try {
-            // List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
-            Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-            //   orgtreeMap.put("organizationList", list);
-            result.setRespCode("1");
-            result.setRespDesc("正常返回数据");
-            result.setRespMsg(orgtreeMap);
+            groupChatService.dissolution(result,inDissolution);
             logServiceDsl.saveAddressInfLog(log,result);
         } catch (Exception e) {
             ////e.printStackTrace();
@@ -244,19 +259,27 @@ public class GroupChatController {
     public Result modify(HttpServletRequest req,@RequestBody InModify inModify) {
         AddressInfLog log =  logServiceDsl.getInfLog(req,"修改群名");
         Result result = new Result();
-       /* if (null == loginID || "".equals(loginID)) {
+        result.setRespMsg("");
+        if (null == inModify.getCustomerId() || "".equals(inModify.getCustomerId())) {
             result.setRespCode("2");
-            result.setRespDesc("loginID 不能为空");
+            result.setRespDesc("操作人 不能为空");
             logServiceDsl.saveAddressInfLog(log,result);
             return result;
-        }*/
+        }
+        if (null == inModify.getGroupName() || "".equals(inModify.getGroupName())) {
+            result.setRespCode("2");
+            result.setRespDesc("群名 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
+        if (null == inModify.getId() || "".equals(inModify.getId())) {
+            result.setRespCode("2");
+            result.setRespDesc("群ID 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
         try {
-            // List<OrganizationDsl> list = organizationServiceDslImpl.getOrganizationByDsl(organ);
-            Map<String, Object> orgtreeMap = new LinkedHashMap<String, Object>();
-            //   orgtreeMap.put("organizationList", list);
-            result.setRespCode("1");
-            result.setRespDesc("正常返回数据");
-            result.setRespMsg(orgtreeMap);
+            groupChatService.modify(result,inModify);
             logServiceDsl.saveAddressInfLog(log,result);
         } catch (Exception e) {
             ////e.printStackTrace();

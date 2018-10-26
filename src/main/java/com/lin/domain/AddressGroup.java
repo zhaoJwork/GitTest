@@ -58,6 +58,19 @@ public class AddressGroup implements Serializable{
 	@Column(name = "GROUP_IMG")
 	private String groupImg;
 
+	@ApiModelProperty(value = "三部群组ID")
+	@Column(name = "GROUPCHAT_ID")
+	private String groupChatID;
+
+
+	public String getGroupChatID() {
+		return groupChatID;
+	}
+
+	public void setGroupChatID(String groupChatID) {
+		this.groupChatID = groupChatID;
+	}
+
 	public String getRowId() {
 		return rowId;
 	}
