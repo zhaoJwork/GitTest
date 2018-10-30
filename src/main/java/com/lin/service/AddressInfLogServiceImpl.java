@@ -100,13 +100,7 @@ public class AddressInfLogServiceImpl extends AbstractService<AddressInfLog,Stri
 		if(null == req ){
 			log.setReqJson("test");
 		}else{
-			String reqstr = "";
-			if(req.getQueryString().indexOf("loginID") > 0 ){
-				if(req.getQueryString().indexOf("crator") > 0){
-
-				}
-			}
-			log.setReqJson(req.getRequestURL().toString() + "?" + req.getQueryString() + reqstr);
+			log.setReqJson(req.getRequestURL().toString() + "?" + req.getQueryString() );
 		}
 		return log;
 	}

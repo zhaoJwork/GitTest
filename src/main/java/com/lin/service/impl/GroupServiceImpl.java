@@ -30,6 +30,7 @@ import com.lin.util.ImageUtil;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -38,6 +39,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  * @date 2017年8月18日
  */
 @Service("groupService")
+@Transactional(rollbackFor = Exception.class)
 public class GroupServiceImpl implements GroupServiceI {
 
 	@Value("${application.pic_HttpIP}")

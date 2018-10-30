@@ -4,23 +4,20 @@ import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.*;
 import com.lin.util.ImageUtil;
-import com.lin.util.NetUtil;
 import com.lin.vo.JoinUsers;
-import com.lin.vo.UserDetailsVo;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import io.swagger.models.auth.In;
 import net.sf.json.JSONArray;
 import com.lin.util.Result;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import net.sf.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,8 +34,10 @@ import java.util.*;
  *
  */
 @Service("newGroupService")
+@Transactional(rollbackFor = Exception.class)
 public class GroupService extends AbstractService<AddressGroup,String>{
 
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	private static final String String = null;
 
 	@Autowired
@@ -64,15 +63,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	private AddressGroupUserRepository addressGroupUserRepository;
 	@Autowired
 	private SendGroupService sendGroupService;
-	@Autowired
-	private EntityManager entityManager;
 
-	private JPAQueryFactory queryFactory;
-
-	@PostConstruct
-	public void init() {
-		queryFactory = new JPAQueryFactory(entityManager);
-	}
 
 
 	/**
@@ -159,7 +150,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 			if(!"".equals(groupID) && null != groupID){
 
 				QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
-				long oldCount = queryFactory.select(qAddressGroupUser.groupId.count()).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+				long oldCount = jpaQueryFactory().select(qAddressGroupUser.groupId.count()).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
 				userCount = Integer.parseInt(oldCount+"");
 
 				if(!"".equals(userList) && null != userList) {
@@ -171,7 +162,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						String userID = jsonObj.getString("userID");
 						users.add(userID);
 					}
-					long newCount = queryFactory.select(qAddressGroupUser.groupId.count()).from(qAddressGroupUser)
+					long newCount = jpaQueryFactory().select(qAddressGroupUser.groupId.count()).from(qAddressGroupUser)
 							.where(qAddressGroupUser.groupId.eq(groupID).and(qAddressGroupUser.groupUser.in(users))).fetchCount();
 					userCount = userCount + users.size()-Integer.parseInt(newCount+"");;
 				}
@@ -270,8 +261,8 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 				QUser qUser = QUser.user;
 				QUserNewAssist uass = QUserNewAssist.userNewAssist;
-				AddressGroup group = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
-				List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
+				AddressGroup group = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+				List<JoinUsers> listJoinUsers = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
 						 							qAddressGroupUser.groupUser.as("customerId"),
 						 							qUser.userName.as("nickName"),
 						 							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
@@ -282,9 +273,26 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						 .leftJoin(uass)
 						 .on(qUser.userID.eq(uass.userid))
 						 .where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-				sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp + group.getGroupImg(),listJoinUsers);
+				String result1 = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp + group.getGroupImg(),listJoinUsers);
+				logger.info("createGroup--------" + result1);
+				if("" != result1 && !result1.equals("error")){
+					try{
+						JSONObject obj1 = JSONObject.fromObject(result1);
+						String data = obj1.getString("data");
+						logger.info("createGroup---data-----" + data);
+						JSONObject objID = JSONObject.fromObject(data);
+						String groupChatID = objID.getString("id");
+						logger.info("createGroup---groupChatID-----" + groupChatID);
+						jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID,groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
+		result.setRespCode("1");
+		result.setRespDesc("创建成功");
 	}
 
 
@@ -301,7 +309,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
-		List<User> userIdList = queryFactory.select(Projections.bean(User.class,
+		List<User> userIdList = jpaQueryFactory().select(Projections.bean(User.class,
 					qAddressGroupUser.groupUser.as("userID"),
 					new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("userPic")
 				)
@@ -354,7 +362,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 			String saveUrl = picGroupDbImg + union+ groupID + ".png";
 			// 更新appuser.address_group表
 			if (f.exists()) {
-				AddressGroup addressGroup = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+				AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 				addressGroup.setUpdateDate(new Date());
 				addressGroup.setGroupImg(saveUrl);
 				super.update(addressGroup);
