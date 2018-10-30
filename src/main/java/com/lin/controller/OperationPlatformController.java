@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,7 +79,8 @@ public class OperationPlatformController {
 	@ApiImplicitParam(dataType = "OperationPlatform")
 	@GetMapping("/selectislogin")
 	public Result selectislogin(HttpServletRequest req, OperationPlatform operat) {
-		logger.info("用户在线查询::==" + req.getRequestURL() + "?staffID=" + operat.getStaffID()+ "&deptID=" +operat.getDeptID());
+		logger.info("用户在线查询::==" + req.getRequestURL() + "?staffID=" + operat.getStaffID()+ "&deptID=" +operat.getDeptID()
+			+ "&pageSize=" +operat.getPageSize()+ "&pageNum=" +operat.getPageNum());
 		Result result = new Result();
 		if(operat.getStaffID() == null || operat.getStaffID().trim().equals("")) {
 			result.setRespCode("2");
@@ -110,9 +112,11 @@ public class OperationPlatformController {
 	
 	
 	@ApiOperation(value="添加黑名单")
-	@ApiImplicitParam(dataType = "BlackUserList")
-	@GetMapping("/addblack")
-	public Result addblack(HttpServletRequest req, BlackUserList blackUserList) {
+	@PostMapping("/addblack")
+	public Result addblack(HttpServletRequest req,BlackUserList blackUserList) {
+//		BlackUserList blackUserList = new BlackUserList();
+//		blackUserList.setCreateBy(createBy);
+//		blackUserList.setUserID(userID);
 		logger.info("添加黑名单::==" + req.getRequestURL() + "?staffID=" + blackUserList.getCreateBy()+ "&userID=" +blackUserList.getUserID());
 		Result result = new Result();
 		if(blackUserList.getCreateBy() == null || blackUserList.getCreateBy().trim().equals("")) {
@@ -140,8 +144,7 @@ public class OperationPlatformController {
 	
 	
 	@ApiOperation(value="取消黑名单")
-	@ApiImplicitParam(dataType = "BlackUserList")
-	@GetMapping("/cancelblack")
+	@PostMapping("/cancelblack")
 	public Result cancelblack(HttpServletRequest req, BlackUserList blackUserList) {
 		logger.info("取消黑名单::==" + req.getRequestURL() + "?staffID=" + blackUserList.getCreateBy()+ "&userID=" +blackUserList.getUserID());
 		Result result = new Result();

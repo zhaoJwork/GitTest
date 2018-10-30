@@ -7,6 +7,7 @@ import javax.persistence.Table;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * 用户联系信息
@@ -16,6 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
  *
  */
 @ApiModel(value = "partyContactInfo", description = "联系信息")
+@Data
 @Entity
 @Table(name = "jparty_contact_info", schema = "torder")
 public class PartyContactInfo {
@@ -36,39 +38,6 @@ public class PartyContactInfo {
 	@ApiModelProperty(value = "用户邮箱")
 	@Column(name = "E_MAIL")
 	private Integer eMail;
-
-	public Integer getContactID() {
-		return contactID;
-	}
-
-	public void setContactID(Integer contactID) {
-		this.contactID = contactID;
-	}
-
-	public Integer getPartyID() {
-		return partyID;
-	}
-
-	public void setPartyID(Integer partyID) {
-		this.partyID = partyID;
-	}
-
-	public Integer getMobilePhone() {
-		return mobilePhone;
-	}
-
-	public void setMobilePhone(Integer mobilePhone) {
-		this.mobilePhone = mobilePhone;
-	}
-
-	public Integer geteMail() {
-		return eMail;
-	}
-
-	public void seteMail(Integer eMail) {
-		this.eMail = eMail;
-	}
-	
 	
 
 }
