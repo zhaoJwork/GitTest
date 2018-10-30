@@ -132,6 +132,9 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 					inroles = inroles.substring(1);
 				}
 			}
+			if("".equals(deptList) || null == deptList) {
+				userCount = userCount + getUserCountByDeptID("", inroles);
+			}
 		}
 
         //部门列表
@@ -391,16 +394,18 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				" where not exists" +
 				" (select 1" +
 				"          from appuser.address_blacklist tt" +
-				"         where tt.user_id = u.user_id)" +
-				"   and u.dep_id in" +
-				"       (select t.organ_id" +
-				"          from appuser.address_organization t" +
-				"         where t.flag = '1'" +
-				"           and not exists (select 1" +
-				"                  from appuser.address_blackorglist tt" +
-				"                 where t.organ_id = tt.org_id)" +
-				"         start with t.organ_id = '"+ deptID +"'" +
-				"        connect by prior t.organ_id = t.pid)");
+				"         where tt.user_id = u.user_id)" );
+		if (!"".equals(deptID) && null != deptID) {
+			sql.append("   and u.dep_id in" +
+					"       (select t.organ_id" +
+					"          from appuser.address_organization t" +
+					"         where t.flag = '1'" +
+					"           and not exists (select 1" +
+					"                  from appuser.address_blackorglist tt" +
+					"                 where t.organ_id = tt.org_id)" +
+					"         start with t.organ_id = '" + deptID + "'" +
+					"        connect by prior t.organ_id = t.pid)");
+		}
 		if (!"".equals(roles) && null != roles){
 			sql.append(" and u.pos_id in ( " + roles + " )");
 		}
@@ -422,16 +427,18 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				" where not exists" +
 				" (select 1" +
 				"          from appuser.address_blacklist tt" +
-				"         where tt.user_id = u.user_id)" +
-				"   and u.dep_id in" +
-				"       (select t.organ_id" +
-				"          from appuser.address_organization t" +
-				"         where t.flag = '1'" +
-				"           and not exists (select 1" +
-				"                  from appuser.address_blackorglist tt" +
-				"                 where t.organ_id = tt.org_id)" +
-				"         start with t.organ_id = '"+ deptID +"'" +
-				"        connect by prior t.organ_id = t.pid)");
+				"         where tt.user_id = u.user_id)" );
+		if (!"".equals(deptID) && null != deptID) {
+			sql.append("   and u.dep_id in" +
+					"       (select t.organ_id" +
+					"          from appuser.address_organization t" +
+					"         where t.flag = '1'" +
+					"           and not exists (select 1" +
+					"                  from appuser.address_blackorglist tt" +
+					"                 where t.organ_id = tt.org_id)" +
+					"         start with t.organ_id = '" + deptID + "'" +
+					"        connect by prior t.organ_id = t.pid)");
+		}
 		if (!"".equals(roles) && null != roles){
 			sql.append(" and u.pos_id in ( " + roles + " )");
 		}

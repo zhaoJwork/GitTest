@@ -4,6 +4,8 @@ import com.lin.util.NetUtil;
 import com.lin.vo.JoinUsers;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,8 @@ import java.util.Map;
  */
 @Service
 public class SendGroupService {
+
+
     @Value("${application.pic_HttpIP}")
     private String picHttpIp;
     @Value("${application.enterprise.createGroup}")
@@ -37,6 +41,7 @@ public class SendGroupService {
     @Value("${application.enterprise.updateGroupInfo}")
     private String enterpriseUpdateGroupInfo;
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      *      创建群组
@@ -78,6 +83,7 @@ public class SendGroupService {
         obj.put("crator",crator);
         obj.put("groupName",groupName);
         obj.put("id",id);
+        obj.put("oneKeyFlag ","1");
         obj.put("avatar",picHttpIp + avatar);
         List<Map> listMap = new ArrayList<Map>();
         for(JoinUsers joinuser :joinUsers){
@@ -88,6 +94,8 @@ public class SendGroupService {
             listMap.add(map);
         }
         obj.put("joinUsers",listMap);
+
+        logger.info("createGroup::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseCreateGroup,
                     "POST",
@@ -135,6 +143,7 @@ public class SendGroupService {
             listMap.add(map);
         }
         obj.put("joinUsers",listMap);
+        logger.info("inviteFriend::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseInviteFriend,
                     "POST",
@@ -178,6 +187,7 @@ public class SendGroupService {
             ids.substring(1);
         }
         obj.put("customerIds",ids);
+        logger.info("removeMembers::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseRemoveMembers,
                     "POST",
@@ -210,6 +220,7 @@ public class SendGroupService {
         JSONObject obj = new JSONObject();
         obj.put("groupId",groupId);
         obj.put("customerId",customerId);
+        logger.info("exitGroup::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseExitGroup,
                     "POST",
@@ -242,6 +253,7 @@ public class SendGroupService {
         JSONObject obj = new JSONObject();
         obj.put("groupId",groupId);
         obj.put("masterId",masterId);
+        logger.info("dissolution::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseDissolution,
                     "POST",
@@ -277,6 +289,7 @@ public class SendGroupService {
         obj.put("id",id);
         obj.put("groupName",groupName);
         obj.put("customerId",customerId);
+        logger.info("modify::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseModify,
                     "POST",
@@ -306,7 +319,8 @@ public class SendGroupService {
         Map map = new HashMap();
         map.put("bool",false);
         JSONObject obj = new JSONObject();
-        obj.put("customerId",customerId);
+        obj.put("queryGroup",customerId);
+        logger.info("modify::"+obj.toString());
         List<JoinUsers> joinUsers = new ArrayList<JoinUsers>();
         try {
             String result = NetUtil.send(enterpriseQueryGroup,
@@ -352,6 +366,7 @@ public class SendGroupService {
         JSONObject obj = new JSONObject();
         obj.put("groupId",groupId);
         obj.put("avatar",avatar);
+        logger.info("updateGroupInfo::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseUpdateGroupInfo,
                     "POST",

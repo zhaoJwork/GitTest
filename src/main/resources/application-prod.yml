@@ -9,7 +9,7 @@ spring:
     username: sales_app
     password: sales#0724
     driver-class-name: oracle.jdbc.driver.OracleDriver
-    type: com.alibaba.druid.pool.DruidDataSource
+    #type: com.alibaba.druid.pool.DruidDataSource
   jpa:
     show-sql: true
     generate-ddl: false

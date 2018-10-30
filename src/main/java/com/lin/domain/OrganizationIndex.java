@@ -19,7 +19,7 @@ import java.io.Serializable;
 @ApiModel(value="OrganizationIndex", description="部门索引")
 @Entity
 @Data
-@Table(name="ADDRESS_ORGAN_TEMP_INDEX")
+@Table(name="ADDRESS_ORGAN_INDEX")
 public class OrganizationIndex implements Serializable {
 
 	@ApiModelProperty(value = "主键")
