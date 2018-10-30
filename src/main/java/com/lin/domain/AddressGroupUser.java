@@ -43,39 +43,5 @@ public class AddressGroupUser implements Serializable{
 	@ApiModelProperty(value = "组创建时间")
 	@Column(name = "CREATE_DATE")
 	private Date createDate;
-
-	public String getRowId() {
-		return rowId;
-	}
-
-	public void setRowId(String rowId) {
-		this.rowId = rowId;
-	}
-
-	public String getGroupId() {
-		return groupId;
-	}
-
-	public void setGroupId(String groupId) {
-		this.groupId = groupId;
-	}
-
-	public String getGroupUser() {
-		return groupUser;
-	}
-
-	public void setGroupUser(String groupUser) {
-		this.groupUser = groupUser;
-	}
-
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-	
-	
 	
 }

@@ -1,7 +1,10 @@
 package com.lin.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -17,11 +20,11 @@ import com.lin.domain.BlackUserList;
 import com.lin.domain.QBlackUserList;
 import com.lin.domain.QOrganizationDsl;
 import com.lin.domain.QUser;
-import com.lin.domain.QUserLongJournal;
 import com.lin.domain.QUserNewAssist;
 import com.lin.domain.QUserStaff;
-import com.lin.domain.UserLongJournal;
+import com.lin.domain.QUserTicketBean;
 import com.lin.domain.UserStaff;
+import com.lin.domain.UserTicketBean;
 import com.lin.repository.AddressBlackListRepository;
 import com.lin.util.Result;
 import com.lin.vo.OperationPlatform;
@@ -59,9 +62,10 @@ public class OperationPlatformService {
 	 * 用户模糊查询列表
 	 * @param operat 参数实体类
 	 * @author liudongdong
+	 * @throws ParseException 
 	 * @date 2018年10月19日
 	 */
-	public void selectUserList(Result result, OperationPlatform operat) {
+	public void selectUserList(Result result, OperationPlatform operat) throws ParseException {
 		
 		// 导入Querydsl部分局部实例
 		QUser user = QUser.user;
@@ -69,24 +73,25 @@ public class OperationPlatformService {
 		QUserStaff qUserStaff = QUserStaff.userStaff;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QBlackUserList qBlackUserList = QBlackUserList.blackUserList;
-			
+		QUserTicketBean qUserTicketBean = QUserTicketBean.userTicketBean;
+		
 		// 动态拼接where条件
 		List<Predicate> predicate = new ArrayList<Predicate>();
 		Predicate[] pre = new Predicate[predicate.size()];
 		
-		if(operat.getStaffName() != null) {
+		if(operat.getStaffName() != null && !("".equals(operat.getStaffName())) ) {
 			predicate.add(user.userName.like( "%"+operat.getStaffName()+"%"));
 		}
-		if(operat.getCrmAccount() != null) {
+		if(operat.getCrmAccount() != null && !("".equals(operat.getCrmAccount()))) {
 			predicate.add(user.crmAccount.eq(operat.getCrmAccount()));
 		}
-		if(operat.getTelNum() != null) {
+		if(operat.getTelNum() != null && !("".equals(operat.getTelNum()))) {
 			predicate.add(user.phone.eq(operat.getTelNum()));
 		}
-		if(operat.getDeptID() != null) {
+		if(operat.getDeptID() != null && !("".equals(operat.getDeptID()))) {
 			predicate.add(organ.organizationID.eq(operat.getDeptID()));
 		}
-		if(operat.getType() != null) {
+		if(operat.getType() != null && !("".equals(operat.getType()))) {
 			predicate.add(qUserStaff.statusCD.eq(operat.getType()));
 		}
 		
@@ -112,7 +117,6 @@ public class OperationPlatformService {
 					.as("userImg"),
 				user.crmAccount,
 				user.phone.as("telNum"),
-				user.flagOnline,
 				user.address,
 				user.updateDate,
 				qUserStaff.statusCD,
@@ -121,7 +125,7 @@ public class OperationPlatformService {
 		)).from(user)
 				.leftJoin(uass).on(user.userID.eq(uass.userid))
 				.leftJoin(qUserStaff).on(user.userID.eq(qUserStaff.staffID.stringValue()))
-				.leftJoin(organ).on(organ.organizationID.eq(qUserStaff.orgID.stringValue()))
+				.leftJoin(organ).on(organ.organizationID.eq(user.organizationID))
 				.leftJoin(qBlackUserList).on(qBlackUserList.userID.eq(user.userID))
 				.where(predicate.toArray(pre))
 				.offset((Long.parseLong(operat.getPageSize())-1)*Long.parseLong(operat.getPageNum()))
@@ -132,8 +136,23 @@ public class OperationPlatformService {
 		if(list.size() !=0 ) {
 			
 			// 处理返回图像数据
+			List<UserTicketBean> userTicketBeans = null;
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			for (int i = 0; i < list.size(); i++) {
-				list.get(0).setUserImg(picHttpIp + list.get(0).getUserImg());
+				
+				userTicketBeans = queryFactory.select(Projections.bean(UserTicketBean.class,
+						qUserTicketBean.createDate.max().as("createDate")
+				))
+				.from(qUserTicketBean)
+				.where(qUserTicketBean.userName.eq(list.get(i).getCrmAccount()))
+				.fetch();
+				if(userTicketBeans.size() > 0  && !(userTicketBeans.get(0)==null)) {
+					list.get(i).setIsLogin("0");
+				}else {
+					list.get(i).setIsLogin("1");
+				}
+				list.get(i).setUpdateDate(format.format(format.parse(list.get(i).getUpdateDate())));
+				list.get(i).setUserImg(picHttpIp + list.get(i).getUserImg());
 			}
 			result.setRespCode("1");
 			result.setRespDesc("查询成功");
@@ -158,12 +177,12 @@ public class OperationPlatformService {
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QUserStaff qUserStaff = QUserStaff.userStaff;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
-		QUserLongJournal qUserLongJournal = QUserLongJournal.userLongJournal;
-		
+		QUserTicketBean qUserTicketBean = QUserTicketBean.userTicketBean;
 		// 动态拼接where条件
 		List<Predicate> predicate = new ArrayList<Predicate>();
 		Predicate[] pre = new Predicate[predicate.size()];
-		if(operat.getDeptID() != null) {
+		predicate.add(user.crmAccount.isNotNull());
+		if(operat.getDeptID() != null && !("".equals(operat.getDeptID()))) {
 			predicate.add(organ.organizationID.eq(operat.getDeptID()));
 		}
 		
@@ -186,35 +205,37 @@ public class OperationPlatformService {
 				qUserStaff.statusCD,
 				organ.organizationID.as("deptID"),
 				organ.organizationName.as("deptName")
-		)).from(user)
+		)).from(qUserTicketBean)
+				.leftJoin(user).on(qUserTicketBean.userName.eq(user.crmAccount))
 				.leftJoin(uass).on(user.userID.eq(uass.userid))
 				.leftJoin(qUserStaff).on(user.userID.eq(qUserStaff.staffID.stringValue()))
-				.leftJoin(organ).on(organ.organizationID.eq(qUserStaff.orgID.stringValue()))
+				.leftJoin(organ).on(organ.organizationID.eq(user.organizationID))
 				.where(predicate.toArray(pre))
 				.offset((Long.parseLong(operat.getPageSize())-1)*Long.parseLong(operat.getPageNum()))
 				.limit(Long.parseLong(operat.getPageNum()))
+				.distinct()
 				.fetch();
 		
 		// 返回判断结果
 		if(list.size() !=0 ) {
 			
 			// 返回结果添加最近上线时间
-			List<UserLongJournal> userLoginDate = null;
+			List<UserTicketBean> userTicketBeans = null;
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			for (int i = 0; i < list.size(); i++) {
-				userLoginDate = queryFactory.select(Projections.bean(UserLongJournal.class,
-						qUserLongJournal.loginDate.max().as("loginDate")
+				userTicketBeans = queryFactory.select(Projections.bean(UserTicketBean.class,
+						qUserTicketBean.createDate.max().as("createDate")
 				))
-				.from(qUserLongJournal)
-				.where(qUserLongJournal.staffID.eq(list.get(i).getStaffID()))
+				.from(qUserTicketBean)
+				.where(qUserTicketBean.userName.eq(list.get(i).getCrmAccount()))
 				.fetch();
 				// 处理返回图像数据
-				list.get(0).setUserImg(picHttpIp + list.get(0).getUserImg());
+				list.get(i).setUserImg(picHttpIp + list.get(i).getUserImg());
 				
-				if(userLoginDate.size() > 0  && !(userLoginDate.get(0)==null)) {
-					list.get(i).setLoginTime(userLoginDate.get(0).getLoginDate());
+				if(userTicketBeans.size() > 0  && !(userTicketBeans.get(0)==null)) {
+					list.get(i).setLoginTime(format.format(new Date(userTicketBeans.get(0).getCreateDate())));
 				}
 			}
-			
 			result.setRespCode("1");
 			result.setRespDesc("查询成功");
 			result.setRespMsg(list);
@@ -246,16 +267,21 @@ public class OperationPlatformService {
 			UserStaff staff = queryFactory.selectFrom(qUserStaff)
 					.where(qUserStaff.staffID.eq(Integer.parseInt(blackUserList.getUserID())))
 					.fetchOne();
-			
-			blackUserList.setRowID(getSeq().toString());
-			blackUserList.setCreateDate(cal.getTime());
-			blackUserList.setUserName(staff.getStaffName());
-			// 初始黑名单添加
-			addressBlackListRepository.save(blackUserList);
-			
-			result.setRespCode("1");
-			result.setRespDesc("添加成功");
-			result.setRespMsg("1");
+			if(staff == null) {
+				result.setRespCode("2");
+				result.setRespDesc("该人员不在人员列表中!");
+				result.setRespMsg("0");
+			}else {
+				blackUserList.setRowID(getSeq().toString());
+				blackUserList.setCreateDate(cal.getTime());
+				blackUserList.setUserName(staff.getStaffName());
+				// 初始黑名单添加
+				addressBlackListRepository.save(blackUserList);
+				
+				result.setRespCode("1");
+				result.setRespDesc("添加成功");
+				result.setRespMsg("1");
+			}
 		}else {
 			result.setRespCode("2");
 			result.setRespDesc("该人员已在黑名单中!");
