@@ -84,7 +84,7 @@ public class SendGroupService {
         obj.put("groupName",groupName);
         obj.put("id",id);
         obj.put("oneKeyFlag ","1");
-        obj.put("avatar",picHttpIp + avatar);
+        obj.put("avatar",avatar);
         List<Map> listMap = new ArrayList<Map>();
         for(JoinUsers joinuser :joinUsers){
             Map map = new HashMap();
@@ -365,7 +365,7 @@ public class SendGroupService {
         Boolean bool = false;
         JSONObject obj = new JSONObject();
         obj.put("groupId",groupId);
-        obj.put("avatar",avatar);
+        obj.put("avatar",picHttpIp + avatar);
         logger.info("updateGroupInfo::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseUpdateGroupInfo,

@@ -18,6 +18,8 @@ import com.lin.domain.*;
 import com.lin.service.SendGroupService;
 import com.lin.vo.JoinUsers;
 import net.sf.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(rollbackFor = Exception.class)
 public class GroupServiceImpl implements GroupServiceI {
 
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Value("${application.pic_HttpIP}")
 	private String picHttpIp;
 
@@ -124,7 +127,10 @@ public class GroupServiceImpl implements GroupServiceI {
 				gb.setGroupName("/1/mphotos/10000001.png");
 				groupDao.updateGroupImgInfo(gb);
 				// 创建群组 成功 生成群组头像 zhangWeiJie
-				editGroupImg(groupID);
+				String saveImp = editGroupImg(groupID);
+				if("" != saveImp) {
+					queryFactory.update(qAddressGroup).set(qAddressGroup.groupImg, saveImp).where(qAddressGroup.groupId.eq(groupID)).execute();
+				}
 			}
 
 			//一键建群
@@ -141,7 +147,7 @@ public class GroupServiceImpl implements GroupServiceI {
 					.leftJoin(uass)
 					.on(qUser.userID.eq(uass.userid))
 					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-			String result = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),group.getGroupImg(),listJoinUsers);
+			String result = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp+group.getGroupImg(),listJoinUsers);
 			if("" != result && !result.equals("error")){
 				JSONObject obj = JSONObject.fromObject(result);
 				String data = obj.getString("data");
@@ -200,7 +206,10 @@ public class GroupServiceImpl implements GroupServiceI {
 								.on(qUser.userID.eq(uass.userid))
 								.where(qAddressGroupUser.groupId.eq(groupID).and(qAddressGroupUser.groupUser.in(list))).fetch();
 						sendGroupService.inviteFriend(loginID, listJoinUsers);
-						sendGroupService.updateGroupInfo(addressGroup.getGroupChatID(),saveImp);
+						if("" != saveImp) {
+							sendGroupService.updateGroupInfo(addressGroup.getGroupChatID(),saveImp);
+							queryFactory.update(qAddressGroup).set(qAddressGroup.groupImg, saveImp).where(qAddressGroup.groupId.eq(groupID)).execute();
+						}
 					}
 				} else if (type.equals("2")) {// 2 删除人员
 					List<JoinUsers> list = new ArrayList<JoinUsers>();
@@ -223,7 +232,10 @@ public class GroupServiceImpl implements GroupServiceI {
 					// 编辑群组人员，重新生成群组头像 zhangWeiJie
 					String saveImp = editGroupImg(groupID);
 					sendGroupService.removeMembers(loginID,addressGroup.getGroupChatID(),list);
-					sendGroupService.updateGroupInfo(addressGroup.getGroupChatID(),saveImp);
+					if("" != saveImp) {
+						sendGroupService.updateGroupInfo(addressGroup.getGroupChatID(), saveImp);
+						queryFactory.update(qAddressGroup).set(qAddressGroup.groupImg, saveImp).where(qAddressGroup.groupId.eq(groupID)).execute();
+					}
 
 				} else if (type.equals("3")) {// 3 删除组
 					groupDao.deleteGroup(groupID);
@@ -255,22 +267,40 @@ public class GroupServiceImpl implements GroupServiceI {
 
 	private String editGroupImg(String groupID) throws Exception {
 		// 查询所属组的人
-		List<User> userIdList = groupDao.selectGroupUserBygroupID(groupID);
-		//String imgIp = picHttpIp;// "http://42.99.16.145:19491";//
-											// 头像缺少IP地址
-		String tem = picGroupTempImg;// 临时文件路径/cfiles/sales/appkms/2/public/addresslist/group/temp/
-		String imgRoot = picGroupDbImgRoot;//文件所缺根路径/cfiles/sales/appkms
 		String saveUrl = "";
+		QUser qUser = QUser.user;
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		List<User> userIdList = queryFactory.select(Projections.bean(User.class,
+				qAddressGroupUser.groupUser.as("userID"),
+				new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("userPic")
+				)
+		).from(qAddressGroupUser)
+				.leftJoin(qUser)
+				.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+				.leftJoin(uass)
+				.on(qUser.userID.eq(uass.userid))
+				.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+
+		////List<User> userIdList = groupDao.selectGroupUserBygroupID(groupID);
+		String imgIp = picHttpIp;
+		//// 临时文件路径
+		String tem = picGroupTempImg;
+		////文件所缺根路径
+		String imgRoot = picGroupDbImgRoot;
 		List<File> fileList = new ArrayList<File>();
 		for (User u : userIdList) {
 			String uPic = u.getUserPic();
-			if (uPic == null || uPic.equals("/1/mphotos/10000001.png")) {
+			logger.info("imgIp===============" + imgIp);
+			logger.info("imgIp===============" + uPic);
+			if (uPic == null || uPic.equals(imgIp + "/1/mphotos/10000001.png")) {
 				// 10000001.png数据库中因为不能有空数据，所以写死的假数据
 				continue;
 			}
 			String uPicTem = tem + u.getUserID() + ".png";
 			try {
-				uPic =  imgRoot + uPic;
+				uPic=uPic.replace(imgIp,imgRoot);
 				File fromFile = new File(uPic);
 				File toFile = new File(uPicTem);
 				copyFile(fromFile,toFile);
@@ -286,6 +316,7 @@ public class GroupServiceImpl implements GroupServiceI {
 				e.printStackTrace();
 			}
 		}
+		logger.info("fileList===============" + fileList.size());
 		if (fileList.size() > 0) {
 			//文件名称不能单用groupId生成 如果前端设置本地缓存 则图片不会更新
 			String union=System.currentTimeMillis()+"";
@@ -295,15 +326,11 @@ public class GroupServiceImpl implements GroupServiceI {
 			ImageUtil.createImage(fileList, groupImgAddress, "");
 			File f = new File(groupImgAddress);
 			saveUrl = picGroupDbImg + union+ groupID + ".png";
+			logger.info("saveUrl===============" + saveUrl);
 			// 更新appuser.address_group表
-			if (f.exists()) {
-				GroupBean gb = new GroupBean();
-				gb.setGroupID(groupID);
-				gb.setGroupName(saveUrl);
-				groupDao.updateGroupImgInfo(gb);
-			}
+
 		}
-		return picHttpIp + saveUrl;
+		return saveUrl;
 	}
 
 	@SuppressWarnings("rawtypes")

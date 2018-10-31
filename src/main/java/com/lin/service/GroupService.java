@@ -193,6 +193,11 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	 * @param groupDesc
 	 */
 	public void saveGroupCount(Result result, String loginID, String queryType, String roleList, String deptList, String userList, String groupID,String groupName,String groupDesc){
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+		QUser qUser = QUser.user;
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
+
 		//角色列表ID
 		String inroles = "";
 		////查询类型 1角色
@@ -251,16 +256,16 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				}
 				////更新头像
 				try {
-					editGroupImg(groupID);
+					String saveUrl = editGroupImg(groupID);
+					if("" != saveUrl) {
+						jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg, saveUrl).where(qAddressGroup.groupId.eq(groupID)).execute();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
 				////推送极光推送
-				QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
-				QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
-				QUser qUser = QUser.user;
-				QUserNewAssist uass = QUserNewAssist.userNewAssist;
+
 				AddressGroup group = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 				List<JoinUsers> listJoinUsers = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
 						 							qAddressGroupUser.groupUser.as("customerId"),
@@ -273,7 +278,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						 .leftJoin(uass)
 						 .on(qUser.userID.eq(uass.userid))
 						 .where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-				String result1 = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp + group.getGroupImg(),listJoinUsers);
+				String result1 = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(), group.getGroupImg(),listJoinUsers);
 				logger.info("createGroup--------" + result1);
 				if("" != result1 && !result1.equals("error")){
 					try{
@@ -284,7 +289,6 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						String groupChatID = objID.getString("id");
 						logger.info("createGroup---groupChatID-----" + groupChatID);
 						jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID,groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
-
 					}catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -302,9 +306,9 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	 * 编辑图片
 	 * @param groupID
 	 */
-	private void editGroupImg(String groupID) throws Exception{
+	private String editGroupImg(String groupID) throws Exception{
 		// 查询所属组的人
-
+		String saveUrl = "";
 		QUser qUser = QUser.user;
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
@@ -329,6 +333,8 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		List<File> fileList = new ArrayList<File>();
 		for (User u : userIdList) {
 			String uPic = u.getUserPic();
+			logger.info("imgIp===============" + imgIp);
+			logger.info("imgIp===============" + uPic);
 			if (uPic == null || uPic.equals(imgIp + "/1/mphotos/10000001.png")) {
 				// 10000001.png数据库中因为不能有空数据，所以写死的假数据
 				continue;
@@ -351,6 +357,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				e.printStackTrace();
 			}
 		}
+		logger.info("fileList===============" + fileList.size());
 		if (fileList.size() > 0) {
 			//文件名称不能单用groupId生成 如果前端设置本地缓存 则图片不会更新
 			String union=System.currentTimeMillis()+"";
@@ -359,15 +366,11 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 			// 9张图片生成1张图片
 			ImageUtil.createImage(fileList, groupImgAddress, "");
 			File f = new File(groupImgAddress);
-			String saveUrl = picGroupDbImg + union+ groupID + ".png";
+			saveUrl = picGroupDbImg + union+ groupID + ".png";
 			// 更新appuser.address_group表
-			if (f.exists()) {
-				AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
-				addressGroup.setUpdateDate(new Date());
-				addressGroup.setGroupImg(saveUrl);
-				super.update(addressGroup);
-			}
+
 		}
+		return saveUrl;
 	}
 
 	/**

@@ -46,10 +46,10 @@ public class Group {
 		if(Strings.isNullOrEmpty(groupImg)){
 			return groupImg;
 		}else{
-			if(Strings.isNullOrEmpty(groupChatID)){
-				return picHttpIp + groupImg;
-			}else{
+			if(groupImg.indexOf("http://") > -1){
 				return groupImg;
+			}else{
+				return picHttpIp + groupImg;
 			}
 		}
 	}

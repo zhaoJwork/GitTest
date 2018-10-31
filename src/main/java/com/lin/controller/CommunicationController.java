@@ -68,7 +68,7 @@ public class CommunicationController {
 	@ApiOperation(value="常用分组列表")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "groupname", value = "分组名称", required = true, dataType = "String")
+			@ApiImplicitParam(name = "groupname", value = "分组名称" , dataType = "String")
 	})
 	@GetMapping("grouplist")
 	public Result grouplist(HttpServletRequest req, String loginID,String groupname) {
