@@ -279,6 +279,19 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						 .leftJoin(uass)
 						 .on(qUser.userID.eq(uass.userid))
 						 .where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+
+				JoinUsers user  =  jpaQueryFactory().select(Projections.bean(JoinUsers.class,
+						qAddressGroup.createUser.as("customerId"),
+						qUser.userName.as("nickName"),
+						new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+						))
+						.from(qAddressGroup)
+						.leftJoin(qUser)
+						.on(qAddressGroup.createUser.eq(qUser.userID))
+						.leftJoin(uass)
+						.on(qUser.userID.eq(uass.userid))
+						.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+				listJoinUsers.add(user);
 				String result1 = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(), picHttpIp+ saveUrl,listJoinUsers);
 				if("" != result1 && !result1.equals("error")){
 					try{

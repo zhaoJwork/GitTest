@@ -148,6 +148,18 @@ public class GroupServiceImpl implements GroupServiceI {
 					.leftJoin(uass)
 					.on(qUser.userID.eq(uass.userid))
 					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+			JoinUsers user  =  queryFactory.select(Projections.bean(JoinUsers.class,
+					qAddressGroup.createUser.as("customerId"),
+					qUser.userName.as("nickName"),
+					new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+			))
+					.from(qAddressGroup)
+					.leftJoin(qUser)
+					.on(qAddressGroup.createUser.eq(qUser.userID))
+					.leftJoin(uass)
+					.on(qUser.userID.eq(uass.userid))
+					.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+			listJoinUsers.add(user);
 			String result = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp+saveImp,listJoinUsers);
 			if("" != result && !result.equals("error")){
 				JSONObject obj = JSONObject.fromObject(result);
