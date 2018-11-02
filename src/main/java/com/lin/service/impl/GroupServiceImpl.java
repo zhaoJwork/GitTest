@@ -111,6 +111,7 @@ public class GroupServiceImpl implements GroupServiceI {
 			gb.setGroupDesc(groupDesc);
 			gb.setCreateUser(loginID);
 			groupDao.saveGroup(gb);
+            String saveImp = "";
 			if (null != userIds && !"".equals(userIds)) {
 				String[] userID = userIds.split("_");
 				List<GroupUserBean> listGU = new ArrayList<GroupUserBean>();
@@ -127,7 +128,7 @@ public class GroupServiceImpl implements GroupServiceI {
 				gb.setGroupName("/1/mphotos/10000001.png");
 				groupDao.updateGroupImgInfo(gb);
 				// 创建群组 成功 生成群组头像 zhangWeiJie
-				String saveImp = editGroupImg(groupID);
+				saveImp = editGroupImg(groupID);
 				if("" != saveImp) {
 					queryFactory.update(qAddressGroup).set(qAddressGroup.groupImg, saveImp).where(qAddressGroup.groupId.eq(groupID)).execute();
 				}
@@ -147,7 +148,7 @@ public class GroupServiceImpl implements GroupServiceI {
 					.leftJoin(uass)
 					.on(qUser.userID.eq(uass.userid))
 					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-			String result = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp+group.getGroupImg(),listJoinUsers);
+			String result = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp+saveImp,listJoinUsers);
 			if("" != result && !result.equals("error")){
 				JSONObject obj = JSONObject.fromObject(result);
 				String data = obj.getString("data");
@@ -195,6 +196,7 @@ public class GroupServiceImpl implements GroupServiceI {
 					String saveImp = editGroupImg(groupID);
 					if(null != addressGroup && !"".equals(addressGroup.getGroupChatID())) {
 						List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
+								qAddressGroupUser.groupId.as("groupId"),
 								qAddressGroupUser.groupUser.as("customerId"),
 								qUser.userName.as("nickName"),
 								new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
@@ -231,7 +233,6 @@ public class GroupServiceImpl implements GroupServiceI {
 					}
 					// 编辑群组人员，重新生成群组头像 zhangWeiJie
 					String saveImp = editGroupImg(groupID);
-					sendGroupService.removeMembers(loginID,addressGroup.getGroupChatID(),list);
 					if("" != saveImp) {
 						sendGroupService.updateGroupInfo(addressGroup.getGroupChatID(), saveImp);
 						queryFactory.update(qAddressGroup).set(qAddressGroup.groupImg, saveImp).where(qAddressGroup.groupId.eq(groupID)).execute();
@@ -242,8 +243,8 @@ public class GroupServiceImpl implements GroupServiceI {
 					GroupUserBean gu = new GroupUserBean();
 					gu.setGroupID(groupID);
 					groupDao.deleteGroupUser(gu);
-					////解散群组
-					sendGroupService.dissolution(addressGroup.getGroupChatID(),loginID);
+					////通知群组分组解散
+					sendGroupService.save2OutGroup(addressGroup.getGroupChatID(),loginID);
 				}
 			}
 			// groupName=以小组分组&

@@ -254,9 +254,10 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 					}
 					addressGroupUserRepository.saveAll(listgu);
 				}
+				String saveUrl = "";
 				////更新头像
 				try {
-					String saveUrl = editGroupImg(groupID);
+					saveUrl = editGroupImg(groupID);
 					if("" != saveUrl) {
 						jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg, saveUrl).where(qAddressGroup.groupId.eq(groupID)).execute();
 					}
@@ -278,16 +279,13 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						 .leftJoin(uass)
 						 .on(qUser.userID.eq(uass.userid))
 						 .where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-				String result1 = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(), group.getGroupImg(),listJoinUsers);
-				logger.info("createGroup--------" + result1);
+				String result1 = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(), picHttpIp+ saveUrl,listJoinUsers);
 				if("" != result1 && !result1.equals("error")){
 					try{
 						JSONObject obj1 = JSONObject.fromObject(result1);
 						String data = obj1.getString("data");
-						logger.info("createGroup---data-----" + data);
 						JSONObject objID = JSONObject.fromObject(data);
 						String groupChatID = objID.getString("id");
-						logger.info("createGroup---groupChatID-----" + groupChatID);
 						jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID,groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
 					}catch (Exception e) {
 						e.printStackTrace();

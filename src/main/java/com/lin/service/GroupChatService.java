@@ -4,27 +4,13 @@ import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.AddressGroupRepository;
 import com.lin.repository.AddressGroupUserRepository;
-import com.lin.util.ImageUtil;
 import com.lin.util.Result;
 import com.lin.vo.*;
-import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.*;
 
 
@@ -67,12 +53,14 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 		addressGroupRepository.save(addressGroup);
 		List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
 		for (int i = 0; i < inCreateGroup.getJoinUsers().size(); i++) {
+			if(!inCreateGroup.getJoinUsers().get(i).getCustomerId().equals(inCreateGroup.getCrator())){
 				AddressGroupUser addressGroupUser = new AddressGroupUser();
 				addressGroupUser.setRowId(getSeq()+"");
 				addressGroupUser.setGroupId(groupID);
 				addressGroupUser.setGroupUser(inCreateGroup.getJoinUsers().get(i).getCustomerId());
 				addressGroupUser.setCreateDate(new Date());
 				listgu.add(addressGroupUser);
+			}
 		}
 		addressGroupUserRepository.saveAll(listgu);
 		result.setRespCode("1");
@@ -85,18 +73,26 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 	 */
 	public void inviteFriend(Result result, InInviteFriend inviteFriend){
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
 		if(0 < inviteFriend.getMembers().size()){
 			for (int i = 0; i < inviteFriend.getMembers().size(); i++) {
 				String groupChatID = inviteFriend.getMembers().get(i).getGroupId();
-				AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupChatID.eq(groupChatID)).fetchOne();
-				if(null != addressGroup){
-					AddressGroupUser addressGroupUser = new AddressGroupUser();
-					addressGroupUser.setRowId(getSeq()+"");
-					addressGroupUser.setGroupId(addressGroup.getGroupId());
-					addressGroupUser.setGroupUser(inviteFriend.getMembers().get(i).getCustomerId());
-					addressGroupUser.setCreateDate(new Date());
-					listgu.add(addressGroupUser);
+				List<AddressGroup> addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupChatID.eq(groupChatID)).fetch();
+				if(null != addressGroup && 0 < addressGroup.size()){
+					for (int j =0 ; j < addressGroup.size() ; j ++) {
+						AddressGroup aglist = addressGroup.get(j);
+						AddressGroupUser aguOld = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser)
+								.where(qAddressGroupUser.groupId.eq(aglist.getGroupId()).and(qAddressGroupUser.groupUser.eq(inviteFriend.getMembers().get(i).getCustomerId()))).fetchOne();
+						if (null == aguOld) {
+							AddressGroupUser addressGroupUser = new AddressGroupUser();
+							addressGroupUser.setRowId(getSeq() + "");
+							addressGroupUser.setGroupId(aglist.getGroupId());
+							addressGroupUser.setGroupUser(inviteFriend.getMembers().get(i).getCustomerId());
+							addressGroupUser.setCreateDate(new Date());
+							listgu.add(addressGroupUser);
+						}
+					}
 				}
 			}
 			addressGroupUserRepository.saveAll(listgu);
@@ -106,22 +102,29 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 	}
 
 	/**
-	 * 删除成员
+	 * 删除成员 不提供
 	 * @return
 	 */
 	public void removeMembers(Result result, InRemoveMembers inRemoveMembers){
-		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+
+		result.setRespCode("1");
+		result.setRespDesc("正常返回数据");
+
+		/*QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
-		AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupChatID.eq(inRemoveMembers.getGroupId())).fetchOne();
+		List<AddressGroup> addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupChatID.eq(inRemoveMembers.getGroupId())).fetch();
 		String[] customerIds = inRemoveMembers.getCustomerIds().split(",");
-		if(null != addressGroup) {
+		if(null != addressGroup && 0 < addressGroup.size()) {
 			if (0 < customerIds.length) {
 				for (int i = 0; i < customerIds.length; i++) {
 					String customerId = customerIds[i];
-					jpaQueryFactory().delete(qAddressGroupUser)
-							.where(qAddressGroupUser.groupId.eq(addressGroup.getGroupId()).and(qAddressGroupUser.groupUser.eq(customerId)))
-							.execute();
+					for (int j = 0 ; j < addressGroup.size() ; j ++) {
+						AddressGroup aglist = addressGroup.get(j);
+						jpaQueryFactory().delete(qAddressGroupUser)
+								.where(qAddressGroupUser.groupId.eq(aglist.getGroupId()).and(qAddressGroupUser.groupUser.eq(customerId)))
+								.execute();
+					}
 				}
 			}
 			result.setRespCode("1");
@@ -129,7 +132,7 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 		}else{
 			result.setRespCode("1");
 			result.setRespDesc("分组不存在");
-		}
+		}*/
 	}
 
 	/**
@@ -138,7 +141,9 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 	 */
 	public void updateGroupInfo(Result result, InUpdateGroupInfo inUpdateGroupInfo){
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
-		jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg,inUpdateGroupInfo.getAvatar())
+		jpaQueryFactory().update(qAddressGroup)
+				.set(qAddressGroup.groupImg,inUpdateGroupInfo.getAvatar())
+				.set(qAddressGroup.updateDate,new Date())
 				.where(qAddressGroup.groupChatID.eq(inUpdateGroupInfo.getGroupId()))
 				.execute();
 		result.setRespCode("1");
@@ -146,51 +151,63 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 	}
 
 	/**
-	 * 退出群组
+	 * 退出群组 不提供
 	 * @return
 	 */
 	public void exitGroup(Result result, InExitGroup inExitGroup){
-		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		result.setRespCode("1");
+		result.setRespDesc("正常返回数据");
+
+		/*QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
-		AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupChatID.eq(inExitGroup.getGroupId())).fetchOne();
-		if(null != addressGroup) {
-			jpaQueryFactory().delete(qAddressGroupUser)
-					.where(qAddressGroupUser.groupId.eq(addressGroup.getGroupId()).and(qAddressGroupUser.groupUser.eq(inExitGroup.getCustomerId())))
-					.execute();
-			result.setRespCode("1");
-			result.setRespDesc("正常返回数据");
+		List<AddressGroup> addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupChatID.eq(inExitGroup.getGroupId())).fetch();
+		if(null != addressGroup && 0 < addressGroup.size()) {
+			for (int j = 0 ; j < addressGroup.size() ; j ++) {
+				AddressGroup aglist = addressGroup.get(j);
+				jpaQueryFactory().delete(qAddressGroupUser)
+						.where(qAddressGroupUser.groupId.eq(aglist.getGroupId()).and(qAddressGroupUser.groupUser.eq(inExitGroup.getCustomerId())))
+						.execute();
+				result.setRespCode("1");
+				result.setRespDesc("正常返回数据");
+			}
 		}else{
 			result.setRespCode("1");
 			result.setRespDesc("分组不存在");
-		}
+		}*/
 	}
 
 	/**
-	 * 解散群组
+	 * 解散群组 不提供
 	 * @return
 	 */
 	public void dissolution(Result result, InDissolution inDissolution){
-		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		result.setRespCode("1");
+		result.setRespDesc("正常返回数据");
+
+		/*QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
-		AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup)
-				.where(qAddressGroup.groupChatID.eq(inDissolution.getGroupId())).fetchOne();
-		if(null != addressGroup) {
-			jpaQueryFactory().delete(qAddressGroupUser)
-					.where(qAddressGroupUser.groupId.eq(addressGroup.getGroupId()))
-					.execute();
-			jpaQueryFactory().delete(qAddressGroup)
-					.where(qAddressGroup.groupId.eq(addressGroup.getGroupId()))
-					.execute();
+		List<AddressGroup> addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup)
+				.where(qAddressGroup.groupChatID.eq(inDissolution.getGroupId())).fetch();
+		if(null != addressGroup && 0 < addressGroup.size()) {
+			for (int j = 0 ; j < addressGroup.size() ; j ++) {
+				AddressGroup aglist = addressGroup.get(j);
+				jpaQueryFactory().delete(qAddressGroupUser)
+						.where(qAddressGroupUser.groupId.eq(aglist.getGroupId()))
+						.execute();
+				jpaQueryFactory().delete(qAddressGroup)
+						.where(qAddressGroup.groupId.eq(aglist.getGroupId()))
+						.execute();
+			}
 			result.setRespCode("1");
 			result.setRespDesc("正常返回数据");
 		}else{
 			result.setRespCode("1");
 			result.setRespDesc("分组不存在");
-		}
+		}*/
 	}
 
 	/**
-	 * 群头像更新
+	 * 群名称更新
 	 * @return
 	 */
 	public void modify(Result result, InModify inModify){
@@ -211,13 +228,11 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 	}
 	@Override
 	public long deleteByIds(String... ids) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public List<AddressGroup> findByIds(String... ids) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

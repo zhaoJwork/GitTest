@@ -40,6 +40,8 @@ public class SendGroupService {
     private String enterpriseQueryGroup;
     @Value("${application.enterprise.updateGroupInfo}")
     private String enterpriseUpdateGroupInfo;
+    @Value("${application.enterprise.save2OutGroup}")
+    private String enterpriseSave2OutGroup;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -82,8 +84,8 @@ public class SendGroupService {
         JSONObject obj = new JSONObject();
         obj.put("crator",crator);
         obj.put("groupName",groupName);
-        obj.put("id",id);
-        obj.put("oneKeyFlag ","1");
+        obj.put("id","");
+        obj.put("oneKeyFlag","1");
         obj.put("avatar",avatar);
         List<Map> listMap = new ArrayList<Map>();
         for(JoinUsers joinuser :joinUsers){
@@ -256,6 +258,41 @@ public class SendGroupService {
         logger.info("dissolution::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseDissolution,
+                    "POST",
+                    obj.toString(),
+                    "application/json;charset=utf-8");
+            JSONObject objR = JSONObject.fromObject(result);
+            String respCode = objR.getString("respCode");
+            if ("0".equals(respCode)){
+                bool = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return bool;
+        }
+        return bool;
+    }
+
+    /**
+     *      设置分组状态
+     *  {
+     *     "crator":"99300",
+     * 	   "groupId": "1569862",
+     * 	   "status":"0"
+     * }
+     * @param groupId 群ID
+     * @param crator 分组staffID
+     *
+     */
+    public Boolean save2OutGroup(String groupId, String crator){
+        Boolean bool = false;
+        JSONObject obj = new JSONObject();
+        obj.put("groupId",groupId);
+        obj.put("crator",crator);
+        obj.put("status","0");
+        logger.info("save2OutGroup::"+obj.toString());
+        try {
+            String result = NetUtil.send(enterpriseSave2OutGroup,
                     "POST",
                     obj.toString(),
                     "application/json;charset=utf-8");

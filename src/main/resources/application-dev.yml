@@ -62,5 +62,6 @@ application:
     modify: http://10.128.49.65:20060/enterprise_go/group/modify
     queryGroup: http://10.128.49.65:20060/enterprise_go/group/queryGroup
     updateGroupInfo: http://10.128.49.65:20060/enterprise_go/group/updateGroupInfo
+    save2OutGroup: http://10.128.49.65:20060/enterprise_go/group/save2OutGroup
 swagger:
   show: true
