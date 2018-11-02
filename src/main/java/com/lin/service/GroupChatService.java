@@ -177,17 +177,15 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 	}
 
 	/**
-	 * 解散群组 不提供
+	 * 解散群组
 	 * @return
 	 */
 	public void dissolution(Result result, InDissolution inDissolution){
-		result.setRespCode("1");
-		result.setRespDesc("正常返回数据");
-
-		/*QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		List<AddressGroup> addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup)
-				.where(qAddressGroup.groupChatID.eq(inDissolution.getGroupId())).fetch();
+				.where(qAddressGroup.groupChatID.eq(inDissolution.getGroupId())
+						.and(qAddressGroup.createUser.eq(inDissolution.getMasterId()))).fetch();
 		if(null != addressGroup && 0 < addressGroup.size()) {
 			for (int j = 0 ; j < addressGroup.size() ; j ++) {
 				AddressGroup aglist = addressGroup.get(j);
@@ -203,7 +201,7 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 		}else{
 			result.setRespCode("1");
 			result.setRespDesc("分组不存在");
-		}*/
+		}
 	}
 
 	/**
