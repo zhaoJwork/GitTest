@@ -135,6 +135,7 @@ public class SendGroupService {
         Boolean bool = false;
         JSONObject obj = new JSONObject();
         obj.put("sender",sender);
+        obj.put("oneKeyFlag","1");
         List<Map> listMap = new ArrayList<Map>();
         for(JoinUsers joinuser :members){
             Map map = new HashMap();
@@ -180,6 +181,7 @@ public class SendGroupService {
         JSONObject obj = new JSONObject();
         obj.put("masterId",masterId);
         obj.put("groupId",groupId);
+        obj.put("oneKeyFlag","1");
         List<Map> listMap = new ArrayList<Map>();
         String ids = "";
         for(JoinUsers joinuser :customerIds){
@@ -222,6 +224,7 @@ public class SendGroupService {
         JSONObject obj = new JSONObject();
         obj.put("groupId",groupId);
         obj.put("customerId",customerId);
+        obj.put("oneKeyFlag","1");
         logger.info("exitGroup::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseExitGroup,
@@ -255,6 +258,7 @@ public class SendGroupService {
         JSONObject obj = new JSONObject();
         obj.put("groupId",groupId);
         obj.put("masterId",masterId);
+        obj.put("oneKeyFlag","1");
         logger.info("dissolution::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseDissolution,
@@ -290,6 +294,7 @@ public class SendGroupService {
         obj.put("groupId",groupId);
         obj.put("crator",crator);
         obj.put("status","0");
+        obj.put("oneKeyFlag","1");
         logger.info("save2OutGroup::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseSave2OutGroup,
@@ -326,6 +331,7 @@ public class SendGroupService {
         obj.put("id",id);
         obj.put("groupName",groupName);
         obj.put("customerId",customerId);
+        obj.put("oneKeyFlag","1");
         logger.info("modify::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseModify,
@@ -357,6 +363,7 @@ public class SendGroupService {
         map.put("bool",false);
         JSONObject obj = new JSONObject();
         obj.put("queryGroup",customerId);
+        obj.put("oneKeyFlag","1");
         logger.info("modify::"+obj.toString());
         List<JoinUsers> joinUsers = new ArrayList<JoinUsers>();
         try {
@@ -403,6 +410,7 @@ public class SendGroupService {
         JSONObject obj = new JSONObject();
         obj.put("groupId",groupId);
         obj.put("avatar",picHttpIp + avatar);
+        obj.put("oneKeyFlag","1");
         logger.info("updateGroupInfo::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseUpdateGroupInfo,
