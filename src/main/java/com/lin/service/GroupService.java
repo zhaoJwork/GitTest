@@ -122,9 +122,9 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				if (inroles.length() > 0) {
 					inroles = inroles.substring(1);
 				}
-			}
-			if("".equals(deptList) || null == deptList) {
-				userCount = userCount + getUserCountByDeptID("", inroles,groupID);
+				if("".equals(deptList) || null == deptList) {
+					userCount = userCount + getUserCountByDeptID("", inroles,groupID);
+				}
 			}
 		}
 
@@ -278,6 +278,10 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 									.leftJoin(qAddressGroup)
 									.on(qAddressGroup.groupId.eq(qAddressGroupUser.groupId))
 									.where(qAddressGroupUser.groupId.eq(groupID).and(qAddressGroupUser.groupUser.in(list))).fetch();
+							logger.info("新增人数 ==="+ list.size());
+							if(null != listJoinUsers) {
+								logger.info("新增人数listJoinUsers ===" + listJoinUsers.size());
+							}
 							sendGroupService.inviteFriend(loginID, listJoinUsers);
 						}
 					} catch (Exception e) {
