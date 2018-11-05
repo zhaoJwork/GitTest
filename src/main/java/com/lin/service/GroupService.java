@@ -124,7 +124,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				}
 			}
 			if("".equals(deptList) || null == deptList) {
-				userCount = userCount + getUserCountByDeptID("", inroles);
+				userCount = userCount + getUserCountByDeptID("", inroles,groupID);
 			}
 		}
 
@@ -138,12 +138,18 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				for (int i = 0; i < objlist.size(); i++) {
 					JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
 					String deptID = jsonObj.getString("deptID");
-					userCount = userCount + getUserCountByDeptID(deptID, inroles);
+					userCount = userCount + getUserCountByDeptID(deptID, inroles,groupID);
 
 				}
 			}
 		}
-        //人员列表
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+		if(null != groupID && !"".equals(groupID)){
+			long uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+			userCount = userCount + Integer.parseInt(uCount + "");
+		}
+
+       /* //人员列表
         String inusers = "";
 		////查询类型 1已有查询
 		if("4".equals(queryType)) {
@@ -171,7 +177,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				result.setRespDesc("groupID 不能为空");
 				return ;
 			}
-        }
+        }*/
 
 		JSONObject jsonObject   = new JSONObject();
         jsonObject.put("userCount",userCount);
@@ -197,7 +203,10 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		QUser qUser = QUser.user;
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
-
+		long uCount = 0;
+		/*if(null != groupID && !"".equals(groupID)){
+			uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+		}*/
 		//角色列表ID
 		String inroles = "";
 		////查询类型 1角色
@@ -223,91 +232,148 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		String indepts = "";
 		////查询类型 1角色 2部门
 		if("1".equals(queryType) || "2".equals(queryType)) {
-			if (!"".equals(deptList) && null != deptList) {
-				////保存主表数据
-				AddressGroup addressGroup = new AddressGroup();
-				addressGroup.setGroupName(groupName);
-				addressGroup.setGroupDesc(groupDesc);
-				groupID = getSeq()+"";
-				addressGroup.setRowId(groupID);
-				addressGroup.setGroupId(groupID);
-				addressGroup.setCreateUser(loginID);
-				addressGroup.setCreateDate(new Date());
-				addressGroup.setUpdateDate(new Date());
-				addressGroup.setGroupImg("/1/mphotos/10000001.png");
-				addressGroupRepository.save(addressGroup);
-				////保存子表数据
-				JSONObject obj = JSONObject.fromObject(deptList);
-				JSONArray objlist = obj.getJSONArray("deptList");
-				for (int i = 0; i < objlist.size(); i++) {
-					JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
-					String deptID = jsonObj.getString("deptID");
-					List list = getUserByDeptID(deptID,inroles);
+			if(null != groupID && !"".equals(groupID)){
+				if (!"".equals(deptList) && null != deptList) {
+					AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+					////保存子表数据
+					JSONObject obj = JSONObject.fromObject(deptList);
+					JSONArray objlist = obj.getJSONArray("deptList");
 					List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
-					for(int m = 0 ; m < list.size() ; m ++){
-						AddressGroupUser addressGroupUser = new AddressGroupUser();
-						addressGroupUser.setRowId(getSeq()+"");
-						addressGroupUser.setGroupId(groupID);
-						addressGroupUser.setGroupUser(list.get(m).toString());
-						addressGroupUser.setCreateDate(new Date());
-						listgu.add(addressGroupUser);
+					for (int i = 0; i < objlist.size(); i++) {
+						JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
+						String deptID = jsonObj.getString("deptID");
+						List list = getUserByDeptID(deptID, inroles,groupID);
+						for (int m = 0; m < list.size(); m++) {
+							AddressGroupUser addressGroupUser = new AddressGroupUser();
+							addressGroupUser.setRowId(getSeq() + "");
+							addressGroupUser.setGroupId(groupID);
+							addressGroupUser.setGroupUser(list.get(m).toString());
+							addressGroupUser.setCreateDate(new Date());
+							listgu.add(addressGroupUser);
+						}
 					}
 					addressGroupUserRepository.saveAll(listgu);
-				}
-				String saveUrl = "";
-				////更新头像
-				try {
-					saveUrl = editGroupImg(groupID);
-					if("" != saveUrl) {
-						jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg, saveUrl).where(qAddressGroup.groupId.eq(groupID)).execute();
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				////推送极光推送
-
-				AddressGroup group = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
-				List<JoinUsers> listJoinUsers = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
-						 							qAddressGroupUser.groupUser.as("customerId"),
-						 							qUser.userName.as("nickName"),
-						 							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
-						 ))
-						 .from(qAddressGroupUser)
-						 .leftJoin(qUser)
-						 .on(qAddressGroupUser.groupUser.eq(qUser.userID))
-						 .leftJoin(uass)
-						 .on(qUser.userID.eq(uass.userid))
-						 .where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-
-				JoinUsers user  =  jpaQueryFactory().select(Projections.bean(JoinUsers.class,
-						qAddressGroup.createUser.as("customerId"),
-						qUser.userName.as("nickName"),
-						new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
-						))
-						.from(qAddressGroup)
-						.leftJoin(qUser)
-						.on(qAddressGroup.createUser.eq(qUser.userID))
-						.leftJoin(uass)
-						.on(qUser.userID.eq(uass.userid))
-						.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
-				listJoinUsers.add(user);
-				String result1 = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(), picHttpIp+ saveUrl,listJoinUsers);
-				if("" != result1 && !result1.equals("error")){
-					try{
-						JSONObject obj1 = JSONObject.fromObject(result1);
-						String data = obj1.getString("data");
-						JSONObject objID = JSONObject.fromObject(data);
-						String groupChatID = objID.getString("id");
-						jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID,groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
-					}catch (Exception e) {
+					String saveUrl = "";
+					////更新头像
+					try {
+						saveUrl = editGroupImg(groupID);
+						if ("" != saveUrl) {
+							jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg, saveUrl).where(qAddressGroup.groupId.eq(groupID)).execute();
+							sendGroupService.updateGroupInfo(addressGroup.getGroupChatID(),saveUrl);
+							List<String> list = new ArrayList<String>();
+							for(AddressGroupUser addressGroupUser : listgu){
+								list.add(addressGroupUser.getGroupUser());
+							}
+							List<JoinUsers> listJoinUsers = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
+									qAddressGroup.groupChatID.as("groupId"),
+									qAddressGroupUser.groupUser.as("customerId"),
+									qUser.userName.as("nickName"),
+									new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+							))
+									.from(qAddressGroupUser)
+									.leftJoin(qUser)
+									.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+									.leftJoin(uass)
+									.on(qUser.userID.eq(uass.userid))
+									.leftJoin(qAddressGroup)
+									.on(qAddressGroup.groupId.eq(qAddressGroupUser.groupId))
+									.where(qAddressGroupUser.groupId.eq(groupID).and(qAddressGroupUser.groupUser.in(list))).fetch();
+							sendGroupService.inviteFriend(loginID, listJoinUsers);
+						}
+					} catch (Exception e) {
 						e.printStackTrace();
+					}
+
+
+				}
+			}else {
+				if (!"".equals(deptList) && null != deptList) {
+					////保存主表数据
+					AddressGroup addressGroup = new AddressGroup();
+					addressGroup.setGroupName(groupName);
+					addressGroup.setGroupDesc(groupDesc);
+					groupID = getSeq() + "";
+					addressGroup.setRowId(groupID);
+					addressGroup.setGroupId(groupID);
+					addressGroup.setCreateUser(loginID);
+					addressGroup.setCreateDate(new Date());
+					addressGroup.setUpdateDate(new Date());
+					addressGroup.setGroupImg("/1/mphotos/10000001.png");
+					addressGroupRepository.save(addressGroup);
+					////保存子表数据
+					JSONObject obj = JSONObject.fromObject(deptList);
+					JSONArray objlist = obj.getJSONArray("deptList");
+					for (int i = 0; i < objlist.size(); i++) {
+						JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
+						String deptID = jsonObj.getString("deptID");
+						List list = getUserByDeptID(deptID, inroles,"");
+						List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
+						for (int m = 0; m < list.size(); m++) {
+							AddressGroupUser addressGroupUser = new AddressGroupUser();
+							addressGroupUser.setRowId(getSeq() + "");
+							addressGroupUser.setGroupId(groupID);
+							addressGroupUser.setGroupUser(list.get(m).toString());
+							addressGroupUser.setCreateDate(new Date());
+							listgu.add(addressGroupUser);
+						}
+						addressGroupUserRepository.saveAll(listgu);
+					}
+					String saveUrl = "";
+					////更新头像
+					try {
+						saveUrl = editGroupImg(groupID);
+						if ("" != saveUrl) {
+							jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg, saveUrl).where(qAddressGroup.groupId.eq(groupID)).execute();
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					////推送极光推送
+
+					AddressGroup group = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+					List<JoinUsers> listJoinUsers = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
+							qAddressGroupUser.groupUser.as("customerId"),
+							qUser.userName.as("nickName"),
+							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+					))
+							.from(qAddressGroupUser)
+							.leftJoin(qUser)
+							.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+							.leftJoin(uass)
+							.on(qUser.userID.eq(uass.userid))
+							.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+
+					JoinUsers user = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
+							qAddressGroup.createUser.as("customerId"),
+							qUser.userName.as("nickName"),
+							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+					))
+							.from(qAddressGroup)
+							.leftJoin(qUser)
+							.on(qAddressGroup.createUser.eq(qUser.userID))
+							.leftJoin(uass)
+							.on(qUser.userID.eq(uass.userid))
+							.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+					listJoinUsers.add(user);
+					String result1 = sendGroupService.createGroup(group.getCreateUser(), group.getGroupName(), group.getGroupId(), picHttpIp + saveUrl, listJoinUsers);
+					if ("" != result1 && !result1.equals("error")) {
+						try {
+							JSONObject obj1 = JSONObject.fromObject(result1);
+							String data = obj1.getString("data");
+							JSONObject objID = JSONObject.fromObject(data);
+							String groupChatID = objID.getString("id");
+							jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID, groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
 		}
 		result.setRespCode("1");
-		result.setRespDesc("创建成功");
+		uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+		result.setRespDesc("创建成功，其中" + uCount + "人已在分组中");
 	}
 
 
@@ -408,7 +474,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	 * @param roles
      * @return
      */
-    private int getUserCountByDeptID(String deptID ,String roles){
+    private int getUserCountByDeptID(String deptID ,String roles,String groupID){
         int i = 0 ;
         StringBuffer sql = new StringBuffer();
         sql.append("select count(distinct u.user_id) cou" +
@@ -431,6 +497,10 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		if (!"".equals(roles) && null != roles){
 			sql.append(" and u.pos_id in ( " + roles + " )");
 		}
+		if (!"".equals(groupID) && null != groupID){
+			sql.append(" and u.user_id not in ( select gu.group_user from appuser.address_group_user gu where gu.group_id = "+ groupID +" )");
+		}
+
 		List list = entityManager.createNativeQuery(sql.toString()).getResultList();
 	    return Integer.parseInt(list.get(0).toString());
     }
@@ -441,7 +511,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 	 * @param roles
 	 * @return
 	 */
-	private List getUserByDeptID(String deptID ,String roles){
+	private List getUserByDeptID(String deptID ,String roles,String groupID){
 		int i = 0 ;
 		StringBuffer sql = new StringBuffer();
 		sql.append("select distinct u.user_id " +
@@ -463,6 +533,9 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		}
 		if (!"".equals(roles) && null != roles){
 			sql.append(" and u.pos_id in ( " + roles + " )");
+		}
+		if (!"".equals(groupID) && null != groupID){
+			sql.append(" and u.user_id not in ( select gu.group_user from appuser.address_group_user gu where gu.group_id = "+ groupID +" )");
 		}
 		return entityManager.createNativeQuery(sql.toString()).getResultList();
 	}

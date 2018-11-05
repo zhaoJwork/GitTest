@@ -208,7 +208,7 @@ public class GroupServiceImpl implements GroupServiceI {
 					String saveImp = editGroupImg(groupID);
 					if(null != addressGroup && !"".equals(addressGroup.getGroupChatID())) {
 						List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
-								qAddressGroupUser.groupId.as("groupId"),
+								qAddressGroup.groupChatID.as("groupId"),
 								qAddressGroupUser.groupUser.as("customerId"),
 								qUser.userName.as("nickName"),
 								new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
@@ -218,6 +218,8 @@ public class GroupServiceImpl implements GroupServiceI {
 								.on(qAddressGroupUser.groupUser.eq(qUser.userID))
 								.leftJoin(uass)
 								.on(qUser.userID.eq(uass.userid))
+								.leftJoin(qAddressGroup)
+								.on(qAddressGroup.groupId.eq(qAddressGroupUser.groupId))
 								.where(qAddressGroupUser.groupId.eq(groupID).and(qAddressGroupUser.groupUser.in(list))).fetch();
 						sendGroupService.inviteFriend(loginID, listJoinUsers);
 						if("" != saveImp) {
