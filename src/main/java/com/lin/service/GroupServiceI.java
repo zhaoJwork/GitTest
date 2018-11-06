@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.lin.domain.Group;
 import com.lin.domain.GroupDetails;
+import com.lin.util.Result;
 
 /**
  * TODO
@@ -14,7 +15,7 @@ public interface GroupServiceI {
 
 	List<Group> selectAllGroupByLoginID(String loginID,String groupname);
 	
-	void editGroup(String loginID,String groupID,String groupName,String groupDesc,String userIds,String type) throws Exception;
+	void editGroup(String loginID, String groupID, String groupName, String groupDesc, String userIds, String type , Result result) throws Exception;
 	
 	GroupDetails groupDetails(String loginID,String groupID);
 

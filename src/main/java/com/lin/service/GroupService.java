@@ -290,6 +290,8 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 
 
 				}
+				uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+				result.setRespDesc("添加成功，其中" + uCount + "人已在分组中");
 			}else {
 				if (!"".equals(deptList) && null != deptList) {
 					////保存主表数据
@@ -361,6 +363,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 							.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 					listJoinUsers.add(user);
 					String result1 = sendGroupService.createGroup(group.getCreateUser(), group.getGroupName(), group.getGroupId(), picHttpIp + saveUrl, listJoinUsers);
+					logger.info("ret====" + result1);
 					if ("" != result1 && !result1.equals("error")) {
 						try {
 							JSONObject obj1 = JSONObject.fromObject(result1);
@@ -368,16 +371,22 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 							JSONObject objID = JSONObject.fromObject(data);
 							String groupChatID = objID.getString("id");
 							jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID, groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+							Map map = new HashMap();
+							map.put("groupId",groupChatID);
+							map.put("groupName",objID.getString("groupName"));
+							map.put("avatar",objID.getString("avatar"));
+							result.setRespMsg(map);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
 				}
 			}
+			uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+			result.setRespDesc("创建成功，其中" + uCount + "人已在分组中");
 		}
 		result.setRespCode("1");
-		uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
-		result.setRespDesc("创建成功，其中" + uCount + "人已在分组中");
+
 	}
 
 
@@ -491,8 +500,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 			sql.append("   and u.dep_id in" +
 					"       (select t.organ_id" +
 					"          from appuser.address_organization t" +
-					"         where t.flag = '1'" +
-					"           and not exists (select 1" +
+					"         where not exists (select 1" +
 					"                  from appuser.address_blackorglist tt" +
 					"                 where t.organ_id = tt.org_id)" +
 					"         start with t.organ_id = '" + deptID + "'" +
@@ -528,8 +536,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 			sql.append("   and u.dep_id in" +
 					"       (select t.organ_id" +
 					"          from appuser.address_organization t" +
-					"         where t.flag = '1'" +
-					"           and not exists (select 1" +
+					"         where not exists (select 1" +
 					"                  from appuser.address_blackorglist tt" +
 					"                 where t.organ_id = tt.org_id)" +
 					"         start with t.organ_id = '" + deptID + "'" +

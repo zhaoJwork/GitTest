@@ -394,10 +394,7 @@ public class CommunicationController {
 			}
 		}
 		try {
-			groupService.editGroup(loginID, groupID, groupName, groupDesc, userIds, type);
-			result.setRespCode("1");
-			result.setRespDesc("正常返回数据");
-			result.setRespMsg("");
+			groupService.editGroup(loginID, groupID, groupName, groupDesc, userIds, type, result);
 			logServiceDsl.saveAddressInfLog(log,result);
 		} catch (Exception e) {
 			logServiceDsl.saveError(e,log);

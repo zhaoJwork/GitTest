@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 
 import com.lin.domain.*;
 import com.lin.service.SendGroupService;
+import com.lin.util.Result;
 import com.lin.vo.JoinUsers;
 import net.sf.json.JSONObject;
 import org.slf4j.Logger;
@@ -95,7 +96,12 @@ public class GroupServiceImpl implements GroupServiceI {
 	 */
 	@Override
 	public void editGroup(String loginID, String groupID, String groupName, String groupDesc, String userIds,
-			String type) throws Exception {
+						  String type, Result ret) throws Exception {
+
+		ret.setRespCode("1");
+		ret.setRespDesc("正常返回数据");
+		ret.setRespMsg("");
+
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		QUser qUser = QUser.user;
@@ -167,7 +173,14 @@ public class GroupServiceImpl implements GroupServiceI {
 				JSONObject objID = JSONObject.fromObject(data);
 				String groupChatID = objID.getString("id");
 				queryFactory.update(qAddressGroup).set(qAddressGroup.groupChatID,groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+				Map map = new HashMap();
+				map.put("groupId",groupChatID);
+				map.put("groupName",objID.getString("groupName"));
+				map.put("avatar",objID.getString("avatar"));
+				ret.setRespMsg(map);
 			}
+			long uCount = queryFactory.select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+			ret.setRespDesc("创建成功，其中" + uCount + "人已在分组中");
 		} else {
 			AddressGroup addressGroup = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 			if (null != type && !"".equals(type)) {

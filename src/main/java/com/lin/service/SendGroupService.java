@@ -132,6 +132,7 @@ public class SendGroupService {
      *
      */
     public Boolean inviteFriend(String sender ,List<JoinUsers> members){
+        logger.info("members==" + members.size());
         Boolean bool = false;
         JSONObject obj = new JSONObject();
         obj.put("sender",sender);
@@ -145,7 +146,7 @@ public class SendGroupService {
             map.put("groupId",joinuser.getGroupId());
             listMap.add(map);
         }
-        obj.put("joinUsers",listMap);
+        obj.put("members",listMap);
         logger.info("inviteFriend::"+obj.toString());
         try {
             String result = NetUtil.send(enterpriseInviteFriend,
