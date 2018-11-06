@@ -112,7 +112,8 @@ public class OperationPlatformController {
 	
 	
 	@ApiOperation(value="添加黑名单")
-	@PostMapping("/addblack")
+	@ApiImplicitParam(dataType = "BlackUserList")
+	@GetMapping("/addblack")
 	public Result addblack(HttpServletRequest req,BlackUserList blackUserList) {
 //		BlackUserList blackUserList = new BlackUserList();
 //		blackUserList.setCreateBy(createBy);
@@ -144,7 +145,8 @@ public class OperationPlatformController {
 	
 	
 	@ApiOperation(value="取消黑名单")
-	@PostMapping("/cancelblack")
+	@ApiImplicitParam(dataType = "BlackUserList")
+	@GetMapping("/cancelblack")
 	public Result cancelblack(HttpServletRequest req, BlackUserList blackUserList) {
 		logger.info("取消黑名单::==" + req.getRequestURL() + "?staffID=" + blackUserList.getCreateBy()+ "&userID=" +blackUserList.getUserID());
 		Result result = new Result();
