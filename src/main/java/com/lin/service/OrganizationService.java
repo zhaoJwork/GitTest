@@ -71,9 +71,9 @@ public class OrganizationService extends AbstractService<OrganizationDsl,String>
 							organDsl.userCount,
 							organDsl.zimuname,
 							organDsl.markID.as("markID"),
-							new CaseBuilder().when(organDsl.markID.eq("1")).then("营销")
-									.when(organDsl.markID.eq("2")).then("支撑")
-									.when(organDsl.markID.eq("3")).then("综合")
+							new CaseBuilder().when(organDsl.markID.eq("1")).then("营销拓展")
+									.when(organDsl.markID.eq("2")).then("能力支撑")
+									.when(organDsl.markID.eq("3")).then("战略统筹")
 									.otherwise("").as("markName"),
 							new CaseBuilder().when(organDsl.markID.eq("")).then(0).otherwise(0).as("markOnline"),
 							new CaseBuilder().when(organDsl.markID.eq("")).then(0).otherwise(0).as("markUser"),
