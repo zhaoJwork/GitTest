@@ -1,12 +1,17 @@
 package com.lin.service;
 
+import com.google.common.base.Strings;
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.AddressGroupRepository;
 import com.lin.repository.AddressGroupUserRepository;
 import com.lin.util.Result;
 import com.lin.vo.*;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +33,8 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 		super(addressGroupRepository);
 	}
 
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp;
 	@Resource
 	private AddressGroupRepository addressGroupRepository;
 	@Resource
@@ -215,6 +222,41 @@ public class GroupChatService extends AbstractService<AddressGroup,String>{
 				.set(qAddressGroup.updateDate,new Date())
 				.where(qAddressGroup.groupChatID.eq(inModify.getId()))
 				.execute();
+		result.setRespCode("1");
+		result.setRespDesc("正常返回数据");
+	}
+	/**
+	 * 查询群组
+	 * @return
+	 */
+	public void queryGroup(Result result, InModify inModify){
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		List<OutGroupChat> outGroupChatList = jpaQueryFactory().select(Projections.bean(OutGroupChat.class,
+				qAddressGroup.groupId.as("groupId"),
+				qAddressGroup.groupChatID.as("groupChatID"),
+				qAddressGroup.groupName.as("groupName"),
+				qAddressGroup.groupImg.as("avatar")
+			))
+				.from(qAddressGroup)
+				.where(qAddressGroup.createUser.eq(inModify.getCustomerId())).fetch();
+		List<Map> listMap = new ArrayList<Map>();
+		if(null != outGroupChatList && 0 < outGroupChatList.size()){
+			for(OutGroupChat outGroupChat : outGroupChatList){
+				Map map = new HashMap();
+					if(outGroupChat.getAvatar().indexOf("http://") > -1){
+						map.put("avatar",outGroupChat.getAvatar());
+					}else{
+						map.put("avatar",picHttpIp + outGroupChat.getAvatar());
+					}
+				map.put("groupId",outGroupChat.getGroupId());
+				map.put("groupName",outGroupChat.getGroupName());
+				map.put("groupChatID",outGroupChat.getGroupChatID());
+				listMap.add(map);
+			}
+		}
+		Map retMap = new HashMap();
+		retMap.put("groupList",listMap);
+		result.setRespMsg(retMap);
 		result.setRespCode("1");
 		result.setRespDesc("正常返回数据");
 	}

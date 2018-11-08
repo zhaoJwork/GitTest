@@ -298,4 +298,35 @@ public class GroupChatController {
         }
         return result;
     }
+
+    /**
+     * 查询群组
+     * @return
+     */
+    @PostMapping("queryGroup")
+    @ApiOperation(value="查询群组")
+    public Result queryGroup(HttpServletRequest req,@RequestBody InModify inModify) {
+        AddressInfLog log =  logServiceDsl.getInfLog(req,"极光查询群组",
+                inModify.toString() +"&loginID="+inModify.getCustomerId());
+        Result result = new Result();
+        result.setRespMsg("");
+        if (null == inModify.getCustomerId() || "".equals(inModify.getCustomerId())) {
+            result.setRespCode("2");
+            result.setRespDesc("操作人 不能为空");
+            logServiceDsl.saveAddressInfLog(log,result);
+            return result;
+        }
+        try {
+            groupChatService.queryGroup(result,inModify);
+            logServiceDsl.saveAddressInfLog(log,result);
+        } catch (Exception e) {
+            ////e.printStackTrace();
+            log.setExpError(e.toString());
+            result.setRespCode("2");
+            result.setRespDesc("失败");
+            result.setRespMsg("");
+            logServiceDsl.saveAddressInfLog(log,result);
+        }
+        return result;
+    }
 }
