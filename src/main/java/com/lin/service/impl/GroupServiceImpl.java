@@ -101,7 +101,8 @@ public class GroupServiceImpl implements GroupServiceI {
 		ret.setRespCode("1");
 		ret.setRespDesc("正常返回数据");
 		ret.setRespMsg("");
-
+		//添加人员时重复人数返回值
+		int retCount = 0 ;
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		QUser qUser = QUser.user;
@@ -179,8 +180,8 @@ public class GroupServiceImpl implements GroupServiceI {
 				map.put("avatar",objID.getString("avatar"));
 				ret.setRespMsg(map);
 			}
-			long uCount = queryFactory.select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
-			ret.setRespDesc("创建成功，其中" + uCount + "人已在分组中");
+			////long uCount = queryFactory.select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+			ret.setRespDesc("创建成功");
 		} else {
 			AddressGroup addressGroup = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 			if (null != type && !"".equals(type)) {
@@ -210,6 +211,8 @@ public class GroupServiceImpl implements GroupServiceI {
 									gu.setGroupUser(uid);
 									listGU.add(gu);
 									list.add(uid);
+								}else {
+									retCount += 1 ;
 								}
 							}
 						}
@@ -240,6 +243,7 @@ public class GroupServiceImpl implements GroupServiceI {
 							queryFactory.update(qAddressGroup).set(qAddressGroup.groupImg, saveImp).where(qAddressGroup.groupId.eq(groupID)).execute();
 						}
 					}
+					ret.setRespDesc("添加成功，其中" + retCount + "人已在分组中");
 				} else if (type.equals("2")) {// 2 删除人员
 					List<JoinUsers> list = new ArrayList<JoinUsers>();
 					if (null != userIds && !"".equals(userIds)) {

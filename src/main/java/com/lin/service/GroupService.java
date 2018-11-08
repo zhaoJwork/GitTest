@@ -233,6 +233,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		////查询类型 1角色 2部门
 		if("1".equals(queryType) || "2".equals(queryType)) {
 			if(null != groupID && !"".equals(groupID)){
+				int retCount = 0;
 				if (!"".equals(deptList) && null != deptList) {
 					AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 					////保存子表数据
@@ -243,6 +244,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
 						String deptID = jsonObj.getString("deptID");
 						List list = getUserByDeptID(deptID, inroles,groupID);
+						retCount += getRpUserCountByDeptID(deptID, inroles,groupID);
 						for (int m = 0; m < list.size(); m++) {
 							AddressGroupUser addressGroupUser = new AddressGroupUser();
 							addressGroupUser.setRowId(getSeq() + "");
@@ -290,8 +292,9 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 
 
 				}
-				uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
-				result.setRespDesc("添加成功，其中" + uCount + "人已在分组中");
+				////uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+
+				result.setRespDesc("添加成功，其中" + retCount + "人已在分组中");
 			}else {
 				if (!"".equals(deptList) && null != deptList) {
 					////保存主表数据
@@ -383,7 +386,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 				}
 			}
 			uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
-			result.setRespDesc("创建成功，其中" + uCount + "人已在分组中");
+			result.setRespDesc("创建成功");
 		}
 		result.setRespCode("1");
 
@@ -549,6 +552,42 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 			sql.append(" and u.user_id not in ( select gu.group_user from appuser.address_group_user gu where gu.group_id = "+ groupID +" )");
 		}
 		return entityManager.createNativeQuery(sql.toString()).getResultList();
+	}
+
+	/**
+	 * 根据部门ID获取重复人员数
+	 * @param deptID
+	 * @param roles
+	 * @return
+	 */
+	private int getRpUserCountByDeptID(String deptID ,String roles,String groupID){
+		int i = 0 ;
+		StringBuffer sql = new StringBuffer();
+		sql.append("select count(distinct u.user_id) cou" +
+				"  from appuser.address_user u" +
+				" where not exists" +
+				" (select 1" +
+				"          from appuser.address_blacklist tt" +
+				"         where tt.user_id = u.user_id)" );
+		if (!"".equals(deptID) && null != deptID) {
+			sql.append("   and u.dep_id in" +
+					"       (select t.organ_id" +
+					"          from appuser.address_organization t" +
+					"         where not exists (select 1" +
+					"                  from appuser.address_blackorglist tt" +
+					"                 where t.organ_id = tt.org_id)" +
+					"         start with t.organ_id = '" + deptID + "'" +
+					"        connect by prior t.organ_id = t.pid)");
+		}
+		if (!"".equals(roles) && null != roles){
+			sql.append(" and u.pos_id in ( " + roles + " )");
+		}
+		if (!"".equals(groupID) && null != groupID){
+			sql.append(" and u.user_id in ( select gu.group_user from appuser.address_group_user gu where gu.group_id = "+ groupID +" )");
+		}
+
+		List list = entityManager.createNativeQuery(sql.toString()).getResultList();
+		return Integer.parseInt(list.get(0).toString());
 	}
 
 	private Integer getSeq(){
