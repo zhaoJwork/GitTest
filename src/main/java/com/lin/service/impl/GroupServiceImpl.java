@@ -140,48 +140,51 @@ public class GroupServiceImpl implements GroupServiceI {
 					queryFactory.update(qAddressGroup).set(qAddressGroup.groupImg, saveImp).where(qAddressGroup.groupId.eq(groupID)).execute();
 				}
 			}
+			long uCount = queryFactory.select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+			if(uCount <= 500) {
+				//一键建群
 
-			//一键建群
-
-			AddressGroup group = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
-			List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
-					qAddressGroupUser.groupUser.as("customerId"),
-					qUser.userName.as("nickName"),
-					new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
-			))
-					.from(qAddressGroupUser)
-					.leftJoin(qUser)
-					.on(qAddressGroupUser.groupUser.eq(qUser.userID))
-					.leftJoin(uass)
-					.on(qUser.userID.eq(uass.userid))
-					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-			JoinUsers user  =  queryFactory.select(Projections.bean(JoinUsers.class,
-					qAddressGroup.createUser.as("customerId"),
-					qUser.userName.as("nickName"),
-					new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
-			))
-					.from(qAddressGroup)
-					.leftJoin(qUser)
-					.on(qAddressGroup.createUser.eq(qUser.userID))
-					.leftJoin(uass)
-					.on(qUser.userID.eq(uass.userid))
-					.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
-			listJoinUsers.add(user);
-			String result = sendGroupService.createGroup(group.getCreateUser(),group.getGroupName(),group.getGroupId(),picHttpIp+saveImp,listJoinUsers);
-			if("" != result && !result.equals("error")){
-				JSONObject obj = JSONObject.fromObject(result);
-				String data = obj.getString("data");
-				JSONObject objID = JSONObject.fromObject(data);
-				String groupChatID = objID.getString("id");
-				queryFactory.update(qAddressGroup).set(qAddressGroup.groupChatID,groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
-				Map map = new HashMap();
-				map.put("groupId",groupChatID);
-				map.put("groupName",objID.getString("groupName"));
-				map.put("avatar",objID.getString("avatar"));
-				ret.setRespMsg(map);
+				AddressGroup group = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+				List<JoinUsers> listJoinUsers = queryFactory.select(Projections.bean(JoinUsers.class,
+						qAddressGroupUser.groupUser.as("customerId"),
+						qUser.userName.as("nickName"),
+						new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+				))
+						.from(qAddressGroupUser)
+						.leftJoin(qUser)
+						.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+						.leftJoin(uass)
+						.on(qUser.userID.eq(uass.userid))
+						.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+				JoinUsers user = queryFactory.select(Projections.bean(JoinUsers.class,
+						qAddressGroup.createUser.as("customerId"),
+						qUser.userName.as("nickName"),
+						new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+				))
+						.from(qAddressGroup)
+						.leftJoin(qUser)
+						.on(qAddressGroup.createUser.eq(qUser.userID))
+						.leftJoin(uass)
+						.on(qUser.userID.eq(uass.userid))
+						.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+				listJoinUsers.add(user);
+				String result = sendGroupService.createGroup(group.getCreateUser(), group.getGroupName(), group.getGroupId(), picHttpIp + saveImp, listJoinUsers);
+				if ("" != result && !result.equals("error")) {
+					JSONObject obj = JSONObject.fromObject(result);
+					String data = obj.getString("data");
+					JSONObject objID = JSONObject.fromObject(data);
+					String groupChatID = objID.getString("id");
+					queryFactory.update(qAddressGroup).set(qAddressGroup.groupChatID, groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+					Map map = new HashMap();
+					map.put("groupId", groupChatID);
+					map.put("groupName", objID.getString("groupName"));
+					map.put("avatar", objID.getString("avatar"));
+					ret.setRespMsg(map);
+				}
+				ret.setRespDesc("创建成功");
+			}else{
+				ret.setRespDesc("创建成功，群组创建失败");
 			}
-			////long uCount = queryFactory.select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
-			ret.setRespDesc("创建成功");
 		} else {
 			AddressGroup addressGroup = queryFactory.select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 			if (null != type && !"".equals(type)) {

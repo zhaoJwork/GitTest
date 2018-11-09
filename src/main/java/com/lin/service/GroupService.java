@@ -365,28 +365,32 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 							.on(qUser.userID.eq(uass.userid))
 							.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 					listJoinUsers.add(user);
-					String result1 = sendGroupService.createGroup(group.getCreateUser(), group.getGroupName(), group.getGroupId(), picHttpIp + saveUrl, listJoinUsers);
-					logger.info("ret====" + result1);
-					if ("" != result1 && !result1.equals("error")) {
-						try {
-							JSONObject obj1 = JSONObject.fromObject(result1);
-							String data = obj1.getString("data");
-							JSONObject objID = JSONObject.fromObject(data);
-							String groupChatID = objID.getString("id");
-							jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID, groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
-							Map map = new HashMap();
-							map.put("groupId",groupChatID);
-							map.put("groupName",objID.getString("groupName"));
-							map.put("avatar",objID.getString("avatar"));
-							result.setRespMsg(map);
-						} catch (Exception e) {
-							e.printStackTrace();
+					uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+					if(uCount <= 500) {
+						String result1 = sendGroupService.createGroup(group.getCreateUser(), group.getGroupName(), group.getGroupId(), picHttpIp + saveUrl, listJoinUsers);
+						logger.info("ret====" + result1);
+						if ("" != result1 && !result1.equals("error")) {
+							try {
+								JSONObject obj1 = JSONObject.fromObject(result1);
+								String data = obj1.getString("data");
+								JSONObject objID = JSONObject.fromObject(data);
+								String groupChatID = objID.getString("id");
+								jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID, groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+								Map map = new HashMap();
+								map.put("groupId", groupChatID);
+								map.put("groupName", objID.getString("groupName"));
+								map.put("avatar", objID.getString("avatar"));
+								result.setRespMsg(map);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
+						result.setRespDesc("创建成功");
+					}else {
+						result.setRespDesc("创建成功，群组创建失败");
 					}
 				}
 			}
-			uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
-			result.setRespDesc("创建成功");
 		}
 		result.setRespCode("1");
 
