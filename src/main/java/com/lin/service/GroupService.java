@@ -358,6 +358,8 @@ public class GroupService extends AbstractService<AddressGroup,String>{
  * @date 2018年11月13日
  *
  */
+
+@Transactional(rollbackFor = Exception.class)
 class GroupList implements Runnable{
 
 	// 参数赋值
@@ -378,12 +380,6 @@ class GroupList implements Runnable{
 	 */
 	@Override
 	public void run() {
-		// 当前线程休眠5秒
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		QUser qUser = QUser.user;
@@ -409,7 +405,9 @@ class GroupList implements Runnable{
 		try {
 			saveUrl = editGroupImg(groupID);
 			if ("" != saveUrl) {
-				jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg, saveUrl).where(qAddressGroup.groupId.eq(groupID)).execute();
+				AddressGroup group = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+				group.setGroupImg(saveUrl);
+				addressGroupRepository.save(group);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -452,12 +450,12 @@ class GroupList implements Runnable{
 					String data = obj1.getString("data");
 					JSONObject objID = JSONObject.fromObject(data);
 					String groupChatID = objID.getString("id");
-					jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID, groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+					group.setGroupChatID(groupChatID);
+					addressGroupRepository.save(group);
 					Map<String, String> map = new HashMap<String, String>();
 					map.put("groupId", groupChatID);
 					map.put("groupName", objID.getString("groupName"));
 					map.put("avatar", objID.getString("avatar"));
-//					result.setRespMsg(map);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
