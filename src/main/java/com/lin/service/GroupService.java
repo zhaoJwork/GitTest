@@ -1,15 +1,18 @@
 package com.lin.service;
 
-import com.ideal.wheel.common.AbstractService;
-import com.lin.domain.*;
-import com.lin.repository.*;
-import com.lin.util.ImageUtil;
-import com.lin.vo.JoinUsers;
-import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import net.sf.json.JSONArray;
-import com.lin.util.Result;
-import net.sf.json.JSONObject;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +20,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.*;
+import com.ideal.wheel.common.AbstractService;
+import com.lin.domain.AddressGroup;
+import com.lin.domain.AddressGroupUser;
+import com.lin.domain.QAddressGroup;
+import com.lin.domain.QAddressGroupUser;
+import com.lin.domain.QPositionDsl;
+import com.lin.domain.QUser;
+import com.lin.domain.QUserNewAssist;
+import com.lin.domain.User;
+import com.lin.repository.AddressGroupRepository;
+import com.lin.repository.AddressGroupUserRepository;
+import com.lin.util.ImageUtil;
+import com.lin.util.Result;
+import com.lin.vo.JoinUsers;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 
 /**
@@ -234,6 +249,7 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 		if("1".equals(queryType) || "2".equals(queryType)) {
 			if(null != groupID && !"".equals(groupID)){
 				int retCount = 0;
+				
 				if (!"".equals(deptList) && null != deptList) {
 					AddressGroup addressGroup = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
 					////保存子表数据
@@ -309,93 +325,149 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 					addressGroup.setUpdateDate(new Date());
 					addressGroup.setGroupImg("/1/mphotos/10000001.png");
 					addressGroupRepository.save(addressGroup);
+					
 					////保存子表数据
 					JSONObject obj = JSONObject.fromObject(deptList);
 					JSONArray objlist = obj.getJSONArray("deptList");
+					int count = 0;
 					for (int i = 0; i < objlist.size(); i++) {
 						JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
 						String deptID = jsonObj.getString("deptID");
-						List list = getUserByDeptID(deptID, inroles,"");
-						List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
-						for (int m = 0; m < list.size(); m++) {
-							AddressGroupUser addressGroupUser = new AddressGroupUser();
-							addressGroupUser.setRowId(getSeq() + "");
-							addressGroupUser.setGroupId(groupID);
-							addressGroupUser.setGroupUser(list.get(m).toString());
-							addressGroupUser.setCreateDate(new Date());
-							listgu.add(addressGroupUser);
-						}
-						addressGroupUserRepository.saveAll(listgu);
+						count = count + getUserCountByDeptID(deptID, inroles,groupID);
+
 					}
-					String saveUrl = "";
-					////更新头像
-					try {
-						saveUrl = editGroupImg(groupID);
-						if ("" != saveUrl) {
-							jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg, saveUrl).where(qAddressGroup.groupId.eq(groupID)).execute();
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					////推送极光推送
-
-					AddressGroup group = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
-					List<JoinUsers> listJoinUsers = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
-							qAddressGroupUser.groupUser.as("customerId"),
-							qUser.userName.as("nickName"),
-							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
-					))
-							.from(qAddressGroupUser)
-							.leftJoin(qUser)
-							.on(qAddressGroupUser.groupUser.eq(qUser.userID))
-							.leftJoin(uass)
-							.on(qUser.userID.eq(uass.userid))
-							.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
-
-					JoinUsers user = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
-							qAddressGroup.createUser.as("customerId"),
-							qUser.userName.as("nickName"),
-							new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
-					))
-							.from(qAddressGroup)
-							.leftJoin(qUser)
-							.on(qAddressGroup.createUser.eq(qUser.userID))
-							.leftJoin(uass)
-							.on(qUser.userID.eq(uass.userid))
-							.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
-					listJoinUsers.add(user);
-					uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
-					if(uCount <= 500) {
-						String result1 = sendGroupService.createGroup(group.getCreateUser(), group.getGroupName(), group.getGroupId(), picHttpIp + saveUrl, listJoinUsers);
-						logger.info("ret====" + result1);
-						if ("" != result1 && !result1.equals("error")) {
-							try {
-								JSONObject obj1 = JSONObject.fromObject(result1);
-								String data = obj1.getString("data");
-								JSONObject objID = JSONObject.fromObject(data);
-								String groupChatID = objID.getString("id");
-								jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID, groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
-								Map map = new HashMap();
-								map.put("groupId", groupChatID);
-								map.put("groupName", objID.getString("groupName"));
-								map.put("avatar", objID.getString("avatar"));
-								result.setRespMsg(map);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						result.setRespDesc("创建成功");
-					}else {
+					if(count > 499) {
 						result.setRespDesc("创建成功，群组创建失败");
+					}else {
+						result.setRespDesc("创建成功");
 					}
+					
+					// 添加线程处理 
+					new Thread(new GroupList(objlist, inroles, groupID, uCount)).start();
+					
 				}
 			}
 		}
 		result.setRespCode("1");
 
 	}
+	
+/**
+ * 添加内部类  进行线程处理  
+ * @author liudongdong
+ * @date 2018年11月13日
+ *
+ */
+class GroupList implements Runnable{
 
+	// 参数赋值
+	private JSONArray objlist;
+	private String inroles;
+	private String groupID;
+	private long uCount;
+	
+	public GroupList(JSONArray objlist, String inroles, String groupID, long uCount) {
+		this.objlist = objlist;
+		this.inroles = inroles;
+		this.groupID = groupID;
+		this.uCount = uCount;
+	}
+
+	/**
+	 * 线程处理
+	 */
+	@Override
+	public void run() {
+		// 当前线程休眠5秒
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+		QUser qUser = QUser.user;
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
+		
+		for (int i = 0; i < objlist.size(); i++) {
+			JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
+			String deptID = jsonObj.getString("deptID");
+			List list = getUserByDeptID(deptID, inroles,"");
+			List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
+			for (int m = 0; m < list.size(); m++) {
+				AddressGroupUser addressGroupUser = new AddressGroupUser();
+				addressGroupUser.setRowId(getSeq() + "");
+				addressGroupUser.setGroupId(groupID);
+				addressGroupUser.setGroupUser(list.get(m).toString());
+				addressGroupUser.setCreateDate(new Date());
+				listgu.add(addressGroupUser);
+			}
+			addressGroupUserRepository.saveAll(listgu);
+		}
+		String saveUrl = "";
+		////更新头像
+		try {
+			saveUrl = editGroupImg(groupID);
+			if ("" != saveUrl) {
+				jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupImg, saveUrl).where(qAddressGroup.groupId.eq(groupID)).execute();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		////推送极光推送
+
+		AddressGroup group = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+		List<JoinUsers> listJoinUsers = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
+				qAddressGroupUser.groupUser.as("customerId"),
+				qUser.userName.as("nickName"),
+				new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+		))
+				.from(qAddressGroupUser)
+				.leftJoin(qUser)
+				.on(qAddressGroupUser.groupUser.eq(qUser.userID))
+				.leftJoin(uass)
+				.on(qUser.userID.eq(uass.userid))
+				.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+
+		JoinUsers user = jpaQueryFactory().select(Projections.bean(JoinUsers.class,
+				qAddressGroup.createUser.as("customerId"),
+				qUser.userName.as("nickName"),
+				new CaseBuilder().when(uass.portrait_url.eq("").or(uass.portrait_url.isNull())).then(qUser.userPic).otherwise(uass.portrait_url).as("avatar")
+		))
+				.from(qAddressGroup)
+				.leftJoin(qUser)
+				.on(qAddressGroup.createUser.eq(qUser.userID))
+				.leftJoin(uass)
+				.on(qUser.userID.eq(uass.userid))
+				.where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+		listJoinUsers.add(user);
+		uCount = jpaQueryFactory().select(qAddressGroupUser).from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(groupID)).fetchCount();
+		if(uCount <= 500) {
+			String result1 = sendGroupService.createGroup(group.getCreateUser(), group.getGroupName(), group.getGroupId(), picHttpIp + saveUrl, listJoinUsers);
+			logger.info("ret====" + result1);
+			if ("" != result1 && !result1.equals("error")) {
+				try {
+					JSONObject obj1 = JSONObject.fromObject(result1);
+					String data = obj1.getString("data");
+					JSONObject objID = JSONObject.fromObject(data);
+					String groupChatID = objID.getString("id");
+					jpaQueryFactory().update(qAddressGroup).set(qAddressGroup.groupChatID, groupChatID).where(qAddressGroup.groupId.eq(groupID)).execute();
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("groupId", groupChatID);
+					map.put("groupName", objID.getString("groupName"));
+					map.put("avatar", objID.getString("avatar"));
+//					result.setRespMsg(map);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		
+		}
+	}
+
+	
+}
 
 
 
