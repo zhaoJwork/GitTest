@@ -4,21 +4,30 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.0.0.RELEASE</version>
-  </parent>
+    <parent>
+        <groupId>com.ideal</groupId>
+        <artifactId>project-wheel</artifactId>
+        <version>1.2</version>
+    </parent>
+    <repositories>
+        <repository>
+            <id>nexus</id>
+            <name>Spring Milestones</name>
+            <url>http://10.128.90.179:8081/repository/maven-public/</url>
+        </repository>
+    </repositories>
 
-  <groupId>com.ideal</groupId>
+    <groupId>com.ideal</groupId>
   <artifactId>app-addresslist</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+    </properties>
+
 
   <dependencies>
     <dependency>
@@ -50,11 +59,11 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
-    <dependency>
+   <!-- <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>druid-spring-boot-starter</artifactId>
       <version>1.1.9</version>
-    </dependency>
+    </dependency>-->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -69,7 +78,7 @@
     <dependency>
       <groupId>com.ideal</groupId>
       <artifactId>wheel-common</artifactId>
-      <version>1.0</version>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>com.lmax</groupId>
@@ -96,7 +105,12 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
-    
+    <dependency>
+      <groupId>net.sf.json-lib</groupId>
+      <artifactId>json-lib</artifactId>
+      <version>2.3</version>
+      <classifier>jdk15</classifier>
+    </dependency>
     
     <!-- 调用迪科接口所需jar包 -->
 	<dependency>

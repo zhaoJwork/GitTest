@@ -18,7 +18,7 @@ import java.util.List;
 public class OrganizationServiceTest {
 
   @Autowired
-  private OrganizationServiceImpl organizationServiceDsl;
+  private OrganizationService organizationServiceDsl;
 
   /**
    * 测试按上一级查询组织部门
@@ -26,16 +26,9 @@ public class OrganizationServiceTest {
   @Test
   public void testLoad(){
     OrganizationDsl dsl = new OrganizationDsl();
-    dsl.setpID("0");
+    dsl.setpID("1947350");
     List<OrganizationDsl> list = organizationServiceDsl.getOrganizationByDsl(dsl);
     Assert.assertNotNull(list);
   }
 
-  /**
-   * 测试按上一级查询组织部门
-   */
-  @Test
-  public void delRedis(){
-     organizationServiceDsl.rmJedisOrg();
-  }
 }

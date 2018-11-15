@@ -100,7 +100,27 @@ public class AddressInfLogServiceImpl extends AbstractService<AddressInfLog,Stri
 		if(null == req ){
 			log.setReqJson("test");
 		}else{
-			log.setReqJson(req.getRequestURL().toString() + "?" + req.getQueryString());
+			log.setReqJson(req.getRequestURL().toString() + "?" + req.getQueryString() );
+		}
+		return log;
+	}
+
+	/**
+	 * 生成日志实体
+	 * @param req
+	 * @param infName
+	 * @param reqJson
+	 * @return
+	 */
+	public AddressInfLog getInfLog(HttpServletRequest req, String infName,String reqJson) {
+		AddressInfLog log = new AddressInfLog();
+		log.setAddName(infName);
+		log.setCreateDate(Calendar.getInstance().getTime());
+		log.setRowID(seqLong());
+		if(null == req ){
+			log.setReqJson("test");
+		}else{
+			log.setReqJson(req.getRequestURL().toString() + "?" + reqJson);
 		}
 		return log;
 	}

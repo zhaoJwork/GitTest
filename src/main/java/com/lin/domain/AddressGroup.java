@@ -28,8 +28,6 @@ public class AddressGroup implements Serializable{
 	@ApiModelProperty(value = "主键")
 	@Id
 	@Column(name = "ROW_ID")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator="SEQ_ADDRESS_GROUP")
-	@SequenceGenerator(name="SEQ_ADDRESS_GROUP", sequenceName="seq_app_addresslist")
 	private String rowId;
 	
 	@ApiModelProperty(value = "组id")
@@ -59,6 +57,19 @@ public class AddressGroup implements Serializable{
 	@ApiModelProperty(value = "组图片")
 	@Column(name = "GROUP_IMG")
 	private String groupImg;
+
+	@ApiModelProperty(value = "三部群组ID")
+	@Column(name = "GROUPCHAT_ID")
+	private String groupChatID;
+
+
+	public String getGroupChatID() {
+		return groupChatID;
+	}
+
+	public void setGroupChatID(String groupChatID) {
+		this.groupChatID = groupChatID;
+	}
 
 	public String getRowId() {
 		return rowId;

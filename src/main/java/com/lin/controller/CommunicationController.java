@@ -68,7 +68,7 @@ public class CommunicationController {
 	@ApiOperation(value="常用分组列表")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登录人", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "groupname", value = "分组名称", required = true, dataType = "String")
+			@ApiImplicitParam(name = "groupname", value = "分组名称" , dataType = "String")
 	})
 	@GetMapping("grouplist")
 	public Result grouplist(HttpServletRequest req, String loginID,String groupname) {
@@ -394,10 +394,7 @@ public class CommunicationController {
 			}
 		}
 		try {
-			groupService.editGroup(loginID, groupID, groupName, groupDesc, userIds, type);
-			result.setRespCode("1");
-			result.setRespDesc("正常返回数据");
-			result.setRespMsg("");
+			groupService.editGroup(loginID, groupID, groupName, groupDesc, userIds, type, result);
 			logServiceDsl.saveAddressInfLog(log,result);
 		} catch (Exception e) {
 			logServiceDsl.saveError(e,log);
