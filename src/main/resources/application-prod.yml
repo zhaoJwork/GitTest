@@ -33,33 +33,35 @@ logging:
 
 application:
   pic_HttpIP: http://42.99.16.176:19491
- #生成群组头像 图片 暂存地址 群组中所有人的头像地址
+  #生成群组头像 图片 暂存地址 群组中所有人的头像地址
   pic_group_temp_img: /cfiles/sales/appkms/2/public/addresslist/group/temp/
- #pic_group_temp_img=E:\\test\\
- #群组头像生成完成 保存到服务器地址
+  #pic_group_temp_img=E:\\test\\
+  #群组头像生成完成 保存到服务器地址
   pic_group_img: /cfiles/sales/appkms/2/public/addresslist/group/
- #pic_group_img=E:\\test\\
- #保存数据库地址
+  #pic_group_img=E:\\test\\
+  #保存数据库地址
   pic_group_db_img: /2/public/addresslist/group/
- #pic_group_db_img=E:\\test\\
- #拷贝图像 补全文件路径
+  #pic_group_db_img=E:\\test\\
+  #拷贝图像 补全文件路径
   pic_group_db_img_root: /cfiles/sales/appkms
- #生产
+  #生产
   sales_integral_add_score: /sales-integral/common/addScore
- #生产
+  #生产
   ADDB_DK: http://10.128.87.58:8101/CRM-PAD/services/SalesPAD?wsdl
- #测试  图片地址
+  #测试  图片地址
   CUST_IMG: http://42.99.16.176/mpi/plist_dir/plist_dir/custLogo/150_noword/
   redis_host: 10.128.49.138
   redis_port: 6379
   redis_timeout: 30000
   enterprise:
-    createGroup:
-    inviteFriend:
-    removeMembers:
-    exitGroup:
-    dissolution:
-    modify:
-    queryGroup:
+    createGroup: http://10.128.87.54:20057/enterprise_go/group/createGroup
+    inviteFriend: http://10.128.87.54:20057/enterprise_go/customer/inviteFriend
+    removeMembers: http://10.128.87.54:20057/enterprise_go/group/removeMembers
+    exitGroup: http://10.128.87.54:20057/enterprise_go/group/exitGroup
+    dissolution: http://10.128.87.54:20057/enterprise_go/group/dissolution
+    modify: http://10.128.87.54:20057/enterprise_go/group/modify
+    queryGroup: http://10.128.87.54:20057/enterprise_go/group/queryGroup
+    updateGroupInfo: http://10.128.87.54:20057/enterprise_go/group/updateGroupInfo
+    save2OutGroup: http://10.128.87.54:20057/enterprise_go/group/save2OutGroup
 swagger:
   show: false
