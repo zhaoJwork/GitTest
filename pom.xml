@@ -260,7 +260,7 @@
               <goal>add-test-sources</goal>
             </goals>
             <configuration>
-              <outputDirectory>target/generated-sources</outputDirectory>
+              <outputDirectory>target/generated-sources/jpa</outputDirectory>
               <logOnlyOnError>true</logOnlyOnError>
               <processors>
                 <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
