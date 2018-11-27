@@ -1,28 +1,22 @@
 package com.lin.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import com.lin.domain.QCust;
-import com.lin.domain.QCustTreeNode;
-import com.lin.domain.QCustTreeRel;
-import com.lin.domain.QDKLogourl;
-import com.lin.domain.QUserStaff;
+import com.lin.domain.*;
 import com.lin.repository.AddressCollectionRepository;
 import com.lin.util.Result;
 import com.lin.util.XmlReqAndRes;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -32,7 +26,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  *
  */
 @Service
-public class CustomerService  {
+public class CustomerService {
 
 	@Value("${application.ADDB_DK}")
 	private String addressBookDKUrl;
@@ -118,7 +112,7 @@ public class CustomerService  {
 		Map<String, Object> xmlMap = XmlReqAndRes.reqAndRes(busiCode, addressBookDKUrl, map);
 		if(xmlMap.isEmpty()) {
 			result.setRespCode("2");
-			result.setRespDesc("访问迪科接口失败");
+			result.setRespDesc("接口访问异常");
 			result.setRespMsg("");
 			return;
 		}
@@ -301,7 +295,7 @@ public class CustomerService  {
 
 		if(xmlMap.isEmpty()) {
 			result.setRespCode("2");
-			result.setRespDesc("访问迪科接口失败");
+			result.setRespDesc("接口返回异常");
 			result.setRespMsg("");
 			return;
 		}
