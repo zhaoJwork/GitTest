@@ -13,6 +13,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import com.lin.vo.*;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,6 @@ import com.lin.repository.AddressGroupRepository;
 import com.lin.repository.AddressGroupUserRepository;
 import com.lin.util.ImageUtil;
 import com.lin.util.Result;
-import com.lin.vo.JoinUsers;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 
@@ -663,6 +664,85 @@ class GroupList implements Runnable{
 		List list = entityManager.createNativeQuery(sql.toString()).getResultList();
 		return Integer.parseInt(list.get(0).toString());
 	}
+
+	/**
+	 * 根据当前人获取分组列表
+	 * @param result
+	 * @param loginID
+	 * @param groupID
+	 * @param groupName
+	 */
+	public void getGroupListByID(Result result,String loginID,String groupID,String groupName){
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutGroup.class,
+				qAddressGroup.groupId.as("groupID"),
+				qAddressGroup.groupName.as("groupName"),
+				qAddressGroup.groupImg.as("groupImg")
+			)).from(qAddressGroup)
+				.where(qAddressGroup.createUser.eq(loginID));
+		if(null != groupID && !"".equals(groupID)){
+			jpaQuery.where(qAddressGroup.groupId.eq(groupID));
+		}
+		if(null != groupName && !"".equals(groupName)){
+			jpaQuery.where(qAddressGroup.groupName.like("%" + groupName + "%"));
+		}
+		List<OutGroup> outGroupList = jpaQuery.fetch();
+		if(null != outGroupList && 0 < outGroupList.size()){
+
+			for(int i = 0 ; i < outGroupList.size() ; i ++){
+				long groupUserCount = jpaQueryFactory().select(qAddressGroupUser.count())
+						.from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(outGroupList.get(i).getGroupID())).fetchCount();
+				outGroupList.get(i).setGroupUserCount(groupUserCount);
+				if(outGroupList.get(i).getGroupImg().indexOf("http://") < 0){
+					outGroupList.get(i).setGroupImg(picHttpIp + outGroupList.get(i).getGroupImg());
+				}
+			}
+		}
+
+
+		result.setRespMsg(outGroupList);
+	}
+
+	/**
+	 * 根据当前人获取分组列表
+	 * @param result
+	 * @param loginID
+	 * @param groupID
+	 */
+	public void getGroupDesByID(Result result,String loginID,String groupID){
+		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
+		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
+		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutGroup.class,
+				qAddressGroup.groupId.as("groupID"),
+				qAddressGroup.groupName.as("groupName"),
+				qAddressGroup.groupImg.as("groupImg")
+		)).from(qAddressGroup)
+				.where(qAddressGroup.createUser.eq(loginID))
+				.where(qAddressGroup.groupId.eq(groupID));
+		OutGroup outGroup = (OutGroup)jpaQuery.fetchOne();
+		if (null != outGroup) {
+			if (outGroup.getGroupImg().indexOf("http://") < 0) {
+				outGroup.setGroupImg(picHttpIp + outGroup.getGroupImg());
+			}
+			QUser user = QUser.user;
+			QUserNewAssist uass = QUserNewAssist.userNewAssist;
+			List<OutGroupUser> outGroupUserList = jpaQueryFactory().select(Projections.bean(OutGroupUser.class,
+					user.userID.as("userID"),
+					user.userName.as("userName")
+			)).from(qAddressGroupUser)
+					.leftJoin(user)
+					.on(qAddressGroupUser.groupUser.eq(user.userID))
+					.leftJoin(uass)
+					.on(user.userID.eq(uass.userid))
+					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+
+			outGroup.setGroupUserList(outGroupUserList);
+		}
+		result.setRespMsg(outGroup);
+	}
+
+
 
 	private Integer getSeq(){
 		List noTalk = entityManager.createNativeQuery("select appuser.seq_app_addresslist.nextval from dual")
