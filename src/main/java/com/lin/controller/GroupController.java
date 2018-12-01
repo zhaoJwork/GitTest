@@ -159,5 +159,72 @@ public class GroupController {
 		}
 		return result;
 	}
-	
+
+
+	@ApiOperation(value="根据当前人获取分组列表")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "loginID", value = "当前登入Id", required = true, dataType = "String"),
+		@ApiImplicitParam(name = "groupID", value = "分组ID", dataType = "String"),
+		@ApiImplicitParam(name = "groupName", value = "分组名称", dataType = "String")
+	})
+	@GetMapping("/getGroupListByID")
+	public Result getGroupListByID(HttpServletRequest req, String loginID, String groupID,String groupName) {
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"根据当前人获取分组列表");
+		Result result = new Result();
+		if(loginID == null || loginID.trim().equals("")) {
+			result.setRespCode("2");
+			result.setRespDesc("loginID 不能为空");
+			logger.info("loginID 不能为空");
+			return result;
+		}
+
+		try {
+			this.newGroupService.getGroupListByID(result,loginID,groupID,groupName);
+			logServiceDsl.saveAddressInfLog(log,result);
+		} catch (Exception e) {
+			log.setExpError(e.toString());
+			result.setRespCode("2");
+			result.setRespDesc("失败");
+			result.setRespMsg("");
+			logServiceDsl.saveAddressInfLog(log,result);
+		}
+		return result;
+	}
+
+	@ApiOperation(value="根据分组ID获取分组详情")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "loginID", value = "当前登入Id", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String")
+	})
+	@GetMapping("/getGroupDesByID")
+	public Result getGroupDesByID(HttpServletRequest req, String loginID, String groupID) {
+		AddressInfLog log =  logServiceDsl.getInfLog(req,"根据分组ID获取分组详情");
+		Result result = new Result();
+		if(loginID == null || loginID.trim().equals("")) {
+			result.setRespCode("2");
+			result.setRespDesc("loginID 不能为空");
+			logger.info("loginID 不能为空");
+			return result;
+		}
+		if(groupID == null || groupID.trim().equals("")) {
+			result.setRespCode("2");
+			result.setRespDesc("groupID 不能为空");
+			logger.info("groupID 不能为空");
+			return result;
+		}
+
+		try {
+			this.newGroupService.getGroupDesByID(result,loginID,groupID);
+			logServiceDsl.saveAddressInfLog(log,result);
+		} catch (Exception e) {
+			log.setExpError(e.toString());
+			result.setRespCode("2");
+			result.setRespDesc("失败");
+			result.setRespMsg("");
+			logServiceDsl.saveAddressInfLog(log,result);
+		}
+		return result;
+	}
+
+
 }
