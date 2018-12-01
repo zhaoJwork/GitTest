@@ -699,8 +699,8 @@ class GroupList implements Runnable{
 				}
 			}
 		}
-
-
+		result.setRespCode("1");
+		result.setRespDesc("正常返回数据");
 		result.setRespMsg(outGroupList);
 	}
 
@@ -739,6 +739,8 @@ class GroupList implements Runnable{
 
 			outGroup.setGroupUserList(outGroupUserList);
 		}
+		result.setRespCode("1");
+		result.setRespDesc("正常返回数据");
 		result.setRespMsg(outGroup);
 	}
 
