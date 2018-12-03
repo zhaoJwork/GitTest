@@ -35,7 +35,7 @@ import java.util.List;
  * @date 2018年10月10日
  *
  */
-@Api(description = "通讯录-新分组功能API")
+@Api(description = "新通讯录-分组功能API")
 @RequestMapping("/group")
 @RestController
 public class GroupController {

@@ -28,7 +28,7 @@ public class UserServiceTest {
   @Test
   public void getUserList(){
     List<OutUser> users = userService.getUserList("10","1",
-            "","","","","","1");
+            "","","","","1959935","1");
     for(OutUser outUser : users){
       System.out.println(outUser.toString());
     }

@@ -1,6 +1,8 @@
 package com.lin.service;
 
 import com.lin.domain.OrganizationDsl;
+import com.lin.vo.OutDep;
+import com.lin.vo.OutUser;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -24,10 +26,20 @@ public class OrganizationServiceTest {
    * 测试按上一级查询组织部门
    */
   @Test
-  public void testLoad(){
+  public void getOrganizationByDsl(){
     OrganizationDsl dsl = new OrganizationDsl();
     dsl.setpID("1947350");
     List<OrganizationDsl> list = organizationServiceDsl.getOrganizationByDsl(dsl);
+    Assert.assertNotNull(list);
+  }
+
+  /**
+   * 获取部门列表
+   */
+  @Test
+  public void getDepList(){
+    List<OutDep> list = organizationServiceDsl.getDepList("1844641");
+    System.out.println(list.size());
     Assert.assertNotNull(list);
   }
 

@@ -167,6 +167,7 @@ public class UserService extends AbstractService<User,String> {
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QOrganizationDsl provinceOrgan = QOrganizationDsl.organizationDsl;
+		QOrganizationDsl depOrgan = QOrganizationDsl.organizationDsl;
 		QUserTicketBean qUserTicketBean = QUserTicketBean.userTicketBean;
 		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutUser.class,
 				user.userID.as("userID"),
@@ -204,7 +205,11 @@ public class UserService extends AbstractService<User,String> {
 			jpaQuery.where(user.provinceID.eq(provinceID));
 		}
 		if(null != depID && !"".equals(depID)) {
-			jpaQuery.where(user.organizationID.eq(depID));
+			jpaQuery.where(user.organizationID.in(
+					jpaQueryFactory().select(depOrgan.organizationID).from(depOrgan).where(depOrgan.organizationName.in(
+						jpaQueryFactory().select(depOrgan.organizationName).from(depOrgan).where(depOrgan.organizationID.eq(depID))
+					))
+			));
 		}
 		jpaQuery.orderBy(user.createDate.asc())
 				.offset((Long.parseLong(pageNum)-1)*Long.parseLong(pageSize))
@@ -217,7 +222,6 @@ public class UserService extends AbstractService<User,String> {
 				UserTicketBean userTicketBean = null;
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				for (int i = 0; i < userList.size(); i++) {
-
 					userTicketBean = jpaQueryFactory().select(Projections.bean(UserTicketBean.class,
 							qUserTicketBean.createDate.max().as("createDate")
 					)).from(qUserTicketBean)

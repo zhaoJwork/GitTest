@@ -1,7 +1,5 @@
 package com.lin.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lin.domain.OrganizationDsl;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -33,19 +31,22 @@ public class OrganizationControllerTest {
   @Autowired
   private WebApplicationContext wac;
 
- /* @Before
+  @Before
   public void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
   }
-*/
+
   @Test
   public void A00_get() throws Exception {
-    /*mockMvc.perform(MockMvcRequestBuilders.post("/communicationdsl/organizationlist")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED).content("pid=0")
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.result").value(true))
-        .andDo(print());*/
+      String responseString = mockMvc.perform(
+              MockMvcRequestBuilders.get("/organ/getDepList")    //请求的url,请求的方法是get
+                      .contentType(MediaType.APPLICATION_FORM_URLENCODED)  //数据的格式
+                      .param("loginID","1")
+                      .param("provinceID","1")//添加参数
+      ).andExpect(status().isOk())    //返回的状态是200
+              .andDo(print())         //打印出请求和相应的内容
+              .andReturn().getResponse().getContentAsString();   //将相应的数据转换为字符串
+      System.out.println("--------返回的json = " + responseString);
 
   }
 
