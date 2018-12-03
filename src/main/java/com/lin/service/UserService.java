@@ -4,6 +4,7 @@ import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.UserRepository;
 import com.lin.vo.OperationPlatform;
+import com.lin.vo.OutParentUser;
 import com.lin.vo.OutUser;
 import com.lin.vo.UserDetailsVo;
 import com.querydsl.core.support.QueryBase;
@@ -19,9 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 import org.springframework.util.Assert;
 
 /**
@@ -156,11 +156,14 @@ public class UserService extends AbstractService<User,String> {
 	 * @param isLoginTime
 	 * @return
 	 */
-	public List<OutUser> getUserList(String pageSize,String pageNum,
-			String userName, String crmAccount, String phone, String provinceID, String depID,
-			String isLoginTime){
+	public OutParentUser getUserList(String pageSize, String pageNum,
+						   String userName, String crmAccount, String phone, String provinceID, String depID,
+						   String isLoginTime,String isUserCount){
+		OutParentUser outParentUser = new OutParentUser();
 		//isLoginTime 赋值默认值
 		isLoginTime = isLoginTime==null ? "0":isLoginTime;
+		//isLoginTime 赋值默认值
+		isUserCount = isUserCount==null ? "0":isUserCount;
 		List<OutUser> userList = new ArrayList<OutUser>();
 		// 导入Querydsl部分局部实例
 		QUser user = QUser.user;
@@ -215,6 +218,37 @@ public class UserService extends AbstractService<User,String> {
 				.offset((Long.parseLong(pageNum)-1)*Long.parseLong(pageSize))
 				.limit(Long.parseLong(pageSize));
 		userList = jpaQuery.fetch();
+		if("1".equals(isUserCount)) {
+			JPAQuery userCountJPAQuery = jpaQueryFactory().select(user.userID.count()
+			).from(user)
+					.leftJoin(uass).on(user.userID.eq(uass.userid))
+					.leftJoin(organ).on(organ.organizationID.eq(user.organizationID))
+					.leftJoin(provinceOrgan).on(provinceOrgan.organizationID.eq(user.provinceID));
+			if (null != userName && !"".equals(userName)) {
+				userCountJPAQuery.where(user.userName.like(userName + "%"));
+			}
+			if (null != crmAccount && !"".equals(crmAccount)) {
+				userCountJPAQuery.where(user.crmAccount.like(crmAccount + "%"));
+			}
+			if (null != phone && !"".equals(phone)) {
+				userCountJPAQuery.where(user.phone.like(phone + "%"));
+			}
+			if (null != provinceID && !"".equals(provinceID)) {
+				userCountJPAQuery.where(user.provinceID.eq(provinceID));
+			}
+			if (null != depID && !"".equals(depID)) {
+				userCountJPAQuery.where(user.organizationID.in(
+						jpaQueryFactory().select(depOrgan.organizationID).from(depOrgan).where(depOrgan.organizationName.in(
+								jpaQueryFactory().select(depOrgan.organizationName).from(depOrgan).where(depOrgan.organizationID.eq(depID))
+						))
+				));
+			}
+			long userCount = userCountJPAQuery.fetchCount();
+
+			outParentUser.setUserCount(userCount);
+		}else{
+			outParentUser.setUserCount(0);
+		}
 
 		if("1".equals(isLoginTime)){
 			if(userList.size() !=0 ) {
@@ -233,6 +267,7 @@ public class UserService extends AbstractService<User,String> {
 				}
 			}
 		}
-		return userList;
+		outParentUser.setOutUserList(userList);
+		return outParentUser;
 	}
 }

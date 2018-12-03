@@ -8,6 +8,7 @@ import com.lin.domain.AddressInfLog;
 import com.lin.service.AddressInfLogServiceImpl;
 import com.lin.service.UserService;
 import com.lin.vo.OperationPlatform;
+import com.lin.vo.OutParentUser;
 import com.lin.vo.OutUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -56,14 +58,15 @@ public class UserController {
 			@ApiImplicitParam(name = "phone", value = "手机号后模糊查询", dataType = "String"),
 			@ApiImplicitParam(name = "provinceID", value = "按所属省份精确查询,号分割", dataType = "String"),
 			@ApiImplicitParam(name = "depID", value = "按所属部门精确查询,号分割", dataType = "String"),
-			@ApiImplicitParam(name = "isLoginTime", value = "是否查询登陆时间1是0否", dataType = "String")
+			@ApiImplicitParam(name = "isLoginTime", value = "是否查询登陆时间1是0否", dataType = "String"),
+			@ApiImplicitParam(name = "isUserCount", value = "是否查询人员数量1是0否", dataType = "String")
 
 
 	})
 	@GetMapping("/getUserList")
 	public Result getUserList(HttpServletRequest req, String loginID, String pageSize,String pageNum,
 							  String userName, String crmAccount, String phone, String provinceID, String depID,
-							  String isLoginTime
+							  String isLoginTime,String isUserCount
 		) throws JsonProcessingException {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"分页获取用户列表");
 		if(loginID == null || loginID.trim().equals("")) {
@@ -80,8 +83,8 @@ public class UserController {
 		}
 
 		try {
-			List<OutUser> userList = this.userService.getUserList(pageSize,pageNum,
-					userName,crmAccount,phone,provinceID,depID,isLoginTime);
+			OutParentUser userList = this.userService.getUserList(pageSize,pageNum,
+					userName,crmAccount,phone,provinceID,depID,isLoginTime,isUserCount);
 			logServiceDsl.saveAddressInfLog(log,mapper.writeValueAsString(userList));
 			return ResultGenerator.genSuccessResult(userList);
 		} catch (Exception e) {
