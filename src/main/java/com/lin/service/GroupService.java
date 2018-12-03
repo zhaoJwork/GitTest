@@ -667,12 +667,11 @@ class GroupList implements Runnable{
 
 	/**
 	 * 根据当前人获取分组列表
-	 * @param result
 	 * @param loginID
 	 * @param groupID
 	 * @param groupName
 	 */
-	public void getGroupListByID(Result result,String loginID,String groupID,String groupName){
+	public List<OutGroup> getGroupListByID(String loginID,String groupID,String groupName){
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutGroup.class,
@@ -699,18 +698,15 @@ class GroupList implements Runnable{
 				}
 			}
 		}
-		result.setRespCode("1");
-		result.setRespDesc("正常返回数据");
-		result.setRespMsg(outGroupList);
+		return outGroupList;
 	}
 
 	/**
 	 * 根据当前人获取分组列表
-	 * @param result
 	 * @param loginID
 	 * @param groupID
 	 */
-	public void getGroupDesByID(Result result,String loginID,String groupID){
+	public OutGroup getGroupDesByID(String loginID,String groupID){
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutGroup.class,
@@ -739,9 +735,7 @@ class GroupList implements Runnable{
 
 			outGroup.setGroupUserList(outGroupUserList);
 		}
-		result.setRespCode("1");
-		result.setRespDesc("正常返回数据");
-		result.setRespMsg(outGroup);
+		return outGroup;
 	}
 
 

@@ -3,6 +3,7 @@ package com.lin.service;
 import com.lin.domain.User;
 import java.util.List;
 
+import com.lin.vo.OutUser;
 import com.lin.vo.UserDetailsVo;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
@@ -20,11 +21,19 @@ public class UserServiceTest {
 
   @Autowired
   private UserService userService;
- /* @Test
-  public void testLoad(){
-    List<User> users = userService.findByIds("188218");
+
+  /**
+   * 分页获取用户列表
+   */
+  @Test
+  public void getUserList(){
+    List<OutUser> users = userService.getUserList("10","1",
+            "","","","","1959935","1");
+    for(OutUser outUser : users){
+      System.out.println(outUser.toString());
+    }
     Assert.assertNotNull(users);
-  }*/
+  }
   @Test
   public void testByUserID(){
     UserDetailsVo users = userService.selectUserDetails("113420","101539");

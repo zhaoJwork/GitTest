@@ -3,15 +3,24 @@ package com.lin.service;
 import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.UserRepository;
+import com.lin.vo.OperationPlatform;
+import com.lin.vo.OutUser;
 import com.lin.vo.UserDetailsVo;
+import com.querydsl.core.support.QueryBase;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.jpa.JPAQueryBase;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.springframework.util.Assert;
 
@@ -28,6 +37,9 @@ public class UserService extends AbstractService<User,String> {
 	public UserService(UserRepository userRepository){
 		super(userRepository);
 	}
+
+	@Value("${application.pic_HttpIP}")
+	private String picHttpIp;
 
 	@Deprecated
 	@Override
@@ -130,5 +142,97 @@ public class UserService extends AbstractService<User,String> {
 				.on(field.terID.eq(userField.terID).and(userField.userID.eq(userID))).fetch();
 		userDetailsDsl.setField(listField);
         return  userDetailsDsl;
+	}
+
+	/**
+	 * 分页获取用户列表
+	 * @param pageSize
+	 * @param pageNum
+	 * @param userName
+	 * @param crmAccount
+	 * @param phone
+	 * @param provinceID
+	 * @param depID
+	 * @param isLoginTime
+	 * @return
+	 */
+	public List<OutUser> getUserList(String pageSize,String pageNum,
+			String userName, String crmAccount, String phone, String provinceID, String depID,
+			String isLoginTime){
+		//isLoginTime 赋值默认值
+		isLoginTime = isLoginTime==null ? "0":isLoginTime;
+		List<OutUser> userList = new ArrayList<OutUser>();
+		// 导入Querydsl部分局部实例
+		QUser user = QUser.user;
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
+		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
+		QOrganizationDsl provinceOrgan = QOrganizationDsl.organizationDsl;
+		QOrganizationDsl depOrgan = QOrganizationDsl.organizationDsl;
+		QUserTicketBean qUserTicketBean = QUserTicketBean.userTicketBean;
+		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutUser.class,
+				user.userID.as("userID"),
+				user.userName.as("userName"),
+				user.crmAccount,
+				user.phone,
+				user.email,
+				organ.organizationID.as("depID"),
+				organ.organizationName.as("depName"),
+				organ.organizationID.as("provinceID"),
+				organ.organizationName.as("provinceName"),
+				user.address,
+				new CaseBuilder()
+						.when(
+								uass.portrait_url.eq("")
+										.or(uass.portrait_url.isNull())
+						)
+						.then(user.userPic.prepend(picHttpIp))
+						.otherwise(uass.portrait_url.prepend(picHttpIp))
+						.as("userImg")
+		)).from(user)
+				.leftJoin(uass).on(user.userID.eq(uass.userid))
+				.leftJoin(organ).on(organ.organizationID.eq(user.organizationID))
+				.leftJoin(provinceOrgan).on(provinceOrgan.organizationID.eq(user.provinceID));
+		if(null != userName && !"".equals(userName)) {
+			jpaQuery.where(user.userName.like(userName+"%"));
+		}
+		if(null != crmAccount && !"".equals(crmAccount)) {
+			jpaQuery.where(user.crmAccount.like(crmAccount+"%"));
+		}
+		if(null != phone && !"".equals(phone)) {
+			jpaQuery.where(user.phone.like(phone+"%"));
+		}
+		if(null != provinceID && !"".equals(provinceID)) {
+			jpaQuery.where(user.provinceID.eq(provinceID));
+		}
+		if(null != depID && !"".equals(depID)) {
+			jpaQuery.where(user.organizationID.in(
+					jpaQueryFactory().select(depOrgan.organizationID).from(depOrgan).where(depOrgan.organizationName.in(
+						jpaQueryFactory().select(depOrgan.organizationName).from(depOrgan).where(depOrgan.organizationID.eq(depID))
+					))
+			));
+		}
+		jpaQuery.orderBy(user.createDate.asc())
+				.offset((Long.parseLong(pageNum)-1)*Long.parseLong(pageSize))
+				.limit(Long.parseLong(pageSize));
+		userList = jpaQuery.fetch();
+
+		if("1".equals(isLoginTime)){
+			if(userList.size() !=0 ) {
+				// 处理返回图像数据
+				UserTicketBean userTicketBean = null;
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				for (int i = 0; i < userList.size(); i++) {
+					userTicketBean = jpaQueryFactory().select(Projections.bean(UserTicketBean.class,
+							qUserTicketBean.createDate.max().as("createDate")
+					)).from(qUserTicketBean)
+							.where(qUserTicketBean.userName.eq(userList.get(i).getCrmAccount()))
+							.fetchOne();
+					if (null != userTicketBean) {
+						userList.get(i).setLoginTime(format.format(new Date(userTicketBean.getCreateDate())));
+					}
+				}
+			}
+		}
+		return userList;
 	}
 }

@@ -6,9 +6,11 @@ import com.ideal.wheel.common.AbstractService;
 import com.lin.domain.*;
 import com.lin.repository.OrganizationRepository;
 import com.lin.util.JsonUtil;
+import com.lin.vo.OutDep;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -164,6 +166,33 @@ public class OrganizationService extends AbstractService<OrganizationDsl,String>
 				.on(qOrganizationIndex.orgID.eq(organDsl.organizationID))
 				.where(predicate).orderBy(QOrganizationDsl.organizationDsl.markID.asc()).fetch();
 	}
+
+	/**
+	 * 获取部门列表
+	 * @param provinceID
+	 * @return
+	 */
+	public List<OutDep> getDepList(String provinceID){
+		List<OutDep> depList= new ArrayList<OutDep>();
+		QOrganizationDsl organs = QOrganizationDsl.organizationDsl;
+		QOrganizationBlack blackDsl = QOrganizationBlack.organizationBlack;
+		QOrganizationIndex qOrganizationIndex = QOrganizationIndex.organizationIndex;
+		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutDep.class,
+				organs.organizationID.min().as("depID"),
+				organs.organizationName.as("depName")
+		)).from(organs)
+				.where(organs.flag.eq("1"))
+				.where(organs.organizationID.notIn(jpaQueryFactory().select(blackDsl.organizationID).from(blackDsl)));
+		if(null != provinceID && !"".equals(provinceID)) {
+			jpaQuery.where(organs.organizationID.in(jpaQueryFactory().select(qOrganizationIndex.orgID).from(qOrganizationIndex)
+			.where(qOrganizationIndex.orgIDIndex.like(provinceID +"%"))));
+		}
+		jpaQuery.groupBy(organs.organizationName);
+		depList = jpaQuery.fetch();
+		return depList;
+	}
+
+
 	@Override
 	public long deleteByIds(String... strings) {
 		return 0;
