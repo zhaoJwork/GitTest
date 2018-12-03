@@ -1,5 +1,8 @@
 package com.lin.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ideal.wheel.common.ResultGenerator;
 import com.lin.domain.AddressBanned;
 import com.lin.domain.AddressCollection;
 import com.lin.domain.AddressInfLog;
@@ -11,6 +14,7 @@ import com.lin.service.PermissionService;
 import com.lin.util.JsonUtil;
 import com.lin.util.Result;
 import com.lin.vo.AddressCollectionVo;
+import com.lin.vo.OutGroup;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -21,11 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 /**
  * 
- * 通讯录-新分组功能
+ * 新通讯录-分组功能
  * @author lwz
  * @date 2018年10月10日
  *
@@ -36,7 +41,9 @@ import javax.servlet.http.HttpServletRequest;
 public class GroupController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+	@Autowired
+	private ObjectMapper mapper;
+
 	@Autowired
 	private GroupService newGroupService;
 
@@ -168,27 +175,22 @@ public class GroupController {
 		@ApiImplicitParam(name = "groupName", value = "分组名称", dataType = "String")
 	})
 	@GetMapping("/getGroupListByID")
-	public Result getGroupListByID(HttpServletRequest req, String loginID, String groupID,String groupName) {
+	public com.ideal.wheel.common.Result getGroupListByID(HttpServletRequest req, String loginID, String groupID, String groupName) throws JsonProcessingException {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"根据当前人获取分组列表");
-		Result result = new Result();
 		if(loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
 			logger.info("loginID 不能为空");
-			return result;
+			return ResultGenerator.genErrorResult("loginID 不能为空");
 		}
-
 		try {
-			this.newGroupService.getGroupListByID(result,loginID,groupID,groupName);
-			logServiceDsl.saveAddressInfLog(log,result);
+			List<OutGroup> result = this.newGroupService.getGroupListByID(loginID,groupID,groupName);
+			logServiceDsl.saveAddressInfLog(log,mapper.writeValueAsString(result));
+			return  ResultGenerator.genSuccessResult(result);
 		} catch (Exception e) {
 			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
-			logServiceDsl.saveAddressInfLog(log,result);
+			com.ideal.wheel.common.Result result = ResultGenerator.genErrorResult(e.toString());
+			logServiceDsl.saveAddressInfLog(log,mapper.writeValueAsString(result));
+			return result;
 		}
-		return result;
 	}
 
 	@ApiOperation(value="根据分组ID获取分组详情")
@@ -197,33 +199,26 @@ public class GroupController {
 			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String")
 	})
 	@GetMapping("/getGroupDesByID")
-	public Result getGroupDesByID(HttpServletRequest req, String loginID, String groupID) {
+	public com.ideal.wheel.common.Result getGroupDesByID(HttpServletRequest req, String loginID, String groupID) throws JsonProcessingException {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"根据分组ID获取分组详情");
-		Result result = new Result();
 		if(loginID == null || loginID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("loginID 不能为空");
 			logger.info("loginID 不能为空");
-			return result;
+			return ResultGenerator.genErrorResult("loginID 不能为空");
 		}
 		if(groupID == null || groupID.trim().equals("")) {
-			result.setRespCode("2");
-			result.setRespDesc("groupID 不能为空");
-			logger.info("groupID 不能为空");
-			return result;
+			logger.info("loginID 不能为空");
+			return ResultGenerator.genErrorResult("groupID 不能为空");
 		}
-
 		try {
-			this.newGroupService.getGroupDesByID(result,loginID,groupID);
-			logServiceDsl.saveAddressInfLog(log,result);
+			OutGroup outGroup = this.newGroupService.getGroupDesByID(loginID,groupID);
+			logServiceDsl.saveAddressInfLog(log,mapper.writeValueAsString(outGroup));
+			return  ResultGenerator.genSuccessResult(outGroup);
 		} catch (Exception e) {
 			log.setExpError(e.toString());
-			result.setRespCode("2");
-			result.setRespDesc("失败");
-			result.setRespMsg("");
-			logServiceDsl.saveAddressInfLog(log,result);
+			com.ideal.wheel.common.Result result = ResultGenerator.genErrorResult(e.toString());
+			logServiceDsl.saveAddressInfLog(log,mapper.writeValueAsString(result));
+			return result;
 		}
-		return result;
 	}
 
 

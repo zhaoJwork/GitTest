@@ -20,6 +20,6 @@ public class LogServiceTest {
   @Test
   public void testLoad(){
     AddressInfLog log =  logService.getInfLog(null,"测试");
-    logService.saveAddressInfLog(log,null);
+    logService.saveAddressInfLog(log,"");
   }
 }
