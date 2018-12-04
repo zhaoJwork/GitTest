@@ -214,7 +214,7 @@ public class UserService extends AbstractService<User,String> {
 					))
 			));
 		}
-		jpaQuery.orderBy(user.createDate.asc())
+		jpaQuery.orderBy(user.userID.asc())
 				.offset((Long.parseLong(pageNum)-1)*Long.parseLong(pageSize))
 				.limit(Long.parseLong(pageSize));
 		userList = jpaQuery.fetch();
