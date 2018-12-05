@@ -120,7 +120,7 @@ public class OperationPlatformService {
 				organ.organizationID.as("deptID"),
 				organ.organizationName.as("deptName"),
 				qPartyContactInfo.mobilePhone.stringValue().as("telNum"),
-				qAddressOrganTempIndex.orgNameIndex,
+				qAddressOrganTempIndex.orgNameIndex.as("address"),
 				new CaseBuilder()
 					.when(
 							qBlackUserList.rowID.eq("")
