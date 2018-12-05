@@ -169,8 +169,7 @@ public class UserService extends AbstractService<User,String> {
 		QUser user = QUser.user;
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
-		QOrganizationDsl provinceOrgan = QOrganizationDsl.organizationDsl;
-		QOrganizationDsl depOrgan = QOrganizationDsl.organizationDsl;
+		QOrganizationDsl provinceOrgan =  new QOrganizationDsl("provinceOrgan");
 		QUserTicketBean qUserTicketBean = QUserTicketBean.userTicketBean;
 		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutUser.class,
 				user.userID.as("userID"),
@@ -178,10 +177,10 @@ public class UserService extends AbstractService<User,String> {
 				user.crmAccount,
 				user.phone,
 				user.email,
-				organ.organizationID.as("depID"),
+				user.organizationID.as("depID"),
 				organ.organizationName.as("depName"),
-				organ.organizationID.as("provinceID"),
-				organ.organizationName.as("provinceName"),
+				user.provinceID.as("provinceID"),
+				provinceOrgan.organizationName.as("provinceName"),
 				user.address,
 				new CaseBuilder()
 						.when(
@@ -192,9 +191,9 @@ public class UserService extends AbstractService<User,String> {
 						.otherwise(uass.portrait_url.prepend(picHttpIp))
 						.as("userImg")
 		)).from(user)
+				.leftJoin(organ).on(user.organizationID.eq(organ.organizationID))
 				.leftJoin(uass).on(user.userID.eq(uass.userid))
-				.leftJoin(organ).on(organ.organizationID.eq(user.organizationID))
-				.leftJoin(provinceOrgan).on(provinceOrgan.organizationID.eq(user.provinceID));
+				.leftJoin(provinceOrgan).on(user.provinceID.eq(provinceOrgan.organizationID));
 		if(null != userName && !"".equals(userName)) {
 			jpaQuery.where(user.userName.like(userName+"%"));
 		}
@@ -209,8 +208,8 @@ public class UserService extends AbstractService<User,String> {
 		}
 		if(null != depID && !"".equals(depID)) {
 			jpaQuery.where(user.organizationID.in(
-					jpaQueryFactory().select(depOrgan.organizationID).from(depOrgan).where(depOrgan.organizationName.in(
-						jpaQueryFactory().select(depOrgan.organizationName).from(depOrgan).where(depOrgan.organizationID.eq(depID))
+					jpaQueryFactory().select(organ.organizationID).from(organ).where(organ.organizationName.in(
+						jpaQueryFactory().select(organ.organizationName).from(organ).where(organ.organizationID.eq(depID))
 					))
 			));
 		}
@@ -220,10 +219,7 @@ public class UserService extends AbstractService<User,String> {
 		userList = jpaQuery.fetch();
 		if("1".equals(isUserCount)) {
 			JPAQuery userCountJPAQuery = jpaQueryFactory().select(user.userID.count()
-			).from(user)
-					.leftJoin(uass).on(user.userID.eq(uass.userid))
-					.leftJoin(organ).on(organ.organizationID.eq(user.organizationID))
-					.leftJoin(provinceOrgan).on(provinceOrgan.organizationID.eq(user.provinceID));
+			).from(user);
 			if (null != userName && !"".equals(userName)) {
 				userCountJPAQuery.where(user.userName.like(userName + "%"));
 			}
@@ -238,8 +234,8 @@ public class UserService extends AbstractService<User,String> {
 			}
 			if (null != depID && !"".equals(depID)) {
 				userCountJPAQuery.where(user.organizationID.in(
-						jpaQueryFactory().select(depOrgan.organizationID).from(depOrgan).where(depOrgan.organizationName.in(
-								jpaQueryFactory().select(depOrgan.organizationName).from(depOrgan).where(depOrgan.organizationID.eq(depID))
+						jpaQueryFactory().select(organ.organizationID).from(organ).where(organ.organizationName.in(
+								jpaQueryFactory().select(organ.organizationName).from(organ).where(organ.organizationID.eq(depID))
 						))
 				));
 			}
