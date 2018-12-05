@@ -6,6 +6,8 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -47,7 +49,8 @@ public class OperationPlatform implements Serializable{
 	private String address;
 	
 	@ApiModelProperty(value = "更新时间")
-	private String updateDate;
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date updateDate;
 	
 	@ApiModelProperty(value = "账号状态 0 正常  1非正常")
 	private String statusCD;

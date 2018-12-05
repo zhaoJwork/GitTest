@@ -17,11 +17,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lin.domain.BlackUserList;
+import com.lin.domain.QAddressOrganTempIndex;
 import com.lin.domain.QBlackUserList;
 import com.lin.domain.QOrganizationDsl;
+import com.lin.domain.QPartyCertification;
+import com.lin.domain.QPartyContactInfo;
+import com.lin.domain.QSystemUser;
 import com.lin.domain.QUser;
 import com.lin.domain.QUserNewAssist;
+import com.lin.domain.QUserOrganization;
 import com.lin.domain.QUserStaff;
+import com.lin.domain.QUserStaffPic;
 import com.lin.domain.QUserTicketBean;
 import com.lin.domain.UserStaff;
 import com.lin.domain.UserTicketBean;
@@ -68,25 +74,30 @@ public class OperationPlatformService {
 	public void selectUserList(Result result, OperationPlatform operat) throws ParseException {
 		
 		// 导入Querydsl部分局部实例
-		QUser user = QUser.user;
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QUserStaff qUserStaff = QUserStaff.userStaff;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QBlackUserList qBlackUserList = QBlackUserList.blackUserList;
 		QUserTicketBean qUserTicketBean = QUserTicketBean.userTicketBean;
+		QPartyContactInfo qPartyContactInfo = QPartyContactInfo.partyContactInfo;
+		QUserStaffPic qUserStaffPic = QUserStaffPic.userStaffPic;
+		QAddressOrganTempIndex qAddressOrganTempIndex = QAddressOrganTempIndex.addressOrganTempIndex;
+		QPartyCertification qPartyCertification = QPartyCertification.partyCertification;
+		QSystemUser qSystemUser = QSystemUser.systemUser;
+		QUserOrganization qUserOrganization = QUserOrganization.userOrganization;
 		
 		// 动态拼接where条件
 		List<Predicate> predicate = new ArrayList<Predicate>();
 		Predicate[] pre = new Predicate[predicate.size()];
 		
 		if(operat.getStaffName() != null && !("".equals(operat.getStaffName())) ) {
-			predicate.add(user.userName.like( "%"+operat.getStaffName()+"%"));
+			predicate.add(qUserStaff.staffName.like( "%"+operat.getStaffName()+"%"));
 		}
 		if(operat.getCrmAccount() != null && !("".equals(operat.getCrmAccount()))) {
-			predicate.add(user.crmAccount.eq(operat.getCrmAccount()));
+			predicate.add(qUserStaff.staffCode.eq(operat.getCrmAccount()));
 		}
 		if(operat.getTelNum() != null && !("".equals(operat.getTelNum()))) {
-			predicate.add(user.phone.eq(operat.getTelNum()));
+			predicate.add(qPartyContactInfo.mobilePhone.stringValue().eq(operat.getTelNum()));
 		}
 		if(operat.getDeptID() != null && !("".equals(operat.getDeptID()))) {
 			predicate.add(organ.organizationID.eq(operat.getDeptID()));
@@ -94,11 +105,22 @@ public class OperationPlatformService {
 		if(operat.getType() != null && !("".equals(operat.getType()))) {
 			predicate.add(qUserStaff.statusCD.eq(operat.getType()));
 		}
+		predicate.add(qPartyCertification.certValID.in("0", "2"));
+		predicate.add(qSystemUser.statusCD.in("1000", "1200"));
+		predicate.add(qUserStaff.statusCD.notIn("1100"));
+		predicate.add(qUserOrganization.statusCD.stringValue().eq("1000"));
 		
 		// 查询
 		List<OperationPlatform> list = queryFactory.select(Projections.bean(OperationPlatform.class,
-				user.userID.as("staffID"),
-				user.userName.as("staffName"),
+				qUserStaff.staffID.stringValue().as("staffID"),
+				qUserStaff.staffName.as("staffName"),
+				qUserStaff.updateDate,
+				qUserStaff.staffCode.as("crmAccount"),
+				qUserStaff.statusCD.stringValue(),
+				organ.organizationID.as("deptID"),
+				organ.organizationName.as("deptName"),
+				qPartyContactInfo.mobilePhone.stringValue().as("telNum"),
+				qAddressOrganTempIndex.orgNameIndex,
 				new CaseBuilder()
 					.when(
 							qBlackUserList.rowID.eq("")
@@ -108,25 +130,33 @@ public class OperationPlatformService {
 					.otherwise("1")
 					.as("blackType"),
 				new CaseBuilder()
+					.when(qUserStaffPic.picUrl.isNull()
+							.and(uass.portrait_url.isNull()))
+					.then("/1/mphotos/10000001.png")
 					.when(
 							uass.portrait_url.eq("")
 							.or(uass.portrait_url.isNull())
 						)
-					.then(user.userPic)
+					.then(qUserStaffPic.picUrl)
+					.when(
+							qUserStaffPic.picUrl.eq("")
+							.or(qUserStaffPic.picUrl.isNull())
+						)
+					.then(uass.portrait_url)
 					.otherwise(uass.portrait_url)
-					.as("userImg"),
-				user.crmAccount,
-				user.phone.as("telNum"),
-				user.address,
-				user.updateDate,
-				qUserStaff.statusCD,
-				organ.organizationID.as("deptID"),
-				organ.organizationName.as("deptName")
-		)).from(user)
-				.leftJoin(uass).on(user.userID.eq(uass.userid))
-				.leftJoin(qUserStaff).on(user.userID.eq(qUserStaff.staffID.stringValue()))
-				.leftJoin(organ).on(organ.organizationID.eq(user.organizationID))
-				.leftJoin(qBlackUserList).on(qBlackUserList.userID.eq(user.userID))
+					.prepend(picHttpIp)
+					.as("userImg")
+				
+		)).from(qUserStaff)
+				.leftJoin(organ).on(organ.organizationID.eq(qUserStaff.departmentID.stringValue()))
+				.leftJoin(qPartyContactInfo).on(qPartyContactInfo.partyID.eq(qUserStaff.partyID))
+				.leftJoin(qBlackUserList).on(qBlackUserList.userID.eq(qUserStaff.staffID.stringValue()))
+				.leftJoin(qUserStaffPic).on(qUserStaffPic.staffID.eq(qUserStaff.staffID.stringValue()))
+				.leftJoin(qAddressOrganTempIndex).on(qAddressOrganTempIndex.orgID.eq(qUserStaff.departmentID.stringValue()))
+				.leftJoin(qPartyCertification).on(qPartyCertification.partyID.eq(qUserStaff.partyID))
+				.leftJoin(qSystemUser).on(qSystemUser.staffID.eq(qUserStaff.staffID))
+				.leftJoin(qUserOrganization).on(qUserOrganization.orgID.eq(qUserStaff.orgID))
+				.leftJoin(uass).on(qUserStaff.staffID.stringValue().eq(uass.userid))
 				.where(predicate.toArray(pre))
 				.offset((Long.parseLong(operat.getPageSize())-1)*Long.parseLong(operat.getPageNum()))
 				.limit(Long.parseLong(operat.getPageNum()))
@@ -137,7 +167,6 @@ public class OperationPlatformService {
 			
 			// 处理返回图像数据
 			List<UserTicketBean> userTicketBeans = null;
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			for (int i = 0; i < list.size(); i++) {
 				
 				userTicketBeans = queryFactory.select(Projections.bean(UserTicketBean.class,
@@ -151,8 +180,6 @@ public class OperationPlatformService {
 				}else {
 					list.get(i).setIsLogin("1");
 				}
-				list.get(i).setUpdateDate(format.format(format.parse(list.get(i).getUpdateDate())));
-				list.get(i).setUserImg(picHttpIp + list.get(i).getUserImg());
 			}
 			result.setRespCode("1");
 			result.setRespDesc("查询成功");
@@ -202,6 +229,7 @@ public class OperationPlatformService {
 				user.phone.as("telNum"),
 				user.email,
 				user.sex,
+				user.address,
 				qUserStaff.statusCD,
 				organ.organizationID.as("deptID"),
 				organ.organizationName.as("deptName")
