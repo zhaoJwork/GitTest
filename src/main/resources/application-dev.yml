@@ -63,5 +63,14 @@ application:
     queryGroup: http://10.128.49.65:20060/enterprise_go/group/queryGroup
     updateGroupInfo: http://10.128.49.65:20060/enterprise_go/group/updateGroupInfo
     save2OutGroup: http://10.128.49.65:20060/enterprise_go/group/save2OutGroup
+feign:
+  hystrixConfig:
+    "hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds": 18000
+  endpointConfig:
+    CrowdConnector:
+      default:
+        url: http://10.128.49.65:20060
+        readTimeoutMillis: 18000
+        connectTimeoutMillis: 15000
 swagger:
   show: true
