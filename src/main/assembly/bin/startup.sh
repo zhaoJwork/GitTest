@@ -54,39 +54,7 @@ if $noJavaHome ; then
 fi
 #==============================================================================
 #set JAVA_OPTS
-#JAVA_OPTS="-server -Xmx3g -Xms3g -XX:MaxPermSize=128m "
-#JAVA_OPTS="$JAVA_OPTS -XX:NewRatio=1" #  eden/old 的比例
-#JAVA_OPTS="$JAVA_OPTS -XX:SurvivorRatio=8"#  s/e的比例
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseParallelGC"
-#JAVA_OPTS="$JAVA_OPTS -XX:ParallelGCThreads=8"
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseParallelOldGC"#  这个是JAVA 6出现的参数选项
-#JAVA_OPTS="$JAVA_OPTS -XX:LargePageSizeInBytes=128m"# 内存页的大小， 不可设置过大， 会影响Perm的大小。
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseFastAccessorMethods"# 原始类型的快速优化
-#JAVA_OPTS="$JAVA_OPTS -XX:+DisableExplicitGC"#  关闭System.gc()
-#JAVA_OPTS="-server -Xms6g -Xmx6g -XX:NewSize=256m -XX:MaxNewSize=256m -XX:MaxPermSize=128m "
-#performance Options
-#JAVA_OPTS="$JAVA_OPTS -Xss256k"
-#JAVA_OPTS="$JAVA_OPTS -XX:+AggressiveOpts"
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseBiasedLocking"
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseFastAccessorMethods"
-#JAVA_OPTS="$JAVA_OPTS -XX:+DisableExplicitGC"
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseParNewGC"
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseConcMarkSweepGC"
-#JAVA_OPTS="$JAVA_OPTS -XX:+CMSParallelRemarkEnabled"
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseCMSCompactAtFullCollection"
-#JAVA_OPTS="$JAVA_OPTS -XX:+UseCMSInitiatingOccupancyOnly"
-#JAVA_OPTS="$JAVA_OPTS -XX:CMSInitiatingOccupancyFraction=75"
-#JAVA_OPTS="$JAVA_OPTS -XX:CMSInitiatingOccupancyFraction=75"
-#GC Log Options
-#JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCApplicationStoppedTime"
-#JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCTimeStamps"
-#JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCDetails"
-#debug Options
-#JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8805"
-# ZK
-#JAVA_OPTS="$JAVA_OPTS -Djava.security.auth.loappAddresslistAPIn.config=/etc/security/apps_client_jaas.conf"
-#agent 目前每个实例需要指定不同端口
-#JAVA_OPTS="$JAVA_OPTS -Drmi.agent.port=8233"
+
 
 appAddresslistAPI_HOME=`pwd`
 JAVA_OPTS="-server -Xmx1000M -Xms1000M -Xmn1000M"

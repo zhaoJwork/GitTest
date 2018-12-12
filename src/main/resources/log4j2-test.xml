@@ -8,7 +8,7 @@ Future versions of Log4j 2 will require disruptor-3.3.3.jar or higher
 -->
 <configuration>
   <Properties>
-    <Property name="baseDir">logs</Property>
+    <Property name="baseDir">${sys:appAddresslistAPI_HOME}/logs</Property>
   </Properties>
   <Appenders>
     <Console name="console-log" target="SYSTEM_OUT">
