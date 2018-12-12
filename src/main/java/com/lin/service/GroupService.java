@@ -263,12 +263,14 @@ public class GroupService extends AbstractService<AddressGroup,String>{
 						List list = getUserByDeptID(deptID, inroles,groupID);
 						retCount += getRpUserCountByDeptID(deptID, inroles,groupID);
 						for (int m = 0; m < list.size(); m++) {
-							AddressGroupUser addressGroupUser = new AddressGroupUser();
-							addressGroupUser.setRowId(getSeq() + "");
-							addressGroupUser.setGroupId(groupID);
-							addressGroupUser.setGroupUser(list.get(m).toString());
-							addressGroupUser.setCreateDate(new Date());
-							listgu.add(addressGroupUser);
+							if(!addressGroup.getCreateUser().equals(list.get(m).toString())) {
+								AddressGroupUser addressGroupUser = new AddressGroupUser();
+								addressGroupUser.setRowId(getSeq() + "");
+								addressGroupUser.setGroupId(groupID);
+								addressGroupUser.setGroupUser(list.get(m).toString());
+								addressGroupUser.setCreateDate(new Date());
+								listgu.add(addressGroupUser);
+							}
 						}
 					}
 					addressGroupUserRepository.saveAll(listgu);
@@ -385,19 +387,22 @@ class GroupList implements Runnable{
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		QUser qUser = QUser.user;
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
-		
+		AddressGroup groupNot = jpaQueryFactory().select(qAddressGroup).from(qAddressGroup).where(qAddressGroup.groupId.eq(groupID)).fetchOne();
+
 		for (int i = 0; i < objlist.size(); i++) {
 			JSONObject jsonObj = JSONObject.fromObject(objlist.getString(i));
 			String deptID = jsonObj.getString("deptID");
 			List list = getUserByDeptID(deptID, inroles,"");
 			List<AddressGroupUser> listgu = new ArrayList<AddressGroupUser>();
 			for (int m = 0; m < list.size(); m++) {
-				AddressGroupUser addressGroupUser = new AddressGroupUser();
-				addressGroupUser.setRowId(getSeq() + "");
-				addressGroupUser.setGroupId(groupID);
-				addressGroupUser.setGroupUser(list.get(m).toString());
-				addressGroupUser.setCreateDate(new Date());
-				listgu.add(addressGroupUser);
+				if(!groupNot.getCreateUser().equals(list.get(m).toString())) {
+					AddressGroupUser addressGroupUser = new AddressGroupUser();
+					addressGroupUser.setRowId(getSeq() + "");
+					addressGroupUser.setGroupId(groupID);
+					addressGroupUser.setGroupUser(list.get(m).toString());
+					addressGroupUser.setCreateDate(new Date());
+					listgu.add(addressGroupUser);
+				}
 			}
 			addressGroupUserRepository.saveAll(listgu);
 		}
