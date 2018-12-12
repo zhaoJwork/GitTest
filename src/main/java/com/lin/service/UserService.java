@@ -65,6 +65,7 @@ public class UserService extends AbstractService<User,String> {
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QPositionDsl posDsl = QPositionDsl.positionDsl;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
+		QOrganizationDsl provinceOrgan =  new QOrganizationDsl("provinceOrgan");
 		QAddressCollection coll = QAddressCollection.addressCollection;
 		QAddressBanned ban = QAddressBanned.addressBanned;
 		QContext context = QContext.context;
@@ -88,7 +89,9 @@ public class UserService extends AbstractService<User,String> {
 				uass.install.as("install"),
 				user.quanPin,
 				user.shouZiMu,
-				user.crmAccount
+				user.crmAccount,
+				user.provinceID,
+				provinceOrgan.organizationName.as("provinceName")
 		)).from(user)
 				.leftJoin(uass)
 				.on(user.userID.eq(uass.userid))
@@ -96,6 +99,8 @@ public class UserService extends AbstractService<User,String> {
 				.on(posDsl.posId.eq(user.post))
 				.leftJoin(organ)
 				.on(user.organizationID.eq(organ.organizationID))
+				.leftJoin(provinceOrgan)
+				.on(user.provinceID.eq(provinceOrgan.organizationID))
 				.where(user.userID.eq(userID)).fetchOne();
         if (null == userDetailsDsl){
 			return null;
