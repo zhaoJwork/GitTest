@@ -15,7 +15,6 @@ import java.util.List;
  * @time 2018-06-13
  *
  */
-@Data
 public class UserDetailsVo {
 
 	/**
@@ -111,6 +110,16 @@ public class UserDetailsVo {
 	 * CRM账号
 	 */
 	private String crmAccount;
+
+	/**
+	 * 省份ID
+	 */
+	private String provinceID;
+
+	/**
+	 * 省份ID
+	 */
+	private String provinceName;
 
 	@JsonIgnore
 	public static String picHttpIp;
@@ -297,5 +306,29 @@ public class UserDetailsVo {
 
 	public void setShouZiMu(String shouZiMu) {
 		this.shouZiMu = shouZiMu;
+	}
+
+	public String getCrmAccount() {
+		return crmAccount;
+	}
+
+	public void setCrmAccount(String crmAccount) {
+		this.crmAccount = crmAccount;
+	}
+
+	public String getProvinceID() {
+		return provinceID;
+	}
+
+	public void setProvinceID(String provinceID) {
+		this.provinceID = provinceID;
+	}
+
+	public String getProvinceName() {
+		return provinceName;
+	}
+
+	public void setProvinceName(String provinceName) {
+		this.provinceName = provinceName;
 	}
 }
