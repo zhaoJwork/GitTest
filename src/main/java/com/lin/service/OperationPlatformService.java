@@ -1,43 +1,29 @@
 package com.lin.service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-
+import com.lin.domain.*;
+import com.lin.repository.AddressBlackListRepository;
+import com.lin.util.RangeTimeUtil;
+import com.lin.util.Result;
+import com.lin.vo.OperationPlatform;
+import com.querydsl.core.types.ConstantImpl;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.DateTemplate;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringTemplate;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lin.domain.BlackUserList;
-import com.lin.domain.QAddressOrganTempIndex;
-import com.lin.domain.QBlackUserList;
-import com.lin.domain.QOrganizationDsl;
-import com.lin.domain.QPartyCertification;
-import com.lin.domain.QPartyContactInfo;
-import com.lin.domain.QSystemUser;
-import com.lin.domain.QUser;
-import com.lin.domain.QUserNewAssist;
-import com.lin.domain.QUserOrganization;
-import com.lin.domain.QUserStaff;
-import com.lin.domain.QUserStaffPic;
-import com.lin.domain.QUserTicketBean;
-import com.lin.domain.UserStaff;
-import com.lin.domain.UserTicketBean;
-import com.lin.repository.AddressBlackListRepository;
-import com.lin.util.Result;
-import com.lin.vo.OperationPlatform;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 运营平台-service类
@@ -74,6 +60,7 @@ public class OperationPlatformService {
 	public void selectUserList(Result result, OperationPlatform operat) throws ParseException {
 		
 		// 导入Querydsl部分局部实例
+		HashMap<String, Object> map = new HashMap<String, Object>();
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QUserStaff qUserStaff = QUserStaff.userStaff;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
@@ -85,7 +72,9 @@ public class OperationPlatformService {
 		QPartyCertification qPartyCertification = QPartyCertification.partyCertification;
 		QSystemUser qSystemUser = QSystemUser.systemUser;
 		QUserOrganization qUserOrganization = QUserOrganization.userOrganization;
-		
+		QUserLongJournal qUserLongJournal = QUserLongJournal.userLongJournal;
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 		// 动态拼接where条件
 		List<Predicate> predicate = new ArrayList<Predicate>();
 		Predicate[] pre = new Predicate[predicate.size()];
@@ -105,16 +94,53 @@ public class OperationPlatformService {
 		if(operat.getType() != null && !("".equals(operat.getType()))) {
 			predicate.add(qUserStaff.statusCD.eq(operat.getType()));
 		}
-		predicate.add(qPartyCertification.certValID.in("0", "2"));
 		predicate.add(qSystemUser.statusCD.in("1000", "1200"));
 		predicate.add(qUserStaff.statusCD.notIn("1100"));
+		predicate.add(qPartyCertification.certValID.in("0", "2"));
 		predicate.add(qUserOrganization.statusCD.stringValue().eq("1000"));
-		
+
+		DateTemplate loginDate = Expressions.dateTemplate(
+				Date.class, "to_date({0},'{1s}')", qUserLongJournal.loginDate, ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+		if("1".equals(operat.getTimeType())){
+			// 今日时间段
+			DateTemplate from = Expressions.dateTemplate(
+					Date.class, "to_date({0},'{1s}')", format.format(RangeTimeUtil.getDayBegin()), ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+
+			DateTemplate to = Expressions.dateTemplate(
+					Date.class, "to_date({0},'{1s}')", format.format(RangeTimeUtil.getDayEnd()), ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+			predicate.add(loginDate.between(from,to));
+		}else if("2".equals(operat.getTimeType())){
+			// 本周时间段
+			DateTemplate from = Expressions.dateTemplate(
+					Date.class, "to_date({0},'{1s}')", format.format(RangeTimeUtil.getBeginDayOfWeek()), ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+
+			DateTemplate to = Expressions.dateTemplate(
+					Date.class, "to_date({0},'{1s}')", format.format(RangeTimeUtil.getEndDayOfWeek()), ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+			predicate.add(loginDate.between(from,to));
+		}
+
+		// 统计总数
+		Long lcount = queryFactory.select(
+				qUserStaff.staffID.countDistinct())
+				.from(qUserStaff)
+				.leftJoin(organ).on(organ.organizationID.eq(qUserStaff.departmentID.stringValue()))
+				.leftJoin(qPartyContactInfo).on(qPartyContactInfo.partyID.eq(qUserStaff.partyID))
+				.leftJoin(qBlackUserList).on(qBlackUserList.userID.eq(qUserStaff.staffID.stringValue()))
+				.leftJoin(qUserStaffPic).on(qUserStaffPic.staffID.eq(qUserStaff.staffID.stringValue()))
+				.leftJoin(qAddressOrganTempIndex).on(qAddressOrganTempIndex.orgID.eq(qUserStaff.departmentID.stringValue()))
+				.leftJoin(qPartyCertification).on(qPartyCertification.partyID.eq(qUserStaff.partyID))
+				.leftJoin(qUserLongJournal).on(qUserLongJournal.staffID.eq(qUserStaff.staffID.stringValue()))
+				.leftJoin(qSystemUser).on(qSystemUser.staffID.eq(qUserStaff.staffID))
+				.leftJoin(qUserOrganization).on(qUserOrganization.orgID.eq(qUserStaff.orgID))
+				.leftJoin(uass).on(qUserStaff.staffID.stringValue().eq(uass.userid))
+				.where(predicate.toArray(pre))
+				.fetchOne();
+
+
 		// 查询
 		List<OperationPlatform> list = queryFactory.select(Projections.bean(OperationPlatform.class,
 				qUserStaff.staffID.stringValue().as("staffID"),
 				qUserStaff.staffName.as("staffName"),
-				qUserStaff.updateDate,
 				qUserStaff.staffCode.as("crmAccount"),
 				qUserStaff.statusCD.stringValue(),
 				organ.organizationID.as("deptID"),
@@ -154,36 +180,50 @@ public class OperationPlatformService {
 				.leftJoin(qUserStaffPic).on(qUserStaffPic.staffID.eq(qUserStaff.staffID.stringValue()))
 				.leftJoin(qAddressOrganTempIndex).on(qAddressOrganTempIndex.orgID.eq(qUserStaff.departmentID.stringValue()))
 				.leftJoin(qPartyCertification).on(qPartyCertification.partyID.eq(qUserStaff.partyID))
+				.leftJoin(qUserLongJournal).on(qUserLongJournal.staffID.eq(qUserStaff.staffID.stringValue()))
 				.leftJoin(qSystemUser).on(qSystemUser.staffID.eq(qUserStaff.staffID))
 				.leftJoin(qUserOrganization).on(qUserOrganization.orgID.eq(qUserStaff.orgID))
 				.leftJoin(uass).on(qUserStaff.staffID.stringValue().eq(uass.userid))
 				.where(predicate.toArray(pre))
 				.offset((Long.parseLong(operat.getPageSize())-1)*Long.parseLong(operat.getPageNum()))
 				.limit(Long.parseLong(operat.getPageNum()))
+				.distinct()
 				.fetch();
 		
 		// 结果返回
 		if(list.size() !=0 ) {
 			
-			// 处理返回图像数据
 			List<UserTicketBean> userTicketBeans = null;
+
+
 			for (int i = 0; i < list.size(); i++) {
 				
 				userTicketBeans = queryFactory.select(Projections.bean(UserTicketBean.class,
-						qUserTicketBean.createDate.max().as("createDate")
+						qUserLongJournal.loginDate.max().as("loginDate")
 				))
-				.from(qUserTicketBean)
-				.where(qUserTicketBean.userName.eq(list.get(i).getCrmAccount()))
+				.from(qUserLongJournal)
+				.where(qUserLongJournal.userName.eq(list.get(i).getCrmAccount()))
 				.fetch();
-				if(userTicketBeans.size() > 0  && !(userTicketBeans.get(0)==null)) {
+				if(userTicketBeans.get(0)==null) {
 					list.get(i).setIsLogin("0");
 				}else {
-					list.get(i).setIsLogin("1");
+					Date date = format.parse(userTicketBeans.get(0).getLoginDate());
+					list.get(i).setUpdateDate(date);
+					// 今日时间判断
+					if(RangeTimeUtil.isToDay(userTicketBeans.get(0).getLoginDate()) == 2){
+						list.get(i).setIsLogin("1");
+					}else{
+						list.get(i).setIsLogin("0");
+					}
 				}
 			}
+
+			map.put("list",list);
+			map.put("countNum", lcount);
+
 			result.setRespCode("1");
 			result.setRespDesc("查询成功");
-			result.setRespMsg(list);
+			result.setRespMsg(map);
 		}else {
 			result.setRespCode("2");
 			result.setRespDesc("暂无数据");
@@ -224,6 +264,7 @@ public class OperationPlatformService {
 						)
 					.then(user.userPic)
 					.otherwise(uass.portrait_url)
+						.prepend(picHttpIp)
 					.as("userImg"),
 				user.crmAccount,
 				user.phone.as("telNum"),
@@ -257,9 +298,7 @@ public class OperationPlatformService {
 				.from(qUserTicketBean)
 				.where(qUserTicketBean.userName.eq(list.get(i).getCrmAccount()))
 				.fetch();
-				// 处理返回图像数据
-				list.get(i).setUserImg(picHttpIp + list.get(i).getUserImg());
-				
+
 				if(userTicketBeans.size() > 0  && !(userTicketBeans.get(0)==null)) {
 					list.get(i).setLoginTime(format.format(new Date(userTicketBeans.get(0).getCreateDate())));
 				}

@@ -49,7 +49,7 @@ public class OperationPlatform implements Serializable{
 	private String address;
 	
 	@ApiModelProperty(value = "更新时间")
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
 	private Date updateDate;
 	
 	@ApiModelProperty(value = "账号状态 0 正常  1非正常")
@@ -78,11 +78,14 @@ public class OperationPlatform implements Serializable{
 	
 	@ApiModelProperty(value = "用户账号状态")
 	private String type;
-	
-	@ApiModelProperty(value = "列表显示数量")
-	private String pageSize;
+
+	@ApiModelProperty(value = "时间选择类型 1 今天 2 本周")
+	private String timeType;
 	
 	@ApiModelProperty(value = "列表显示页数")
+	private String pageSize;
+	
+	@ApiModelProperty(value = "列表显示数量")
 	private String pageNum;
 	
 }
