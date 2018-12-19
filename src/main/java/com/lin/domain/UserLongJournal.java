@@ -1,12 +1,13 @@
 package com.lin.domain;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 用户账户登入信息
@@ -17,6 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(value = "userLongJournal", description = "登入信息")
 @Entity
+@Data
 @Table(name = "USERLOGIN_JOURNAL", schema = "appuser")
 public class UserLongJournal {
 	
@@ -29,21 +31,9 @@ public class UserLongJournal {
 	@Column(name = "STAFF_ID")
 	private String staffID;
 
-	public String getLoginDate() {
-		return loginDate;
-	}
-
-	public void setLoginDate(String loginDate) {
-		this.loginDate = loginDate;
-	}
-
-	public String getStaffID() {
-		return staffID;
-	}
-
-	public void setStaffID(String staffID) {
-		this.staffID = staffID;
-	}
+	@ApiModelProperty(value = "用户账号")
+	@Column(name = "USERNAME")
+	private String userName;
 
 	
 
