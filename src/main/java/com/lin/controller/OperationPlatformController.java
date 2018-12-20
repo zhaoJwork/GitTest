@@ -73,6 +73,32 @@ public class OperationPlatformController {
 		}
 		return result;
 	}
+
+	@ApiOperation(value="角色列表模糊统计")
+	@ApiImplicitParam(dataType = "OperationPlatform")
+	@GetMapping("/selectUserCount")
+	public Result selectUserCount(HttpServletRequest req, OperationPlatform operat) {
+		logger.info("角色列表模糊统计::==" + req.getRequestURL() + "?staffID=" + operat.getStaffID() + "&staffName=" + operat.getStaffName()
+				+ "&crmAccount=" +operat.getCrmAccount()+ "&telNum=" +operat.getTelNum()+ "&deptID=" +operat.getDeptID()+ "&type=" + operat.getType()
+				+ "&pageSize=" +operat.getPageSize()+ "&pageNum=" +operat.getPageNum()+ "&timeType=" +operat.getTimeType());
+		Result result = new Result();
+		if(operat.getStaffID() == null || operat.getStaffID().trim().equals("")) {
+			result.setRespCode("2");
+			result.setRespDesc("staffID 不能为空");
+			return result;
+		}
+
+		try {
+			this.operationPlatformService.selectUserCount(result,operat);
+			logger.info("角色列表模糊统计::--" + JsonUtil.toJson(result));
+		} catch (Exception e) {
+			result.setRespCode("2");
+			result.setRespDesc("失败");
+			result.setRespMsg("");
+			logger.error("角色列表模糊统计-异常",e.toString());
+		}
+		return result;
+	}
 	
 	
 	@ApiOperation(value="用户在线查询")

@@ -49,23 +49,22 @@ public class OperationPlatformService {
 	public void init() {
 		queryFactory = new JPAQueryFactory(entityManager);
 	}
-	
+
+
 	/**
 	 * 用户模糊查询列表
 	 * @param operat 参数实体类
 	 * @author liudongdong
-	 * @throws ParseException 
+	 * @throws ParseException
 	 * @date 2018年10月19日
 	 */
-	public void selectUserList(Result result, OperationPlatform operat) throws ParseException {
-		
+	public void selectUserCount(Result result, OperationPlatform operat) throws ParseException {
+
 		// 导入Querydsl部分局部实例
-		HashMap<String, Object> map = new HashMap<String, Object>();
 		QUserNewAssist uass = QUserNewAssist.userNewAssist;
 		QUserStaff qUserStaff = QUserStaff.userStaff;
 		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
 		QBlackUserList qBlackUserList = QBlackUserList.blackUserList;
-		QUserTicketBean qUserTicketBean = QUserTicketBean.userTicketBean;
 		QPartyContactInfo qPartyContactInfo = QPartyContactInfo.partyContactInfo;
 		QUserStaffPic qUserStaffPic = QUserStaffPic.userStaffPic;
 		QAddressOrganTempIndex qAddressOrganTempIndex = QAddressOrganTempIndex.addressOrganTempIndex;
@@ -78,7 +77,7 @@ public class OperationPlatformService {
 		// 动态拼接where条件
 		List<Predicate> predicate = new ArrayList<Predicate>();
 		Predicate[] pre = new Predicate[predicate.size()];
-		
+
 		if(operat.getStaffName() != null && !("".equals(operat.getStaffName())) ) {
 			predicate.add(qUserStaff.staffName.like( "%"+operat.getStaffName()+"%"));
 		}
@@ -136,6 +135,79 @@ public class OperationPlatformService {
 				.where(predicate.toArray(pre))
 				.fetchOne();
 
+		result.setRespCode("1");
+		result.setRespDesc("查询成功");
+		result.setRespMsg(lcount);
+	}
+
+
+	/**
+	 * 用户模糊查询列表
+	 * @param operat 参数实体类
+	 * @author liudongdong
+	 * @throws ParseException 
+	 * @date 2018年10月19日
+	 */
+	public void selectUserList(Result result, OperationPlatform operat) throws ParseException {
+		
+		// 导入Querydsl部分局部实例
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		QUserNewAssist uass = QUserNewAssist.userNewAssist;
+		QUserStaff qUserStaff = QUserStaff.userStaff;
+		QOrganizationDsl organ = QOrganizationDsl.organizationDsl;
+		QBlackUserList qBlackUserList = QBlackUserList.blackUserList;
+		QPartyContactInfo qPartyContactInfo = QPartyContactInfo.partyContactInfo;
+		QUserStaffPic qUserStaffPic = QUserStaffPic.userStaffPic;
+		QAddressOrganTempIndex qAddressOrganTempIndex = QAddressOrganTempIndex.addressOrganTempIndex;
+		QPartyCertification qPartyCertification = QPartyCertification.partyCertification;
+		QSystemUser qSystemUser = QSystemUser.systemUser;
+		QUserOrganization qUserOrganization = QUserOrganization.userOrganization;
+		QUserLongJournal qUserLongJournal = QUserLongJournal.userLongJournal;
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		// 动态拼接where条件
+		List<Predicate> predicate = new ArrayList<Predicate>();
+		Predicate[] pre = new Predicate[predicate.size()];
+		
+		if(operat.getStaffName() != null && !("".equals(operat.getStaffName())) ) {
+			predicate.add(qUserStaff.staffName.like( "%"+operat.getStaffName()+"%"));
+		}
+		if(operat.getCrmAccount() != null && !("".equals(operat.getCrmAccount()))) {
+			predicate.add(qUserStaff.staffCode.eq(operat.getCrmAccount()));
+		}
+		if(operat.getTelNum() != null && !("".equals(operat.getTelNum()))) {
+			predicate.add(qPartyContactInfo.mobilePhone.stringValue().eq(operat.getTelNum()));
+		}
+		if(operat.getDeptID() != null && !("".equals(operat.getDeptID()))) {
+			predicate.add(organ.organizationID.eq(operat.getDeptID()));
+		}
+		if(operat.getType() != null && !("".equals(operat.getType()))) {
+			predicate.add(qUserStaff.statusCD.eq(operat.getType()));
+		}
+		predicate.add(qSystemUser.statusCD.in("1000", "1200"));
+		predicate.add(qUserStaff.statusCD.notIn("1100"));
+		predicate.add(qPartyCertification.certValID.in("0", "2"));
+		predicate.add(qUserOrganization.statusCD.stringValue().eq("1000"));
+
+		DateTemplate loginDate = Expressions.dateTemplate(
+				Date.class, "to_date({0},'{1s}')", qUserLongJournal.loginDate, ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+		if("1".equals(operat.getTimeType())){
+			// 今日时间段
+			DateTemplate from = Expressions.dateTemplate(
+					Date.class, "to_date({0},'{1s}')", format.format(RangeTimeUtil.getDayBegin()), ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+
+			DateTemplate to = Expressions.dateTemplate(
+					Date.class, "to_date({0},'{1s}')", format.format(RangeTimeUtil.getDayEnd()), ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+			predicate.add(loginDate.between(from,to));
+		}else if("2".equals(operat.getTimeType())){
+			// 本周时间段
+			DateTemplate from = Expressions.dateTemplate(
+					Date.class, "to_date({0},'{1s}')", format.format(RangeTimeUtil.getBeginDayOfWeek()), ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+
+			DateTemplate to = Expressions.dateTemplate(
+					Date.class, "to_date({0},'{1s}')", format.format(RangeTimeUtil.getEndDayOfWeek()), ConstantImpl.create("yyyy-MM-dd hh24:mi:ss"));
+			predicate.add(loginDate.between(from,to));
+		}
 
 		// 查询
 		List<OperationPlatform> list = queryFactory.select(Projections.bean(OperationPlatform.class,
@@ -219,7 +291,6 @@ public class OperationPlatformService {
 			}
 
 			map.put("list",list);
-			map.put("countNum", lcount);
 
 			result.setRespCode("1");
 			result.setRespDesc("查询成功");
