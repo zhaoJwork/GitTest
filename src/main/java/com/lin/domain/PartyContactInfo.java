@@ -19,7 +19,7 @@ import lombok.Data;
 @ApiModel(value = "partyContactInfo", description = "联系信息")
 @Data
 @Entity
-@Table(name = "jparty_contact_info", schema = "torder")
+@Table(name = "party_contact_info", schema = "jtorder")
 public class PartyContactInfo {
 	
 	@ApiModelProperty(value = "主键")

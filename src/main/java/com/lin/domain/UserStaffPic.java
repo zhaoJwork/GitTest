@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(value = "userStaffPic", description = "用户职员图片")
 @Entity
-@Table(name = "staff_user_pic")
+@Table(name = "staff_user_pic", schema="jtorder")
 public class UserStaffPic implements Serializable {
 
 	@ApiModelProperty(value = "Id主键")

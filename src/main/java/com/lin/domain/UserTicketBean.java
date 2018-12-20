@@ -30,5 +30,8 @@ public class UserTicketBean {
 	@ApiModelProperty(value = "用户编码")
 	@Column(name = "USERNAME")
 	private String userName;
+
+	@ApiModelProperty(value = "用户登入时间")
+	private String loginDate;
 	
 }

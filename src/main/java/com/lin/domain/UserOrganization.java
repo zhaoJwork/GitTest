@@ -5,14 +5,12 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * 中国电信的内部机构
@@ -22,7 +20,8 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(value = "userOrganization", description = "中国电信的内部机构")
 @Entity
-@Table(name = "organization")
+@Data
+@Table(name = "organization", schema="JTUSER")
 public class UserOrganization implements Serializable {
 
 	@ApiModelProperty(value = "组织标识主键")
@@ -106,206 +105,6 @@ public class UserOrganization implements Serializable {
 	@Column(name = "COMMENTS")
 	private String comments;
 
-
-	public Integer getOrgID() {
-		return orgID;
-	}
-
-
-	public void setOrgID(Integer orgID) {
-		this.orgID = orgID;
-	}
-
-
-	public Integer getCommonRegionId() {
-		return commonRegionId;
-	}
-
-
-	public void setCommonRegionId(Integer commonRegionId) {
-		this.commonRegionId = commonRegionId;
-	}
-
-
-	public String getOrgType() {
-		return orgType;
-	}
-
-
-	public void setOrgType(String orgType) {
-		this.orgType = orgType;
-	}
-
-
-	public String getOrgContent() {
-		return orgContent;
-	}
-
-
-	public void setOrgContent(String orgContent) {
-		this.orgContent = orgContent;
-	}
-
-
-	public Integer getOrgScale() {
-		return orgScale;
-	}
-
-
-	public void setOrgScale(Integer orgScale) {
-		this.orgScale = orgScale;
-	}
-
-
-	public String getPrincipal() {
-		return principal;
-	}
-
-
-	public void setPrincipal(String principal) {
-		this.principal = principal;
-	}
-
-
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-
-
-	public Date getStatusDate() {
-		return statusDate;
-	}
-
-
-	public void setStatusDate(Date statusDate) {
-		this.statusDate = statusDate;
-	}
-
-
-	public String getOrgName() {
-		return orgName;
-	}
-
-
-	public void setOrgName(String orgName) {
-		this.orgName = orgName;
-	}
-
-
-	public Integer getStatusCD() {
-		return statusCD;
-	}
-
-
-	public void setStatusCD(Integer statusCD) {
-		this.statusCD = statusCD;
-	}
-
-
-	public String getOrgCode() {
-		return orgCode;
-	}
-
-
-	public void setOrgCode(String orgCode) {
-		this.orgCode = orgCode;
-	}
-
-
-	public Integer getCreateUser() {
-		return createUser;
-	}
-
-
-	public void setCreateUser(Integer createUser) {
-		this.createUser = createUser;
-	}
-
-
-	public Date getUpdateDate() {
-		return updateDate;
-	}
-
-
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
-	}
-
-
-	public Integer getUpdateUser() {
-		return updateUser;
-	}
-
-
-	public void setUpdateUser(Integer updateUser) {
-		this.updateUser = updateUser;
-	}
-
-
-	public String getOrgZB() {
-		return orgZB;
-	}
-
-
-	public void setOrgZB(String orgZB) {
-		this.orgZB = orgZB;
-	}
-
-
-	public String getOrgAdd() {
-		return orgAdd;
-	}
-
-
-	public void setOrgAdd(String orgAdd) {
-		this.orgAdd = orgAdd;
-	}
-
-
-	public String getOrgJcname() {
-		return orgJcname;
-	}
-
-
-	public void setOrgJcname(String orgJcname) {
-		this.orgJcname = orgJcname;
-	}
-
-
-	public String getPartyId() {
-		return partyId;
-	}
-
-
-	public void setPartyId(String partyId) {
-		this.partyId = partyId;
-	}
-
-
-	public String getComments() {
-		return comments;
-	}
-
-
-	public void setComments(String comments) {
-		this.comments = comments;
-	}
-
-
-	@Override
-	public String toString() {
-		return "UserOrganization [orgID=" + orgID + ", commonRegionId=" + commonRegionId + ", orgType=" + orgType
-				+ ", orgContent=" + orgContent + ", orgScale=" + orgScale + ", principal=" + principal + ", createDate="
-				+ createDate + ", statusDate=" + statusDate + ", orgName=" + orgName + ", statusCD=" + statusCD
-				+ ", orgCode=" + orgCode + ", createUser=" + createUser + ", updateDate=" + updateDate + ", updateUser="
-				+ updateUser + ", orgZB=" + orgZB + ", orgAdd=" + orgAdd + ", orgJcname=" + orgJcname + ", partyId="
-				+ partyId + ", comments=" + comments + "]";
-	}
 	
 	
 }

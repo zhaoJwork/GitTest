@@ -44,7 +44,7 @@ public class OperationPlatformController {
 	public Result selectUserList(HttpServletRequest req, OperationPlatform operat) {
 		logger.info("角色列表模糊查询::==" + req.getRequestURL() + "?staffID=" + operat.getStaffID() + "&staffName=" + operat.getStaffName()
 			+ "&crmAccount=" +operat.getCrmAccount()+ "&telNum=" +operat.getTelNum()+ "&deptID=" +operat.getDeptID()+ "&type=" + operat.getType()
-			+ "&pageSize=" +operat.getPageSize()+ "&pageNum=" +operat.getPageNum());
+			+ "&pageSize=" +operat.getPageSize()+ "&pageNum=" +operat.getPageNum()+ "&timeType=" +operat.getTimeType());
 		Result result = new Result();
 		if(operat.getStaffID() == null || operat.getStaffID().trim().equals("")) {
 			result.setRespCode("2");

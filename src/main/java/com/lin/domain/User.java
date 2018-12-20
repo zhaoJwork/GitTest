@@ -90,6 +90,11 @@ public class User implements Serializable ,Comparable<User>{
 	@Column(name = "UPDATE_DATE")
 	private String updateDate;
 	/**
+	 * 创建时间
+	 */
+	@Column(name = "CREATE_DATE")
+	private String createDate;
+	/**
 	 * 是否为领导 1领导 2部门成员
 	 */
 	@Column(name="POSITION_TYPE")

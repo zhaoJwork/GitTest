@@ -85,6 +85,19 @@ public class AddressInfLogServiceImpl extends AbstractService<AddressInfLog,Stri
 		}
 		repository.save(log);
 	}
+	/**
+	 * 保存日志信息
+	 * @param log
+	 * @param respJson
+	 */
+	public void saveAddressInfLog(AddressInfLog log, String respJson) {
+		log.setRespJson(respJson);
+		log.setEndDate(Calendar.getInstance().getTime());
+		if (null == log.getExpError() || log.getExpError().equals("") ) {
+			log.setExpError("");
+		}
+		repository.save(log);
+	}
 
 	/**
 	 * 生成日志实体
