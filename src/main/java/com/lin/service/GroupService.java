@@ -677,6 +677,10 @@ class GroupList implements Runnable{
 	 * @param groupName
 	 */
 	public List<OutGroup> getGroupListByID(String loginID,String groupID,String groupName){
+
+		groupID = groupID == null ? "" : groupID ;
+		groupName = groupName == null ? "" : groupName ;
+
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutGroup.class,
@@ -711,7 +715,7 @@ class GroupList implements Runnable{
 	 * @param loginID
 	 * @param groupID
 	 */
-	public OutGroup getGroupDesByID(String loginID,String groupID){
+	public OutGroup getGroupDesByID(String loginID,String groupID, String pageSize, String pageNum){
 		QAddressGroup qAddressGroup = QAddressGroup.addressGroup;
 		QAddressGroupUser qAddressGroupUser = QAddressGroupUser.addressGroupUser;
 		JPAQuery jpaQuery = jpaQueryFactory().select(Projections.bean(OutGroup.class,
@@ -736,7 +740,11 @@ class GroupList implements Runnable{
 					.on(qAddressGroupUser.groupUser.eq(user.userID))
 					.leftJoin(uass)
 					.on(user.userID.eq(uass.userid))
-					.where(qAddressGroupUser.groupId.eq(groupID)).fetch();
+					.where(qAddressGroupUser.groupId.eq(groupID))
+					.orderBy(qAddressGroupUser.createDate.asc())
+					.offset((Long.parseLong(pageNum)-1)*Long.parseLong(pageSize))
+					.limit(Long.parseLong(pageSize))
+					.fetch();
 
 			outGroup.setGroupUserList(outGroupUserList);
 		}

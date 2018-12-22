@@ -189,6 +189,8 @@ public class GroupController {
 			log.setExpError(e.toString());
 			com.ideal.wheel.common.Result result = ResultGenerator.genErrorResult(e.toString());
 			logServiceDsl.saveAddressInfLog(log,mapper.writeValueAsString(result));
+			e.printStackTrace();
+			logger.error("根据当前人获取分组列表：{}",result);
 			return result;
 		}
 	}
@@ -196,10 +198,12 @@ public class GroupController {
 	@ApiOperation(value="根据分组ID获取分组详情")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "loginID", value = "当前登入Id", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String")
+			@ApiImplicitParam(name = "groupID", value = "分组ID", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "pageSize", value = "数量", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "pageNum", value = "页码", required = true, dataType = "String")
 	})
 	@GetMapping("/getGroupDesByID")
-	public com.ideal.wheel.common.Result getGroupDesByID(HttpServletRequest req, String loginID, String groupID) throws JsonProcessingException {
+	public com.ideal.wheel.common.Result getGroupDesByID(HttpServletRequest req, String loginID, String groupID, String pageSize, String pageNum) throws JsonProcessingException {
 		AddressInfLog log =  logServiceDsl.getInfLog(req,"根据分组ID获取分组详情");
 		if(loginID == null || loginID.trim().equals("")) {
 			logger.info("loginID 不能为空");
@@ -210,7 +214,7 @@ public class GroupController {
 			return ResultGenerator.genErrorResult("groupID 不能为空");
 		}
 		try {
-			OutGroup outGroup = this.newGroupService.getGroupDesByID(loginID,groupID);
+			OutGroup outGroup = this.newGroupService.getGroupDesByID(loginID,groupID,pageSize,pageNum);
 			logServiceDsl.saveAddressInfLog(log,mapper.writeValueAsString(outGroup));
 			return  ResultGenerator.genSuccessResult(outGroup);
 		} catch (Exception e) {
