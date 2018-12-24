@@ -702,7 +702,7 @@ class GroupList implements Runnable{
 				long groupUserCount = jpaQueryFactory().select(qAddressGroupUser.count())
 						.from(qAddressGroupUser).where(qAddressGroupUser.groupId.eq(outGroupList.get(i).getGroupID())).fetchCount();
 				outGroupList.get(i).setGroupUserCount(groupUserCount);
-				if(outGroupList.get(i).getGroupImg().indexOf("http://") < 0){
+				if(null != outGroupList.get(i).getGroupImg() && !"".equals(outGroupList.get(i).getGroupImg()) && outGroupList.get(i).getGroupImg().indexOf("http://") < 0){
 					outGroupList.get(i).setGroupImg(picHttpIp + outGroupList.get(i).getGroupImg());
 				}
 			}
