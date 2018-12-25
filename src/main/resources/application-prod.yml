@@ -69,7 +69,7 @@ feign:
   endpointConfig:
     CrowdConnector:
       default:
-        url: 10.128.87.54:20057
+        url: http://10.128.87.54:20057
         readTimeoutMillis: 18000
         connectTimeoutMillis: 15000
 swagger:
